@@ -5,7 +5,7 @@
 namespace tgui
 {
     std::vector<void*> autoclean;
-    
+
     // Util
 
     C_ABI_STATIC void ABI_Util_free(void* pointer) {
@@ -40,12 +40,66 @@ namespace tgui
 
     // Signal
 
-    C_ABI_RAW int ABI_Signal_connect(Signal* signal, void(*f)()) {
-        return signal->connect(f);
+    C_ABI_RAW int ABI_Signal_connect(Signal* self, void(*f)()) {
+        return self->connect(f);
     }
 
-    C_ABI_RAW bool ABI_Signal_disconnect(Signal* signal, int f) {
-        return signal->disconnect(f);
+    C_ABI_RAW bool ABI_Signal_disconnect(Signal* self, int f) {
+        return self->disconnect(f);
+    }
+
+    // SignalString
+
+    C_ABI_RAW int ABI_SignalString_connect(SignalString* self, void(*f)(const char32_t*)) {
+        return self->connect([=](const String& str) {
+            f(str.data());
+            });
+    }
+
+    // SignalBool
+
+    C_ABI_RAW int ABI_SignalBool_connect(SignalBool* self, void(*f)(int)) {
+        return self->connect(f);
+    }
+
+    // SignalColor
+
+    C_ABI_RAW int ABI_SignalColor_connect(SignalColor* self, void(*f)(void*)) {
+        return self->connect([=](Color col) {
+            auto color = new Color(col);
+            f(color);
+            });
+    }
+
+    // SignalVector2f
+
+    C_ABI_RAW int ABI_SignalVector2f_connect(SignalVector2f* self, void(*f)(void*)) {
+        return self->connect([=](Vector2f vec) {
+            auto vector = new Vector2f(vec);
+            f(vector);
+            });
+    }
+
+    // SignalPointer
+
+    C_ABI_RAW int ABI_SignalPointer_connect(SignalTyped<void*>* self, void(*f)(void*)) {
+        return self->connect(f);
+    }
+
+    // SignalShowEffect
+
+    C_ABI_RAW int ABI_SignalShowEffect_connect(SignalShowEffect* self, void(*f)(int, int)) {
+        return self->connect([=](ShowEffectType showEffectType, bool show) {
+            f(static_cast<int>(showEffectType), static_cast<int>(show));
+            });
+    }
+
+    // SignalAnimationType
+
+    C_ABI_RAW int ABI_SignalAnimationType_connect(SignalAnimationType* self, void(*f)(int)) {
+        return self->connect([=](AnimationType animationType) {
+            f(static_cast<int>(animationType));
+            });
     }
 
     // Window
@@ -228,11 +282,11 @@ namespace tgui
         return (**self).isContainer();
     }
 
-    C_ABI_SIGNAL Signal* ABI_Widget_onPositionChange(Widget::Ptr* self) {
+    C_ABI_SIGNAL SignalVector2f* ABI_Widget_onPositionChange(Widget::Ptr* self) {
         return &(**self).onPositionChange;
     }
 
-    C_ABI_SIGNAL Signal* ABI_Widget_onSizeChange(Widget::Ptr* self) {
+    C_ABI_SIGNAL SignalVector2f* ABI_Widget_onSizeChange(Widget::Ptr* self) {
         return &(**self).onSizeChange;
     }
 
@@ -252,38 +306,38 @@ namespace tgui
         return &(**self).onMouseLeave;
     }
 
-    C_ABI_SIGNAL Signal* ABI_Widget_onShowEffectFinish(Widget::Ptr* self) {
+    C_ABI_SIGNAL SignalShowEffect* ABI_Widget_onShowEffectFinish(Widget::Ptr* self) {
         return &(**self).onShowEffectFinish;
     }
 
-    C_ABI_SIGNAL Signal* ABI_Widget_onAnimationFinish(Widget::Ptr* self) {
+    C_ABI_SIGNAL SignalAnimationType* ABI_Widget_onAnimationFinish(Widget::Ptr* self) {
         return &(**self).onAnimationFinish;
     }
 
 
     // ClickableWidget
 
-    C_ABI_SIGNAL Signal* ABI_ClickableWidget_onMousePress(ClickableWidget::Ptr* self) {
+    C_ABI_SIGNAL SignalVector2f* ABI_ClickableWidget_onMousePress(ClickableWidget::Ptr* self) {
         return &(**self).onMousePress;
     }
 
-    C_ABI_SIGNAL Signal* ABI_ClickableWidget_onMouseRelease(ClickableWidget::Ptr* self) {
+    C_ABI_SIGNAL SignalVector2f* ABI_ClickableWidget_onMouseRelease(ClickableWidget::Ptr* self) {
         return &(**self).onMouseRelease;
     }
 
-    C_ABI_SIGNAL Signal* ABI_ClickableWidget_onClick(ClickableWidget::Ptr* self) {
+    C_ABI_SIGNAL SignalVector2f* ABI_ClickableWidget_onClick(ClickableWidget::Ptr* self) {
         return &(**self).onClick;
     }
 
-    C_ABI_SIGNAL Signal* ABI_ClickableWidget_onRightMousePress(ClickableWidget::Ptr* self) {
+    C_ABI_SIGNAL SignalVector2f* ABI_ClickableWidget_onRightMousePress(ClickableWidget::Ptr* self) {
         return &(**self).onRightMousePress;
     }
 
-    C_ABI_SIGNAL Signal* ABI_ClickableWidget_onRightMouseRelease(ClickableWidget::Ptr* self) {
+    C_ABI_SIGNAL SignalVector2f* ABI_ClickableWidget_onRightMouseRelease(ClickableWidget::Ptr* self) {
         return &(**self).onRightMouseRelease;
     }
 
-    C_ABI_SIGNAL Signal* ABI_ClickableWidget_onRightClick(ClickableWidget::Ptr* self) {
+    C_ABI_SIGNAL SignalVector2f* ABI_ClickableWidget_onRightClick(ClickableWidget::Ptr* self) {
         return &(**self).onRightClick;
     }
 
@@ -404,15 +458,15 @@ namespace tgui
         return (**self).getSuffix().data();
     }
 
-    C_ABI_SIGNAL Signal* ABI_EditBox_onTextChange(EditBox::Ptr* self) {
+    C_ABI_SIGNAL SignalString* ABI_EditBox_onTextChange(EditBox::Ptr* self) {
         return &(**self).onTextChange;
     }
 
-    C_ABI_SIGNAL Signal* ABI_EditBox_onReturnKeyPress(EditBox::Ptr* self) {
+    C_ABI_SIGNAL SignalString* ABI_EditBox_onReturnKeyPress(EditBox::Ptr* self) {
         return &(**self).onReturnKeyPress;
     }
 
-    C_ABI_SIGNAL Signal* ABI_EditBox_onReturnOrUnfocus(EditBox::Ptr* self) {
+    C_ABI_SIGNAL SignalString* ABI_EditBox_onReturnOrUnfocus(EditBox::Ptr* self) {
         return &(**self).onReturnOrUnfocus;
     }
 
@@ -522,15 +576,15 @@ namespace tgui
         return (**self).isTextClickable();
     }
 
-    C_ABI_METHOD Signal* ABI_RadioButton_onCheck(RadioButton::Ptr* self) {
+    C_ABI_SIGNAL SignalBool* ABI_RadioButton_onCheck(RadioButton::Ptr* self) {
         return &(**self).onCheck;
     }
 
-    C_ABI_METHOD Signal* ABI_RadioButton_onUncheck(RadioButton::Ptr* self) {
+    C_ABI_SIGNAL SignalBool* ABI_RadioButton_onUncheck(RadioButton::Ptr* self) {
         return &(**self).onUncheck;
     }
 
-    C_ABI_METHOD Signal* ABI_RadioButton_onChange(RadioButton::Ptr* self) {
+    C_ABI_SIGNAL SignalBool* ABI_RadioButton_onChange(RadioButton::Ptr* self) {
         return &(**self).onChange;
     }
 
@@ -544,6 +598,14 @@ namespace tgui
     }
 
     // Container
+
+    C_ABI_RAW void ABI_Container_get_widgets(Container::Ptr* self, void(*f)(Widget::Ptr* widget, const char32_t* type)) {
+        for (auto w : (**self).getWidgets()) {
+            auto ptr = new Widget::Ptr();
+            ptr->swap(w);
+            f(ptr, (**ptr).getWidgetType().data());
+        }
+    }
 
     C_ABI_METHOD void ABI_Container_add(Container::Ptr* self, Widget::Ptr* widget, char* name) {
         (**self).add(*widget, name);
@@ -739,26 +801,29 @@ namespace tgui
         return (**self).isKeptInParent();
     }
 
-    C_ABI_METHOD Signal* ABI_ChildWindow_onMousePress(ChildWindow::Ptr* self) {
+    C_ABI_SIGNAL Signal* ABI_ChildWindow_onMousePress(ChildWindow::Ptr* self) {
         return &(**self).onMousePress;
     }
 
-    C_ABI_METHOD Signal* ABI_ChildWindow_onClose(ChildWindow::Ptr* self) {
+    C_ABI_SIGNAL Signal* ABI_ChildWindow_onClose(ChildWindow::Ptr* self) {
         return &(**self).onClose;
     }
 
-    C_ABI_METHOD Signal* ABI_ChildWindow_onMinimize(ChildWindow::Ptr* self) {
+    C_ABI_SIGNAL Signal* ABI_ChildWindow_onMinimize(ChildWindow::Ptr* self) {
         return &(**self).onMinimize;
     }
 
-    C_ABI_METHOD Signal* ABI_ChildWindow_onMaximize(ChildWindow::Ptr* self) {
+    C_ABI_SIGNAL Signal* ABI_ChildWindow_onMaximize(ChildWindow::Ptr* self) {
         return &(**self).onMaximize;
     }
 
-    C_ABI_METHOD Signal* ABI_ChildWindow_onEscapeKeyPress(ChildWindow::Ptr* self) {
+    C_ABI_SIGNAL Signal* ABI_ChildWindow_onEscapeKeyPress(ChildWindow::Ptr* self) {
         return &(**self).onEscapeKeyPress;
     }
 
+    C_ABI_SIGNAL SignalTyped<bool*>* ABI_ChildWindow_onClosing(ChildWindow::Ptr* self) {
+        return &(**self).onClosing;
+    }
 
     // Group
 
@@ -786,11 +851,11 @@ namespace tgui
         return new Color((**self).getColor());
     }
 
-    C_ABI_SIGNAL Signal* ABI_ColorPicker_onColorChange(ColorPicker::Ptr* self) {
+    C_ABI_SIGNAL SignalColor* ABI_ColorPicker_onColorChange(ColorPicker::Ptr* self) {
         return &(**self).onColorChange;
     }
 
-    C_ABI_SIGNAL Signal* ABI_ColorPicker_onOkPress(ColorPicker::Ptr* self) {
+    C_ABI_SIGNAL SignalColor* ABI_ColorPicker_onOkPress(ColorPicker::Ptr* self) {
         return &(**self).onOkPress;
     }
 }

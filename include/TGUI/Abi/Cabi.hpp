@@ -29,6 +29,20 @@ namespace tgui
 	// Signal
 	C_ABI_RAW int ABI_Signal_connect(Signal* signal, void(*f)());
 	C_ABI_RAW bool ABI_Signal_disconnect(Signal* signal, int f);
+	// SignalString
+	C_ABI_RAW int ABI_SignalString_connect(SignalString* signal, void(*f)(const char32_t*));
+	// SignalBool
+	C_ABI_RAW int ABI_SignalBool_connect(SignalBool* signal, void(*f)(int));
+	// SignalPointer
+	C_ABI_RAW int ABI_SignalPointer_connect(SignalTyped<void*>* signal, void(*f)(void*));
+	// SignalColor
+	C_ABI_RAW int ABI_SignalColor_connect(SignalColor* self, void(*f)(void*));
+	// SignalVector2f
+	C_ABI_RAW int ABI_SignalVector2f_connect(SignalVector2f* self, void(*f)(void*));
+	// SignalShowEffect
+	C_ABI_RAW int ABI_SignalShowEffect_connect(SignalShowEffect* self, void(*f)(int, int));
+	// SignalAnimationType
+	C_ABI_RAW int ABI_SignalAnimationType_connect(SignalAnimationType* self, void(*f)(int));
 	// Window
 	C_ABI_MAKE sf::RenderWindow* ABI_Window_new();
 	C_ABI_METHOD void ABI_Window_close(sf::WindowBase* self);
@@ -67,21 +81,21 @@ namespace tgui
 	C_ABI_TESTER bool ABI_Widget_isFocusable(Widget::Ptr* self);
 	C_ABI_TESTER bool ABI_Widget_canGainFocus(Widget::Ptr* self);
 	C_ABI_TESTER bool ABI_Widget_isContainer(Widget::Ptr* self);
-	C_ABI_SIGNAL Signal* ABI_Widget_onPositionChange(Widget::Ptr* self);
-	C_ABI_SIGNAL Signal* ABI_Widget_onSizeChange(Widget::Ptr* self);
+	C_ABI_SIGNAL SignalVector2f* ABI_Widget_onPositionChange(Widget::Ptr* self);
+	C_ABI_SIGNAL SignalVector2f* ABI_Widget_onSizeChange(Widget::Ptr* self);
 	C_ABI_SIGNAL Signal* ABI_Widget_onFocus(Widget::Ptr* self);
 	C_ABI_SIGNAL Signal* ABI_Widget_onUnfocus(Widget::Ptr* self);
 	C_ABI_SIGNAL Signal* ABI_Widget_onMouseEnter(Widget::Ptr* self);
 	C_ABI_SIGNAL Signal* ABI_Widget_onMouseLeave(Widget::Ptr* self);
-	C_ABI_SIGNAL Signal* ABI_Widget_onShowEffectFinish(Widget::Ptr* self);
-	C_ABI_SIGNAL Signal* ABI_Widget_onAnimationFinish(Widget::Ptr* self);
+	C_ABI_SIGNAL SignalShowEffect* ABI_Widget_onShowEffectFinish(Widget::Ptr* self);
+	C_ABI_SIGNAL SignalAnimationType* ABI_Widget_onAnimationFinish(Widget::Ptr* self);
 	// ClickableWidget
-	C_ABI_SIGNAL Signal* ABI_ClickableWidget_onMousePress(ClickableWidget::Ptr* self);
-	C_ABI_SIGNAL Signal* ABI_ClickableWidget_onMouseRelease(ClickableWidget::Ptr* self);
-	C_ABI_SIGNAL Signal* ABI_ClickableWidget_onClick(ClickableWidget::Ptr* self);
-	C_ABI_SIGNAL Signal* ABI_ClickableWidget_onRightMousePress(ClickableWidget::Ptr* self);
-	C_ABI_SIGNAL Signal* ABI_ClickableWidget_onRightMouseRelease(ClickableWidget::Ptr* self);
-	C_ABI_SIGNAL Signal* ABI_ClickableWidget_onRightClick(ClickableWidget::Ptr* self);
+	C_ABI_SIGNAL SignalVector2f* ABI_ClickableWidget_onMousePress(ClickableWidget::Ptr* self);
+	C_ABI_SIGNAL SignalVector2f* ABI_ClickableWidget_onMouseRelease(ClickableWidget::Ptr* self);
+	C_ABI_SIGNAL SignalVector2f* ABI_ClickableWidget_onClick(ClickableWidget::Ptr* self);
+	C_ABI_SIGNAL SignalVector2f* ABI_ClickableWidget_onRightMousePress(ClickableWidget::Ptr* self);
+	C_ABI_SIGNAL SignalVector2f* ABI_ClickableWidget_onRightMouseRelease(ClickableWidget::Ptr* self);
+	C_ABI_SIGNAL SignalVector2f* ABI_ClickableWidget_onRightClick(ClickableWidget::Ptr* self);
 	// ButtonBase
 	C_ABI_RAW void ABI_ButtonBase_setTextPosition(ButtonBase::Ptr* self, const char* position, const char* origin);
 	// Button
@@ -111,9 +125,9 @@ namespace tgui
 	C_ABI_GETTER int ABI_EditBox_getCaretPosition(EditBox::Ptr* self);
 	C_ABI_SETTER void ABI_EditBox_setSuffix(EditBox::Ptr* self, char* suffix);
 	C_ABI_GETTER const char32_t* ABI_EditBox_getSuffix(EditBox::Ptr* self);
-	C_ABI_SIGNAL Signal* ABI_EditBox_onTextChange(EditBox::Ptr* self);
-	C_ABI_SIGNAL Signal* ABI_EditBox_onReturnKeyPress(EditBox::Ptr* self);
-	C_ABI_SIGNAL Signal* ABI_EditBox_onReturnOrUnfocus(EditBox::Ptr* self);
+	C_ABI_SIGNAL SignalString* ABI_EditBox_onTextChange(EditBox::Ptr* self);
+	C_ABI_SIGNAL SignalString* ABI_EditBox_onReturnKeyPress(EditBox::Ptr* self);
+	C_ABI_SIGNAL SignalString* ABI_EditBox_onReturnOrUnfocus(EditBox::Ptr* self);
 	// Label
 	C_ABI_MAKE Label::Ptr* ABI_Label_new(char* text);
     C_ABI_SETTER void ABI_Label_setText(Label::Ptr* self, char* text);
@@ -140,9 +154,9 @@ namespace tgui
 	C_ABI_TESTER bool ABI_RadioButton_isChecked(RadioButton::Ptr* self);
 	C_ABI_SETTER void ABI_RadioButton_setTextClickable(RadioButton::Ptr* self, int textClickable);
 	C_ABI_TESTER bool ABI_RadioButton_isTextClickable(RadioButton::Ptr* self);
-	C_ABI_METHOD Signal* ABI_RadioButton_onCheck(RadioButton::Ptr* self);
-	C_ABI_METHOD Signal* ABI_RadioButton_onUncheck(RadioButton::Ptr* self);
-	C_ABI_METHOD Signal* ABI_RadioButton_onChange(RadioButton::Ptr* self);
+	C_ABI_SIGNAL SignalBool* ABI_RadioButton_onCheck(RadioButton::Ptr* self);
+	C_ABI_SIGNAL SignalBool* ABI_RadioButton_onUncheck(RadioButton::Ptr* self);
+	C_ABI_SIGNAL SignalBool* ABI_RadioButton_onChange(RadioButton::Ptr* self);
 	// CheckBox
 	C_ABI_MAKE CheckBox::Ptr* ABI_CheckBox_new();
 	//// ChatBox
@@ -169,6 +183,7 @@ namespace tgui
  //   TGUI_NODISCARD unsigned int getScrollbarValue() const;
  
 	// Container
+	C_ABI_RAW void ABI_Container_get_widgets(Container::Ptr* self, void(*f)(Widget::Ptr* widget, const char32_t* type));
 	C_ABI_METHOD void ABI_Container_add(Container::Ptr* self, Widget::Ptr* widget, char* name);
 	C_ABI_RAW Widget::Ptr* ABI_Container_get(Container::Ptr* self, char* name);
 	C_ABI_METHOD bool ABI_Container_remove(Container::Ptr* self, Widget::Ptr* widget);
@@ -211,25 +226,20 @@ namespace tgui
 	C_ABI_TESTER bool ABI_ChildWindow_isPositionLocked(ChildWindow::Ptr* self);
     C_ABI_SETTER void ABI_ChildWindow_setKeepInParent(ChildWindow::Ptr* self, int enabled);
 	C_ABI_TESTER bool ABI_ChildWindow_isKeptInParent(ChildWindow::Ptr* self);
-	C_ABI_METHOD Signal* ABI_ChildWindow_onMousePress(ChildWindow::Ptr* self);
-	C_ABI_METHOD Signal* ABI_ChildWindow_onClose(ChildWindow::Ptr* self);
-	C_ABI_METHOD Signal* ABI_ChildWindow_onMinimize(ChildWindow::Ptr* self);
-	C_ABI_METHOD Signal* ABI_ChildWindow_onMaximize(ChildWindow::Ptr* self);
-	C_ABI_METHOD Signal* ABI_ChildWindow_onEscapeKeyPress(ChildWindow::Ptr* self);
-
-    /// The window is about to be closed, unless the "abort" parameter is set to true.
-    /// @code
-    /// window->onClosing([](bool* abort) { *abort = true; });
-    /// @endcode
-//    /*SignalTyped<bool*> onClosing = { "Closing" };*/
+	C_ABI_SIGNAL Signal* ABI_ChildWindow_onMousePress(ChildWindow::Ptr* self);
+	C_ABI_SIGNAL Signal* ABI_ChildWindow_onClose(ChildWindow::Ptr* self);
+	C_ABI_SIGNAL Signal* ABI_ChildWindow_onMinimize(ChildWindow::Ptr* self);
+	C_ABI_SIGNAL Signal* ABI_ChildWindow_onMaximize(ChildWindow::Ptr* self);
+	C_ABI_SIGNAL Signal* ABI_ChildWindow_onEscapeKeyPress(ChildWindow::Ptr* self);
+	C_ABI_SIGNAL SignalTyped<bool*>* ABI_ChildWindow_onClosing(ChildWindow::Ptr* self);
 	// Group
 	C_ABI_MAKE Group::Ptr* ABI_Group_new();
 	// ColorPicker
 	C_ABI_MAKE ColorPicker::Ptr* ABI_ColorPicker_new();
 	C_ABI_SETTER void ABI_ColorPicker_setColor(ColorPicker::Ptr* self, Color* color);
 	C_ABI_GETTER Color* ABI_ColorPicker_getColor(ColorPicker::Ptr* self);
-	C_ABI_SIGNAL Signal* ABI_ColorPicker_onColorChange(ColorPicker::Ptr* self);
-	C_ABI_SIGNAL Signal* ABI_ColorPicker_onOkPress(ColorPicker::Ptr* self);
+	C_ABI_SIGNAL SignalColor* ABI_ColorPicker_onColorChange(ColorPicker::Ptr* self);
+	C_ABI_SIGNAL SignalColor* ABI_ColorPicker_onOkPress(ColorPicker::Ptr* self);
 }
 
 #endif //CABI_HPP
