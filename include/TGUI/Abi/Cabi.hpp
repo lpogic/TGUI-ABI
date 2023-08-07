@@ -43,6 +43,8 @@ namespace tgui
 	C_ABI_RAW int ABI_SignalShowEffect_connect(SignalShowEffect* self, void(*f)(int, int));
 	// SignalAnimationType
 	C_ABI_RAW int ABI_SignalAnimationType_connect(SignalAnimationType* self, void(*f)(int));
+	// SignalItem
+	C_ABI_RAW int ABI_SignalItem_connect(SignalItem* self, void(*f)(const char32_t*, const char32_t*));
 	// Window
 	C_ABI_MAKE sf::RenderWindow* ABI_Window_new();
 	C_ABI_METHOD void ABI_Window_close(sf::WindowBase* self);
@@ -61,6 +63,7 @@ namespace tgui
 	C_ABI_STATIC void ABI_Theme_setDefault(char* theme);
 	// Widget
 	C_ABI_FREE void ABI_Widget_free(std::shared_ptr<Widget>* pointer);
+	C_ABI_STATIC Widget* ABI_Widget_getUnshared(std::shared_ptr<Widget>* pointer);
 	C_ABI_STATIC const char32_t* ABI_Widget_getType(Widget::Ptr* self);
 	C_ABI_GETTER const char32_t* ABI_Widget_getName(Widget::Ptr* self);
 	C_ABI_SETTER void ABI_Widget_setSize(Widget::Ptr* self, const char* width, const char* height);
@@ -234,6 +237,93 @@ namespace tgui
 	C_ABI_SIGNAL SignalTyped<bool*>* ABI_ChildWindow_onClosing(ChildWindow::Ptr* self);
 	// Group
 	C_ABI_MAKE Group::Ptr* ABI_Group_new();
+	// BoxLayout
+	C_ABI_RAW Widget::Ptr* ABI_BoxLayout_getByIndex(BoxLayout::Ptr* self, int index);
+	C_ABI_METHOD void ABI_BoxLayout_insert(BoxLayout::Ptr* self, int index, Widget::Ptr* widget, char* name);
+	C_ABI_RAW bool ABI_BoxLayout_removeByIndex(BoxLayout::Ptr* self, int index);
+	// BoxLayoutRatios
+	C_ABI_METHOD void ABI_BoxLayoutRatios_addSpace(BoxLayoutRatios::Ptr* self, float ratio);
+	C_ABI_METHOD void ABI_BoxLayoutRatios_insertSpace(BoxLayoutRatios::Ptr* self, int index, float ratio);
+	C_ABI_RAW void ABI_BoxLayoutRatios_setRatio(BoxLayoutRatios::Ptr* self, Widget::Ptr* widget, float ratio);
+	C_ABI_RAW void ABI_BoxLayoutRatios_setRatioByIndex(BoxLayoutRatios::Ptr* self, int index, float ratio);
+	C_ABI_RAW float ABI_BoxLayoutRatios_getRatio(BoxLayoutRatios::Ptr* self, Widget::Ptr* widget);
+	C_ABI_RAW float ABI_BoxLayoutRatios_getRatioByIndex(BoxLayoutRatios::Ptr* self, int index);
+	// HorizontalLayout
+	C_ABI_MAKE HorizontalLayout::Ptr* ABI_HorizontalLayout_create();
+	// VerticalLayout
+	C_ABI_MAKE VerticalLayout::Ptr* ABI_VerticalLayout_create();
+	// HorizontalWrap
+	C_ABI_MAKE HorizontalWrap::Ptr* ABI_HorizontalWrap_create();
+	// RadioButtonGroup
+	C_ABI_MAKE RadioButtonGroup::Ptr* ABI_RadioButtonGroup_create();
+	C_ABI_METHOD void ABI_RadioButtonGroup_uncheckRadioButtons(RadioButtonGroup::Ptr* self);
+	C_ABI_GETTER RadioButton::Ptr* ABI_RadioButtonGroup_getCheckedRadioButton(RadioButtonGroup::Ptr* self);
+	// Panel
+	C_ABI_MAKE Panel::Ptr* ABI_Panel_create();
+	C_ABI_SIGNAL SignalVector2f* ABI_Panel_onMousePress(Panel::Ptr* self);
+	C_ABI_SIGNAL SignalVector2f* ABI_Panel_onMouseRelease(Panel::Ptr* self);
+	C_ABI_SIGNAL SignalVector2f* ABI_Panel_onClick(Panel::Ptr* self);
+	C_ABI_SIGNAL SignalVector2f* ABI_Panel_onDoubleClick(Panel::Ptr* self);
+	C_ABI_SIGNAL SignalVector2f* ABI_Panel_onRightMousePress(Panel::Ptr* self);
+	C_ABI_SIGNAL SignalVector2f* ABI_Panel_onRightMouseRelease(Panel::Ptr* self);
+	C_ABI_SIGNAL SignalVector2f* ABI_Panel_onRightClick(Panel::Ptr* self);
+	// ScrollablePanel
+	C_ABI_MAKE ScrollablePanel::Ptr* ABI_ScrollablePanel_create();
+	C_ABI_SETTER void ABI_ScrollablePanel_setContentSize(ScrollablePanel::Ptr* self, float x, float y);
+	C_ABI_GETTER Vector2f* ABI_ScrollablePanel_getContentSize(ScrollablePanel::Ptr* self);
+	C_ABI_GETTER Vector2f* ABI_ScrollablePanel_getContentOffset(ScrollablePanel::Ptr* self);
+	C_ABI_GETTER float ABI_ScrollablePanel_getScrollbarWidth(ScrollablePanel::Ptr* self);
+	C_ABI_SETTER void ABI_ScrollablePanel_setVerticalScrollbarPolicy(ScrollablePanel::Ptr* self, int policy);
+	C_ABI_GETTER int ABI_ScrollablePanel_getVerticalScrollbarPolicy(ScrollablePanel::Ptr* self);
+	C_ABI_SETTER void ABI_ScrollablePanel_setHorizontalScrollbarPolicy(ScrollablePanel::Ptr* self, int policy);
+	C_ABI_GETTER int ABI_ScrollablePanel_getHorizontalScrollbarPolicy(ScrollablePanel::Ptr* self);
+	C_ABI_SETTER void ABI_ScrollablePanel_setVerticalScrollAmount(ScrollablePanel::Ptr* self, int amount);
+	C_ABI_GETTER int ABI_ScrollablePanel_getVerticalScrollAmount(ScrollablePanel::Ptr* self);
+	C_ABI_SETTER void ABI_ScrollablePanel_setHorizontalScrollAmount(ScrollablePanel::Ptr* self, int amount);
+	C_ABI_GETTER int ABI_ScrollablePanel_getHorizontalScrollAmount(ScrollablePanel::Ptr* self);
+	C_ABI_SETTER void ABI_ScrollablePanel_setVerticalScrollbarValue(ScrollablePanel::Ptr* self, int value);
+	C_ABI_GETTER int ABI_ScrollablePanel_getVerticalScrollbarValue(ScrollablePanel::Ptr* self);
+	C_ABI_SETTER void ABI_ScrollablePanel_setHorizontalScrollbarValue(ScrollablePanel::Ptr* self, int value);
+	C_ABI_GETTER int ABI_ScrollablePanel_getHorizontalScrollbarValue(ScrollablePanel::Ptr* self);
+	// Grid
+	C_ABI_MAKE Grid::Ptr* ABI_Grid_make();
+	C_ABI_SETTER void ABI_Grid_setAutoSize(Grid::Ptr* self, int autoSize);
+	C_ABI_GETTER bool ABI_Grid_isAutoSize(Grid::Ptr* self);
+	C_ABI_RAW bool ABI_Grid_setWidgetCell(Grid::Ptr* self, Widget::Ptr* widget, int row, int column);
+	C_ABI_RAW Widget::Ptr* ABI_Grid_getWidget(Grid::Ptr* self, int row, int column);
+	C_ABI_RAW void ABI_Grid_setWidgetPadding(Grid::Ptr* self, Widget::Ptr* widget, char* paddingLeft, char* paddingRight, char* paddingTop, char* paddingBottom);
+	C_ABI_RAW Outline* ABI_Grid_getWidgetPadding(Grid::Ptr* self, Widget::Ptr* widget);
+	C_ABI_RAW void ABI_Grid_setWidgetAlignment(Grid::Ptr* self, Widget::Ptr* widget, int alignment);
+	C_ABI_RAW int ABI_Grid_getWidgetAlignment(Grid::Ptr* self, Widget::Ptr* widget);
+	// ComboBox
+	C_ABI_MAKE ComboBox::Ptr* ABI_ComboBox_make();
+	C_ABI_SETTER void ABI_ComboBox_setItemsToDisplay(ComboBox::Ptr* self, int itemsToDisplay);
+	C_ABI_GETTER int ABI_ComboBox_getItemsToDisplay(ComboBox::Ptr* self);
+	C_ABI_METHOD void ABI_ComboBox_addItem(ComboBox::Ptr* self, char* name, char* id);
+	C_ABI_RAW bool ABI_ComboBox_setSelectedItemById(ComboBox::Ptr* self, char* id);
+	C_ABI_RAW bool ABI_ComboBox_setSelectedItemByIndex(ComboBox::Ptr* self, int index);
+	C_ABI_METHOD void ABI_ComboBox_deselectItem(ComboBox::Ptr* self);
+	C_ABI_RAW bool ABI_ComboBox_removeItemById(ComboBox::Ptr* self, char* id);
+	C_ABI_RAW bool ABI_ComboBox_removeItemByIndex(ComboBox::Ptr* self, int index);
+	C_ABI_METHOD void ABI_ComboBox_removeAllItems(ComboBox::Ptr* self);
+	C_ABI_RAW char32_t* ABI_ComboBox_getItemById(ComboBox::Ptr* self, char* id);
+	C_ABI_RAW char32_t* ABI_ComboBox_getSelectedItemId(ComboBox::Ptr* self);
+	C_ABI_RAW bool ABI_ComboBox_changeItemById(ComboBox::Ptr* self, char* id, char* newValue);
+	C_ABI_RAW bool ABI_ComboBox_changeItemByIndex(ComboBox::Ptr* self, int index, char* newValue);
+	C_ABI_GETTER int ABI_ComboBox_getItemCount(ComboBox::Ptr* self);
+	C_ABI_RAW void ABI_ComboBox_getItemIds(ComboBox::Ptr* self, void(*f)(char32_t*));
+	C_ABI_SETTER void ABI_ComboBox_setMaximumItems(ComboBox::Ptr* self, int maximumItems);
+	C_ABI_GETTER int ABI_ComboBox_getMaximumItems(ComboBox::Ptr* self);
+	C_ABI_SETTER void ABI_ComboBox_setDefaultText(ComboBox::Ptr* self, char* defaultText);
+	C_ABI_GETTER const char32_t* ABI_ComboBox_getDefaultText(ComboBox::Ptr* self);
+	C_ABI_SETTER void ABI_ComboBox_setExpandDirection(ComboBox::Ptr* self, int expandDirection);
+	C_ABI_GETTER int ABI_ComboBox_getExpandDirection(ComboBox::Ptr* self);
+	C_ABI_RAW bool ABI_ComboBox_containsId(ComboBox::Ptr* self, char* id);
+	C_ABI_SETTER void ABI_ComboBox_setChangeItemOnScroll(ComboBox::Ptr* self, int changeItemOnScroll);
+	C_ABI_GETTER bool ABI_ComboBox_getChangeItemOnScroll(ComboBox::Ptr* self);
+	C_ABI_SIGNAL SignalItem* ABI_ComboBox_onItemSelect(ComboBox::Ptr* self);
+
+
 	// ColorPicker
 	C_ABI_MAKE ColorPicker::Ptr* ABI_ColorPicker_new();
 	C_ABI_SETTER void ABI_ColorPicker_setColor(ColorPicker::Ptr* self, Color* color);

@@ -2,8 +2,8 @@
 #include <TGUI/TGUI.hpp>
 #include <TGUI/Backend/SFML-Graphics.hpp>
 
-namespace tgui
-{
+namespace tgui {
+
     std::vector<void*> autoclean;
 
     // Util
@@ -102,6 +102,14 @@ namespace tgui
             });
     }
 
+    // SignalItem
+
+    C_ABI_RAW int ABI_SignalItem_connect(SignalItem* self, void(*f)(const char32_t*, const char32_t*)) {
+        return self->connect([=](const String& str1, const String& str2) {
+            f(str1.data(), str2.data());
+            });
+    }
+
     // Window
 
     C_ABI_MAKE sf::RenderWindow* ABI_Window_new() {
@@ -196,6 +204,10 @@ namespace tgui
     C_ABI_FREE void ABI_Widget_free(std::shared_ptr<Widget>* pointer) {
         (*pointer).reset();
         delete pointer;
+    }
+
+    C_ABI_STATIC Widget* ABI_Widget_getUnshared(std::shared_ptr<Widget>* pointer) {
+        return &(**pointer);
     }
 
     C_ABI_STATIC const char32_t* ABI_Widget_getType(Widget::Ptr* self) {
@@ -834,6 +846,371 @@ namespace tgui
         return ptr;
     }
 
+    // BoxLayout
+
+    C_ABI_RAW Widget::Ptr* ABI_BoxLayout_getByIndex(BoxLayout::Ptr* self, int index) {
+        auto widget = (**self).get(index);
+        auto ptr = new Widget::Ptr(nullptr);
+        ptr->swap(widget);
+        return ptr;
+    }
+
+    C_ABI_METHOD void ABI_BoxLayout_insert(BoxLayout::Ptr* self, int index, Widget::Ptr* widget, char* name) {
+        (**self).insert(index, *widget, name);
+    }
+
+    C_ABI_RAW bool ABI_BoxLayout_removeByIndex(BoxLayout::Ptr* self, int index) {
+        return (**self).remove(index);
+    }
+
+    // BoxLayoutRatios
+
+    C_ABI_METHOD void ABI_BoxLayoutRatios_addSpace(BoxLayoutRatios::Ptr* self, float ratio) {
+        (**self).addSpace(ratio);
+    }
+
+    C_ABI_METHOD void ABI_BoxLayoutRatios_insertSpace(BoxLayoutRatios::Ptr* self, int index, float ratio) {
+        (**self).insertSpace(index, ratio);
+    }
+
+    C_ABI_RAW void ABI_BoxLayoutRatios_setRatio(BoxLayoutRatios::Ptr* self, Widget::Ptr* widget, float ratio) {
+        (**self).setRatio(*widget, ratio);
+    }
+
+    C_ABI_RAW void ABI_BoxLayoutRatios_setRatioByIndex(BoxLayoutRatios::Ptr* self, int index, float ratio) {
+        (**self).setRatio(index, ratio);
+    }
+
+    C_ABI_RAW float ABI_BoxLayoutRatios_getRatio(BoxLayoutRatios::Ptr* self, Widget::Ptr* widget) {
+        return (**self).getRatio(*widget);
+    }
+
+    C_ABI_RAW float ABI_BoxLayoutRatios_getRatioByIndex(BoxLayoutRatios::Ptr* self, int index) {
+        return (**self).getRatio(index);
+    }
+
+    // HorizontalLayout
+
+    C_ABI_MAKE HorizontalLayout::Ptr* ABI_HorizontalLayout_create() {
+        auto layout = HorizontalLayout::create();
+        auto ptr = new HorizontalLayout::Ptr(nullptr);
+        ptr->swap(layout);
+        return ptr;
+    }
+
+    // VerticalLayout
+
+    C_ABI_MAKE VerticalLayout::Ptr* ABI_VerticalLayout_create() {
+        auto layout = VerticalLayout::create();
+        auto ptr = new VerticalLayout::Ptr(nullptr);
+        ptr->swap(layout);
+        return ptr;
+    }
+
+    // HorizontalWrap
+
+    C_ABI_MAKE HorizontalWrap::Ptr* ABI_HorizontalWrap_create() {
+        auto layout = HorizontalWrap::create();
+        auto ptr = new HorizontalWrap::Ptr(nullptr);
+        ptr->swap(layout);
+        return ptr;
+    }
+
+    // RadioButtonGroup
+
+    C_ABI_MAKE RadioButtonGroup::Ptr* ABI_RadioButtonGroup_create() {
+        auto group = RadioButtonGroup::create();
+        auto ptr = new RadioButtonGroup::Ptr(nullptr);
+        ptr->swap(group);
+        return ptr;
+    }
+
+    C_ABI_METHOD void ABI_RadioButtonGroup_uncheckRadioButtons(RadioButtonGroup::Ptr* self) {
+        (**self).uncheckRadioButtons();
+    }
+
+    C_ABI_GETTER RadioButton::Ptr* ABI_RadioButtonGroup_getCheckedRadioButton(RadioButtonGroup::Ptr* self) {
+        auto button = (**self).getCheckedRadioButton();
+        if (button == nullptr) {
+            return nullptr;
+        }
+        auto ptr = new RadioButton::Ptr(nullptr);
+        ptr->swap(button);
+        return ptr;
+    }
+
+    // Panel
+
+    C_ABI_MAKE Panel::Ptr* ABI_Panel_create() {
+        auto panel = Panel::create();
+        auto ptr = new Panel::Ptr(nullptr);
+        ptr->swap(panel);
+        return ptr;
+    }
+
+    C_ABI_SIGNAL SignalVector2f* ABI_Panel_onMousePress(Panel::Ptr* self) {
+        return &(**self).onMousePress;
+    }
+
+    C_ABI_SIGNAL SignalVector2f* ABI_Panel_onMouseRelease(Panel::Ptr* self) {
+        return &(**self).onMouseRelease;
+    }
+
+    C_ABI_SIGNAL SignalVector2f* ABI_Panel_onClick(Panel::Ptr* self) {
+        return &(**self).onClick;
+    }
+
+    C_ABI_SIGNAL SignalVector2f* ABI_Panel_onDoubleClick(Panel::Ptr* self) {
+        return &(**self).onDoubleClick;
+    }
+
+    C_ABI_SIGNAL SignalVector2f* ABI_Panel_onRightMousePress(Panel::Ptr* self) {
+        return &(**self).onRightMousePress;
+    }
+
+    C_ABI_SIGNAL SignalVector2f* ABI_Panel_onRightMouseRelease(Panel::Ptr* self) {
+        return &(**self).onRightMouseRelease;
+    }
+
+    C_ABI_SIGNAL SignalVector2f* ABI_Panel_onRightClick(Panel::Ptr* self) {
+        return &(**self).onRightClick;
+    }
+
+    // ScrollablePanel
+
+    C_ABI_MAKE ScrollablePanel::Ptr* ABI_ScrollablePanel_create() {
+        auto panel = ScrollablePanel::create();
+        auto ptr = new ScrollablePanel::Ptr(nullptr);
+        ptr->swap(panel);
+        return ptr;
+    }
+
+    C_ABI_SETTER void ABI_ScrollablePanel_setContentSize(ScrollablePanel::Ptr* self, float x, float y) {
+        (**self).setContentSize(Vector2f(x, y));
+    }
+
+    C_ABI_GETTER Vector2f* ABI_ScrollablePanel_getContentSize(ScrollablePanel::Ptr* self) {
+        return new Vector2f((**self).getContentSize());
+    }
+
+    C_ABI_GETTER Vector2f* ABI_ScrollablePanel_getContentOffset(ScrollablePanel::Ptr* self) {
+        return new Vector2f((**self).getContentOffset());
+    }
+
+    C_ABI_GETTER float ABI_ScrollablePanel_getScrollbarWidth(ScrollablePanel::Ptr* self) {
+        return (**self).getScrollbarWidth();
+    }
+
+    C_ABI_SETTER void ABI_ScrollablePanel_setVerticalScrollbarPolicy(ScrollablePanel::Ptr* self, int policy) {
+        (**self).setVerticalScrollbarPolicy(static_cast<Scrollbar::Policy>(policy));
+    }
+
+    C_ABI_GETTER int ABI_ScrollablePanel_getVerticalScrollbarPolicy(ScrollablePanel::Ptr* self) {
+        return static_cast<int>((**self).getVerticalScrollbarPolicy());
+    }
+
+    C_ABI_SETTER void ABI_ScrollablePanel_setHorizontalScrollbarPolicy(ScrollablePanel::Ptr* self, int policy) {
+        (**self).setHorizontalScrollbarPolicy(static_cast<Scrollbar::Policy>(policy));
+    }
+
+    C_ABI_GETTER int ABI_ScrollablePanel_getHorizontalScrollbarPolicy(ScrollablePanel::Ptr* self) {
+        return static_cast<int>((**self).getHorizontalScrollbarPolicy());
+    }
+
+    C_ABI_SETTER void ABI_ScrollablePanel_setVerticalScrollAmount(ScrollablePanel::Ptr* self, int amount) {
+        (**self).setVerticalScrollAmount(amount);
+    }
+
+    C_ABI_GETTER int ABI_ScrollablePanel_getVerticalScrollAmount(ScrollablePanel::Ptr* self) {
+        return static_cast<int>((**self).getVerticalScrollAmount());
+    }
+
+    C_ABI_SETTER void ABI_ScrollablePanel_setHorizontalScrollAmount(ScrollablePanel::Ptr* self, int amount) {
+        (**self).setHorizontalScrollAmount(amount);
+    }
+
+    C_ABI_GETTER int ABI_ScrollablePanel_getHorizontalScrollAmount(ScrollablePanel::Ptr* self) {
+        return static_cast<int>((**self).getHorizontalScrollAmount());
+    }
+
+    C_ABI_SETTER void ABI_ScrollablePanel_setVerticalScrollbarValue(ScrollablePanel::Ptr* self, int value) {
+        (**self).setVerticalScrollbarValue(value);
+    }
+
+    C_ABI_GETTER int ABI_ScrollablePanel_getVerticalScrollbarValue(ScrollablePanel::Ptr* self) {
+        return static_cast<int>((**self).getVerticalScrollbarValue());
+    }
+
+    C_ABI_SETTER void ABI_ScrollablePanel_setHorizontalScrollbarValue(ScrollablePanel::Ptr* self, int value) {
+        (**self).setHorizontalScrollbarValue(value);
+    }
+
+    C_ABI_GETTER int ABI_ScrollablePanel_getHorizontalScrollbarValue(ScrollablePanel::Ptr* self) {
+        return static_cast<int>((**self).getHorizontalScrollbarValue());
+    }
+
+    // Grid
+
+    C_ABI_MAKE Grid::Ptr* ABI_Grid_make() {
+        auto grid = Grid::create();
+        auto ptr = new Grid::Ptr(nullptr);
+        ptr->swap(grid);
+        return ptr;
+    }
+
+	C_ABI_SETTER void ABI_Grid_setAutoSize(Grid::Ptr* self, int autoSize) {
+        (**self).setAutoSize(autoSize);
+    }
+
+	C_ABI_TESTER bool ABI_Grid_isAutoSize(Grid::Ptr* self) {
+        return (**self).getAutoSize();
+    }
+
+	C_ABI_RAW bool ABI_Grid_setWidgetCell(Grid::Ptr* self, Widget::Ptr* widget, int row, int column) {
+        auto alignment = (**self).getWidgetAlignment(row, column);
+        auto padding = (**self).getWidgetPadding(row, column);
+        return (**self).setWidgetCell(*widget, row, column, alignment, padding);
+    }
+
+	C_ABI_RAW Widget::Ptr* ABI_Grid_getWidget(Grid::Ptr* self, int row, int column) {
+        auto widget = (**self).getWidget(row, column);
+        auto ptr = new Widget::Ptr(nullptr);
+        ptr->swap(widget);
+        return ptr;
+    }
+
+	C_ABI_RAW void ABI_Grid_setWidgetPadding(Grid::Ptr* self, Widget::Ptr* widget, char* paddingLeft, char* paddingRight, char* paddingTop, char* paddingBottom) {
+        (**self).setWidgetPadding(*widget, Padding(paddingLeft, paddingRight, paddingTop, paddingBottom));
+    }
+
+	C_ABI_RAW Outline* ABI_Grid_getWidgetPadding(Grid::Ptr* self, Widget::Ptr* widget) {
+        auto o = (**self).getWidgetPadding(*widget);
+        return new Padding(o.getLeft(), o.getRight(), o.getTop(), o.getBottom());
+    }
+
+	C_ABI_RAW void ABI_Grid_setWidgetAlignment(Grid::Ptr* self, Widget::Ptr* widget, int alignment) {
+        (**self).setWidgetAlignment(*widget, static_cast<Grid::Alignment>(alignment));
+    }
+
+	C_ABI_RAW int ABI_Grid_getWidgetAlignment(Grid::Ptr* self, Widget::Ptr* widget) {
+        return static_cast<int>((**self).getWidgetAlignment(*widget));
+    }
+
+    // ComboBox
+
+	C_ABI_MAKE ComboBox::Ptr* ABI_ComboBox_make() {
+        auto combo = ComboBox::create();
+        auto ptr = new ComboBox::Ptr(nullptr);
+        ptr->swap(combo);
+        return ptr;
+    }
+
+	C_ABI_SETTER void ABI_ComboBox_setItemsToDisplay(ComboBox::Ptr* self, int itemsToDisplay) {
+        (**self).setItemsToDisplay(itemsToDisplay);
+    }
+
+	C_ABI_GETTER int ABI_ComboBox_getItemsToDisplay(ComboBox::Ptr* self) {
+        return static_cast<int>((**self).getItemsToDisplay());
+    }
+
+	C_ABI_METHOD void ABI_ComboBox_addItem(ComboBox::Ptr* self, char* name, char* id) {
+        (**self).addItem(name, id);
+    }
+
+	C_ABI_RAW bool ABI_ComboBox_setSelectedItemById(ComboBox::Ptr* self, char* id) {
+        return (**self).setSelectedItemById(id);
+    }
+
+	C_ABI_RAW bool ABI_ComboBox_setSelectedItemByIndex(ComboBox::Ptr* self, int index) {
+        return (**self).setSelectedItemByIndex(index);
+    }
+
+	C_ABI_METHOD void ABI_ComboBox_deselectItem(ComboBox::Ptr* self) {
+        (**self).deselectItem();
+    }
+
+	C_ABI_RAW bool ABI_ComboBox_removeItemById(ComboBox::Ptr* self, char* id) {
+        return (**self).removeItemById(id);
+    }
+
+	C_ABI_RAW bool ABI_ComboBox_removeItemByIndex(ComboBox::Ptr* self, int index) {
+        return (**self).removeItemByIndex(index);
+    }
+
+	C_ABI_METHOD void ABI_ComboBox_removeAllItems(ComboBox::Ptr* self) {
+        (**self).removeAllItems();
+    }
+
+	C_ABI_RAW char32_t* ABI_ComboBox_getItemById(ComboBox::Ptr* self, char* id) {
+        auto item = new String((**self).getItemById(id));
+        autoclean.push_back(item);
+        return item->data();
+    }
+
+	C_ABI_RAW char32_t* ABI_ComboBox_getSelectedItemId(ComboBox::Ptr* self) {
+        auto id = new String((**self).getSelectedItemId());
+        autoclean.push_back(id);
+        return id->data();
+    }
+
+	C_ABI_METHOD bool ABI_ComboBox_changeItemById(ComboBox::Ptr* self, char* id, char* newValue) {
+        return (**self).changeItemById(id, newValue);
+    }
+
+	C_ABI_METHOD bool ABI_ComboBox_changeItemByIndex(ComboBox::Ptr* self, int index, char* newValue) {
+        return (**self).changeItemByIndex(index, newValue);
+    }
+
+	C_ABI_GETTER int ABI_ComboBox_getItemCount(ComboBox::Ptr* self) {
+        return static_cast<int>((**self).getItemCount());
+    }
+
+	C_ABI_RAW void ABI_ComboBox_getItemIds(ComboBox::Ptr* self, void(*f)(char32_t*)) {
+        for (auto id : (**self).getItemIds()) {
+            f(id.data());
+        }
+    }
+
+	C_ABI_SETTER void ABI_ComboBox_setMaximumItems(ComboBox::Ptr* self, int maximumItems) {
+        (**self).setMaximumItems(maximumItems);
+    }
+
+	C_ABI_GETTER int ABI_ComboBox_getMaximumItems(ComboBox::Ptr* self) {
+        return static_cast<int>((**self).getMaximumItems());
+    }
+
+	C_ABI_SETTER void ABI_ComboBox_setDefaultText(ComboBox::Ptr* self, char* defaultText) {
+        (**self).setDefaultText(defaultText);
+    }
+
+	C_ABI_GETTER const char32_t* ABI_ComboBox_getDefaultText(ComboBox::Ptr* self) {
+        return (**self).getDefaultText().data();
+    }
+
+	C_ABI_SETTER void ABI_ComboBox_setExpandDirection(ComboBox::Ptr* self, int expandDirection) {
+        (**self).setExpandDirection(static_cast<ComboBox::ExpandDirection>(expandDirection));
+    }
+
+	C_ABI_GETTER int ABI_ComboBox_getExpandDirection(ComboBox::Ptr* self) {
+        return static_cast<int>((**self).getExpandDirection());
+    }
+
+	C_ABI_METHOD bool ABI_ComboBox_containsId(ComboBox::Ptr* self, char* id) {
+        return (**self).containsId(id);
+    }
+
+	C_ABI_SETTER void ABI_ComboBox_setChangeItemOnScroll(ComboBox::Ptr* self, int changeItemOnScroll) {
+        (**self).setChangeItemOnScroll(changeItemOnScroll);
+    }
+
+	C_ABI_GETTER bool ABI_ComboBox_getChangeItemOnScroll(ComboBox::Ptr* self) {
+        return (**self).getChangeItemOnScroll();
+    }
+
+	C_ABI_SIGNAL SignalItem* ABI_ComboBox_onItemSelect(ComboBox::Ptr* self) {
+        return &(**self).onItemSelect;
+    }
+    
     // ColorPicker
 
     C_ABI_MAKE ColorPicker::Ptr* ABI_ColorPicker_new() {
