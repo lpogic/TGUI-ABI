@@ -33,6 +33,8 @@ namespace tgui
 	C_ABI_RAW int ABI_SignalString_connect(SignalString* signal, void(*f)(const char32_t*));
 	// SignalBool
 	C_ABI_RAW int ABI_SignalBool_connect(SignalBool* signal, void(*f)(int));
+	// SignalInt
+	C_ABI_RAW int ABI_SignalInt_connect(SignalInt* signal, void(*f)(int));
 	// SignalPointer
 	C_ABI_RAW int ABI_SignalPointer_connect(SignalTyped<void*>* signal, void(*f)(void*));
 	// SignalColor
@@ -295,6 +297,76 @@ namespace tgui
 	C_ABI_RAW Outline* ABI_Grid_getWidgetPadding(Grid::Ptr* self, Widget::Ptr* widget);
 	C_ABI_RAW void ABI_Grid_setWidgetAlignment(Grid::Ptr* self, Widget::Ptr* widget, int alignment);
 	C_ABI_RAW int ABI_Grid_getWidgetAlignment(Grid::Ptr* self, Widget::Ptr* widget);
+	// ListView
+	C_ABI_MAKE ListView::Ptr* ABI_ListView_make();
+	C_ABI_METHOD int ABI_ListView_addColumn(ListView::Ptr* self);
+	C_ABI_SETTER void ABI_ListView_setColumnText(ListView::Ptr* self, int index, char* text);
+	C_ABI_GETTER const char32_t* ABI_ListView_getColumnText(ListView::Ptr* self, int index);
+	C_ABI_SETTER void ABI_ListView_setColumnWidth(ListView::Ptr* self, int index, float width);
+	C_ABI_GETTER float ABI_ListView_getColumnWidth(ListView::Ptr* self, int index);
+	C_ABI_RAW void ABI_ListView_setColumnAlignment(ListView::Ptr* self, int index, int columnAlignment);
+	C_ABI_RAW int ABI_ListView_getColumnAlignment(ListView::Ptr* self, int index);
+	C_ABI_METHOD void ABI_ListView_removeAllColumns(ListView::Ptr* self);
+	C_ABI_GETTER int ABI_ListView_getColumnCount(ListView::Ptr* self);
+	C_ABI_SETTER void ABI_ListView_setHeaderHeight(ListView::Ptr* self, float height);
+	C_ABI_GETTER float ABI_ListView_getHeaderHeight(ListView::Ptr* self);
+	C_ABI_GETTER float ABI_ListView_getCurrentHeaderHeight(ListView::Ptr* self);
+	C_ABI_SETTER void ABI_ListView_setHeaderVisible(ListView::Ptr* self, int showHeader);
+	C_ABI_TESTER bool ABI_ListView_headerVisible(ListView::Ptr* self);
+	C_ABI_RAW int ABI_ListView_addItem(ListView::Ptr* self, char*(*f)(void));
+	C_ABI_RAW void ABI_ListView_insertItem(ListView::Ptr* self, int index, char*(*f)(void));
+	C_ABI_RAW bool ABI_ListView_changeItem(ListView::Ptr* self, int index, char*(*f)(void));
+	C_ABI_RAW bool ABI_ListView_changeSubitem(ListView::Ptr* self, int index, int column, char* item);
+	C_ABI_RAW bool ABI_ListView_removeItem(ListView::Ptr* self, int index);
+	C_ABI_METHOD void ABI_ListView_removeAllItems(ListView::Ptr* self);
+	C_ABI_SETTER void ABI_ListView_setSelectedItem(ListView::Ptr* self, int index);
+	C_ABI_RAW void ABI_ListView_setSelectedItems(ListView::Ptr* self, int(*f)(void));
+	C_ABI_METHOD void ABI_ListView_deselectItems(ListView::Ptr* self);
+	C_ABI_GETTER int ABI_ListView_getSelectedItemIndex(ListView::Ptr* self);
+	C_ABI_RAW void ABI_ListView_getSelectedItemIndices(ListView::Ptr* self, void(*f)(int));
+	C_ABI_SETTER void ABI_ListView_setMultiSelect(ListView::Ptr* self, int multiSelect);
+	C_ABI_TESTER bool ABI_ListView_multiSelect(ListView::Ptr* self);
+	C_ABI_SETTER void ABI_ListView_setItemIcon(ListView::Ptr* self, int index, Texture* texture);
+	C_ABI_GETTER Texture* ABI_ListView_getItemIcon(ListView::Ptr* self, int index);
+	C_ABI_GETTER int ABI_ListView_getItemCount(ListView::Ptr* self);
+	C_ABI_RAW void ABI_ListView_getItemRow(ListView::Ptr* self, int index, void(*f)(const char32_t*));
+	C_ABI_GETTER const char32_t* ABI_ListView_getItemCell(ListView::Ptr* self, int rowIndex, int columnIndex);
+	C_ABI_RAW void ABI_ListView_getItemRows(ListView::Ptr* self, void(*f)(const char32_t*, int row));
+	C_ABI_SETTER void ABI_ListView_setItemHeight(ListView::Ptr* self, int itemHeight);
+	C_ABI_GETTER int ABI_ListView_getItemHeight(ListView::Ptr* self);
+	C_ABI_SETTER void ABI_ListView_setHeaderTextSize(ListView::Ptr* self, int textSize);
+	C_ABI_GETTER int ABI_ListView_getHeaderTextSize(ListView::Ptr* self);
+	C_ABI_SETTER void ABI_ListView_setSeparatorWidth(ListView::Ptr* self, int width);
+	C_ABI_GETTER int ABI_ListView_getSeparatorWidth(ListView::Ptr* self);
+	C_ABI_SETTER void ABI_ListView_setHeaderSeparatorHeight(ListView::Ptr* self, int height);
+	C_ABI_GETTER int ABI_ListView_getHeaderSeparatorHeight(ListView::Ptr* self);
+	C_ABI_SETTER void ABI_ListView_setGridLinesWidth(ListView::Ptr* self, int width);
+	C_ABI_GETTER int ABI_ListView_getGridLinesWidth(ListView::Ptr* self);
+	C_ABI_SETTER void ABI_ListView_setAutoScroll(ListView::Ptr* self, int autoScroll);
+	C_ABI_TESTER bool ABI_ListView_autoScroll(ListView::Ptr* self);
+	C_ABI_SETTER void ABI_ListView_setShowVerticalGridLines(ListView::Ptr* self, int showGridLines);
+	C_ABI_TESTER bool ABI_ListView_showVerticalGridLines(ListView::Ptr* self);
+	C_ABI_SETTER void ABI_ListView_setShowHorizontalGridLines(ListView::Ptr* self, int showGridLines);
+	C_ABI_TESTER bool ABI_ListView_showHorizontalGridLines(ListView::Ptr* self);
+	C_ABI_SETTER void ABI_ListView_setExpandLastColumn(ListView::Ptr* self, int expand);
+	C_ABI_TESTER bool ABI_ListView_expandLastColumn(ListView::Ptr* self);
+	C_ABI_SETTER void ABI_ListView_setVerticalScrollbarPolicy(ListView::Ptr* self, int policy);
+	C_ABI_GETTER int ABI_ListView_getVerticalScrollbarPolicy(ListView::Ptr* self);
+	C_ABI_SETTER void ABI_ListView_setHorizontalScrollbarPolicy(ListView::Ptr* self, int policy);
+	C_ABI_GETTER int ABI_ListView_getHorizontalScrollbarPolicy(ListView::Ptr* self);
+	C_ABI_SETTER void ABI_ListView_setVerticalScrollbarValue(ListView::Ptr* self, int value);
+	C_ABI_GETTER int ABI_ListView_getVerticalScrollbarValue(ListView::Ptr* self);
+	C_ABI_SETTER void ABI_ListView_setHorizontalScrollbarValue(ListView::Ptr* self, int value);
+	C_ABI_GETTER int ABI_ListView_getHorizontalScrollbarValue(ListView::Ptr* self);
+	C_ABI_SETTER void ABI_ListView_setFixedIconSize(ListView::Ptr* self, float width, float height);
+	C_ABI_GETTER Vector2f* ABI_ListView_getFixedIconSize(ListView::Ptr* self);
+	C_ABI_SETTER void ABI_ListView_setResizableColumns(ListView::Ptr* self, int resizable);
+	C_ABI_TESTER bool ABI_ListView_resizableColumns(ListView::Ptr* self);
+	C_ABI_SIGNAL SignalInt* ABI_ListView_onItemSelect(ListView::Ptr* self);
+	C_ABI_SIGNAL SignalInt* ABI_ListView_onDoubleClick(ListView::Ptr* self);
+	C_ABI_SIGNAL SignalInt* ABI_ListView_onRightClick(ListView::Ptr* self);
+	C_ABI_SIGNAL SignalInt* ABI_ListView_onHeaderClick(ListView::Ptr* self);
+
 	// ComboBox
 	C_ABI_MAKE ComboBox::Ptr* ABI_ComboBox_make();
 	C_ABI_SETTER void ABI_ComboBox_setItemsToDisplay(ComboBox::Ptr* self, int itemsToDisplay);
