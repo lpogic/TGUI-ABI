@@ -27,16 +27,18 @@ namespace tgui
 	C_ABI_GETTER int ABI_Color_get_alpha(Color* self);
 	C_ABI_METHOD Color* ABI_Color_fade(Color* self, float fade);
 	// Signal
-	C_ABI_RAW int ABI_Signal_connect(Signal* signal, void(*f)());
-	C_ABI_RAW bool ABI_Signal_disconnect(Signal* signal, int f);
+	C_ABI_RAW int ABI_Signal_connect(Signal* self, void(*f)());
+	C_ABI_RAW bool ABI_Signal_disconnect(Signal* self, int f);
 	// SignalString
-	C_ABI_RAW int ABI_SignalString_connect(SignalString* signal, void(*f)(const char32_t*));
+	C_ABI_RAW int ABI_SignalString_connect(SignalString* self, void(*f)(const char32_t*));
 	// SignalBool
-	C_ABI_RAW int ABI_SignalBool_connect(SignalBool* signal, void(*f)(int));
+	C_ABI_RAW int ABI_SignalBool_connect(SignalBool* self, void(*f)(int));
 	// SignalInt
-	C_ABI_RAW int ABI_SignalInt_connect(SignalInt* signal, void(*f)(int));
+	C_ABI_RAW int ABI_SignalInt_connect(SignalInt* self, void(*f)(int));
+	// SignalFloat
+	C_ABI_RAW int ABI_SignalFloat_connect(SignalFloat* self, void(*f)(float));
 	// SignalPointer
-	C_ABI_RAW int ABI_SignalPointer_connect(SignalTyped<void*>* signal, void(*f)(void*));
+	C_ABI_RAW int ABI_SignalPointer_connect(SignalTyped<void*>* self, void(*f)(void*));
 	// SignalColor
 	C_ABI_RAW int ABI_SignalColor_connect(SignalColor* self, void(*f)(void*));
 	// SignalVector2f
@@ -63,6 +65,14 @@ namespace tgui
 	C_ABI_RAW Widget::Ptr* ABI_Gui_getWidget(Gui* self, const char* name);
 	// Theme
 	C_ABI_STATIC void ABI_Theme_setDefault(char* theme);
+	// Texture
+	C_ABI_MAKE Texture* ABI_Texture_new(char* id, int partRectX, int partRectY, int partRectW, int partRectH, int middlePartX, int middlePartY, int middlePartW, int middlePartH, int smooth);
+	C_ABI_GETTER const char32_t* ABI_Texture_getId(Texture* self);
+	C_ABI_GETTER Vector2u* ABI_Texture_getImageSize(Texture* self);
+	C_ABI_GETTER UIntRect* ABI_Texture_getPartRect(Texture* self);
+	C_ABI_SETTER void ABI_Texture_setColor(Texture* self, int red, int green, int blue);
+	C_ABI_GETTER Color* ABI_Texture_getColor(Texture* self);
+	C_ABI_TESTER bool ABI_Texture_isSmooth(Texture* self);
 	// Widget
 	C_ABI_FREE void ABI_Widget_free(std::shared_ptr<Widget>* pointer);
 	C_ABI_STATIC Widget* ABI_Widget_getUnshared(std::shared_ptr<Widget>* pointer);
@@ -108,6 +118,12 @@ namespace tgui
 	C_ABI_SETTER void ABI_Button_setText(Button::Ptr* self, const char* text);
 	C_ABI_GETTER const char32_t* ABI_Button_getText(Button::Ptr* self);
 	C_ABI_SIGNAL Signal* ABI_Button_onPress(Button::Ptr* self);
+	// BitmapButton
+	C_ABI_MAKE BitmapButton::Ptr* ABI_BitmapButton_new();
+	C_ABI_RAW void ABI_BitmapButton_setImage(BitmapButton::Ptr* self, Texture* texture);
+	C_ABI_GETTER Texture* ABI_BitmapButton_getImage(BitmapButton::Ptr* self);
+	C_ABI_SETTER void ABI_BitmapButton_setImageScaling(BitmapButton::Ptr* self, float relativeHeight);
+	C_ABI_GETTER float ABI_BitmapButton_getImageScaling(BitmapButton::Ptr* self);
 	// EditBox
 	C_ABI_MAKE EditBox::Ptr* ABI_EditBox_new();
 	C_ABI_SETTER void ABI_EditBox_setText(EditBox::Ptr* self, const char* text);
@@ -164,6 +180,21 @@ namespace tgui
 	C_ABI_SIGNAL SignalBool* ABI_RadioButton_onChange(RadioButton::Ptr* self);
 	// CheckBox
 	C_ABI_MAKE CheckBox::Ptr* ABI_CheckBox_new();
+	// Knob
+	C_ABI_MAKE Knob::Ptr* ABI_Knob_new();
+	C_ABI_SETTER void ABI_Knob_setStartRotation(Knob::Ptr* self, float startRotation);
+	C_ABI_GETTER float ABI_Knob_getStartRotation(Knob::Ptr* self);
+	C_ABI_SETTER void ABI_Knob_setEndRotation(Knob::Ptr* self, float endRotation);
+	C_ABI_GETTER float ABI_Knob_getEndRotation(Knob::Ptr* self);
+	C_ABI_SETTER void ABI_Knob_setMinimum(Knob::Ptr* self, float minimum);
+	C_ABI_GETTER float ABI_Knob_getMinimum(Knob::Ptr* self);
+	C_ABI_SETTER void ABI_Knob_setMaximum(Knob::Ptr* self, float maximum);
+	C_ABI_GETTER float ABI_Knob_getMaximum(Knob::Ptr* self);
+	C_ABI_SETTER void ABI_Knob_setValue(Knob::Ptr* self, float value);
+	C_ABI_GETTER float ABI_Knob_getValue(Knob::Ptr* self);
+	C_ABI_SETTER void ABI_Knob_setClockwiseTurning(Knob::Ptr* self, int clockwiseTurning);
+	C_ABI_TESTER float ABI_Knob_getClockwiseTurning(Knob::Ptr* self);
+	C_ABI_SIGNAL SignalFloat* ABI_Knob_onValueChange(Knob::Ptr* self);
 	//// ChatBox
 	//C_ABI_MAKE ChatBox::Ptr* ABI_ChatBox_make();
 	//C_ABI_METHOD void ABI_ChatBox_add_line(ChatBox::Ptr* self, char* text, char* color, unsigned int style);
@@ -326,7 +357,7 @@ namespace tgui
 	C_ABI_RAW void ABI_ListView_getSelectedItemIndices(ListView::Ptr* self, void(*f)(int));
 	C_ABI_SETTER void ABI_ListView_setMultiSelect(ListView::Ptr* self, int multiSelect);
 	C_ABI_TESTER bool ABI_ListView_multiSelect(ListView::Ptr* self);
-	C_ABI_SETTER void ABI_ListView_setItemIcon(ListView::Ptr* self, int index, Texture* texture);
+	C_ABI_METHOD void ABI_ListView_setItemIcon(ListView::Ptr* self, int index, Texture* texture);
 	C_ABI_GETTER Texture* ABI_ListView_getItemIcon(ListView::Ptr* self, int index);
 	C_ABI_GETTER int ABI_ListView_getItemCount(ListView::Ptr* self);
 	C_ABI_RAW void ABI_ListView_getItemRow(ListView::Ptr* self, int index, void(*f)(const char32_t*));
@@ -366,7 +397,6 @@ namespace tgui
 	C_ABI_SIGNAL SignalInt* ABI_ListView_onDoubleClick(ListView::Ptr* self);
 	C_ABI_SIGNAL SignalInt* ABI_ListView_onRightClick(ListView::Ptr* self);
 	C_ABI_SIGNAL SignalInt* ABI_ListView_onHeaderClick(ListView::Ptr* self);
-
 	// ComboBox
 	C_ABI_MAKE ComboBox::Ptr* ABI_ComboBox_make();
 	C_ABI_SETTER void ABI_ComboBox_setItemsToDisplay(ComboBox::Ptr* self, int itemsToDisplay);
@@ -394,14 +424,29 @@ namespace tgui
 	C_ABI_SETTER void ABI_ComboBox_setChangeItemOnScroll(ComboBox::Ptr* self, int changeItemOnScroll);
 	C_ABI_GETTER bool ABI_ComboBox_getChangeItemOnScroll(ComboBox::Ptr* self);
 	C_ABI_SIGNAL SignalItem* ABI_ComboBox_onItemSelect(ComboBox::Ptr* self);
-
-
 	// ColorPicker
 	C_ABI_MAKE ColorPicker::Ptr* ABI_ColorPicker_new();
 	C_ABI_SETTER void ABI_ColorPicker_setColor(ColorPicker::Ptr* self, Color* color);
 	C_ABI_GETTER Color* ABI_ColorPicker_getColor(ColorPicker::Ptr* self);
 	C_ABI_SIGNAL SignalColor* ABI_ColorPicker_onColorChange(ColorPicker::Ptr* self);
 	C_ABI_SIGNAL SignalColor* ABI_ColorPicker_onOkPress(ColorPicker::Ptr* self);
+	// MessageBox
+	C_ABI_MAKE MessageBox::Ptr* ABI_MessageBox_new();
+	C_ABI_SETTER void ABI_MessageBox_setText(MessageBox::Ptr* self, char* text);
+	C_ABI_GETTER const char32_t* ABI_MessageBox_getText(MessageBox::Ptr* self);
+	C_ABI_RAW void ABI_MessageBox_addButton(MessageBox::Ptr* self, char* button);
+	// C_ABI_RAW void ABI_MessageBox_changeButtons(MessageBox::Ptr* self, int size, char*(*f)(void));
+	C_ABI_RAW void ABI_MessageBox_getButtons(MessageBox::Ptr* self, void(*f)(const char32_t*));
+	C_ABI_RAW void ABI_MessageBox_setLabelAlignment(MessageBox::Ptr* self, int alignment);
+	C_ABI_RAW int ABI_MessageBox_getLabelAlignment(MessageBox::Ptr* self);
+	C_ABI_RAW void ABI_MessageBox_setButtonAlignment(MessageBox::Ptr* self, int alignment);
+	C_ABI_RAW int ABI_MessageBox_getButtonAlignment(MessageBox::Ptr* self);
+	C_ABI_SIGNAL SignalString* ABI_MessageBox_onButtonPress(MessageBox::Ptr* self);
+	// Picture
+	C_ABI_MAKE Picture::Ptr* ABI_Picture_new(Texture* texture, int transparent);
+	C_ABI_SETTER void ABI_Picture_ignoreMouseEvents(Picture::Ptr* self, int ignore);
+	C_ABI_TESTER bool ABI_Picture_isIgnoringMouseEvents(Picture::Ptr* self);
+	C_ABI_SIGNAL SignalVector2f* ABI_Picture_onDoubleClick(Picture::Ptr* self);
 }
 
 #endif //CABI_HPP

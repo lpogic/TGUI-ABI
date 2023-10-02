@@ -68,6 +68,12 @@ namespace tgui {
         return self->connect(f);
     }
 
+    // SignalFloat
+
+	C_ABI_RAW int ABI_SignalFloat_connect(SignalFloat* self, void(*f)(float)) {
+        return self->connect(f);
+    }
+
     // SignalColor
 
     C_ABI_RAW int ABI_SignalColor_connect(SignalColor* self, void(*f)(void*)) {
@@ -203,6 +209,38 @@ namespace tgui {
 
     C_ABI_STATIC void ABI_Theme_setDefault(char* theme) {
         Theme::setDefault(theme);
+    }
+
+    // Texture
+
+    C_ABI_MAKE Texture* ABI_Texture_new(char* id, int partRectX, int partRectY, int partRectW, int partRectH, int middlePartX, int middlePartY, int middlePartW, int middlePartH, int smooth) {
+        UIntRect partRect(partRectX, partRectY, partRectW, partRectH);
+        UIntRect middlePart(middlePartX, middlePartY, middlePartW, middlePartH);
+        return new Texture(id, partRect, middlePart, smooth);
+    }
+
+	C_ABI_GETTER const char32_t* ABI_Texture_getId(Texture* self) {
+        return (*self).getId().data();
+    }
+
+	C_ABI_GETTER Vector2u* ABI_Texture_getImageSize(Texture* self) {
+        return new Vector2u((*self).getImageSize());
+    }
+
+	C_ABI_GETTER UIntRect* ABI_Texture_getPartRect(Texture* self) {
+        return new UIntRect((*self).getPartRect());
+    }
+
+	C_ABI_SETTER void ABI_Texture_setColor(Texture* self, int red, int green, int blue) {
+        (*self).setColor({static_cast<uint8_t>(red), static_cast<uint8_t>(green), static_cast<uint8_t>(blue)});
+    }
+
+	C_ABI_GETTER Color* ABI_Texture_getColor(Texture* self) {
+        return new Color((*self).getColor());
+    }
+
+	C_ABI_TESTER bool ABI_Texture_isSmooth(Texture* self) {
+        return (*self).isSmooth();
     }
 
     // Widget
@@ -384,6 +422,30 @@ namespace tgui {
 
     C_ABI_SIGNAL Signal* ABI_Button_onPress(Button::Ptr* self) {
         return &(**self).onPress;
+    }
+
+    // BitmapButton
+	C_ABI_MAKE BitmapButton::Ptr* ABI_BitmapButton_new() {
+        auto self = BitmapButton::create();
+        auto ptr = new BitmapButton::Ptr(nullptr);
+        ptr->swap(self);
+        return ptr;
+    }
+
+	C_ABI_RAW void ABI_BitmapButton_setImage(BitmapButton::Ptr* self, Texture* texture) {
+        (**self).setImage(*texture);
+    }
+
+	C_ABI_GETTER Texture* ABI_BitmapButton_getImage(BitmapButton::Ptr* self) {
+        return new Texture((**self).getImage());
+    }
+
+	C_ABI_SETTER void ABI_BitmapButton_setImageScaling(BitmapButton::Ptr* self, float relativeHeight) {
+        (**self).setImageScaling(relativeHeight);
+    }
+
+	C_ABI_GETTER float ABI_BitmapButton_getImageScaling(BitmapButton::Ptr* self) {
+        return (**self).getImageScaling();
     }
 
     // EditBox
@@ -613,6 +675,67 @@ namespace tgui {
         auto ptr = new CheckBox::Ptr(nullptr);
         ptr->swap(self);
         return ptr;
+    }
+
+    // Knob
+
+    C_ABI_MAKE Knob::Ptr* ABI_Knob_new() {
+        auto self = Knob::create();
+        auto ptr = new Knob::Ptr(nullptr);
+        ptr->swap(self);
+        return ptr;
+    }
+
+	C_ABI_SETTER void ABI_Knob_setStartRotation(Knob::Ptr* self, float startRotation) {
+        (**self).setStartRotation(startRotation);
+    }
+
+	C_ABI_GETTER float ABI_Knob_getStartRotation(Knob::Ptr* self) {
+        return (**self).getStartRotation();
+    }
+
+	C_ABI_SETTER void ABI_Knob_setEndRotation(Knob::Ptr* self, float endRotation) {
+        (**self).setEndRotation(endRotation);
+    }
+
+	C_ABI_GETTER float ABI_Knob_getEndRotation(Knob::Ptr* self) {
+        return (**self).getEndRotation();
+    }
+
+	C_ABI_SETTER void ABI_Knob_setMinimum(Knob::Ptr* self, float minimum) {
+        (**self).setMinimum(minimum);
+    }
+
+	C_ABI_GETTER float ABI_Knob_getMinimum(Knob::Ptr* self) {
+        return (**self).getMinimum();
+    }
+
+	C_ABI_SETTER void ABI_Knob_setMaximum(Knob::Ptr* self, float maximum) {
+        (**self).setMaximum(maximum);
+    }
+
+	C_ABI_GETTER float ABI_Knob_getMaximum(Knob::Ptr* self) {
+        return (**self).getMaximum();
+    }
+
+	C_ABI_SETTER void ABI_Knob_setValue(Knob::Ptr* self, float value) {
+        (**self).setValue(value);
+    }
+
+	C_ABI_GETTER float ABI_Knob_getValue(Knob::Ptr* self) {
+        return (**self).getValue();
+    }
+
+	C_ABI_SETTER void ABI_Knob_setClockwiseTurning(Knob::Ptr* self, int clockwiseTurning) {
+        (**self).setClockwiseTurning(clockwiseTurning);
+    }
+
+	C_ABI_TESTER float ABI_Knob_getClockwiseTurning(Knob::Ptr* self) {
+        return (**self).getClockwiseTurning();
+    }
+
+	C_ABI_SIGNAL SignalFloat* ABI_Knob_onValueChange(Knob::Ptr* self) {
+        return &(**self).onValueChange;
     }
 
     // Container
@@ -1245,7 +1368,7 @@ namespace tgui {
         return (**self).getMultiSelect();
     }
 
-	C_ABI_SETTER void ABI_ListView_setItemIcon(ListView::Ptr* self, int index, Texture* texture) {
+	C_ABI_METHOD void ABI_ListView_setItemIcon(ListView::Ptr* self, int index, Texture* texture) {
         (**self).setItemIcon(index, *texture);
     }
 
@@ -1555,5 +1678,81 @@ namespace tgui {
 
     C_ABI_SIGNAL SignalColor* ABI_ColorPicker_onOkPress(ColorPicker::Ptr* self) {
         return &(**self).onOkPress;
+    }
+
+    // MessageBox
+
+	C_ABI_MAKE MessageBox::Ptr* ABI_MessageBox_new() {
+        auto self = MessageBox::create();
+        auto ptr = new MessageBox::Ptr(nullptr);
+        ptr->swap(self);
+        return ptr;
+    }
+
+	C_ABI_SETTER void ABI_MessageBox_setText(MessageBox::Ptr* self, char* text) {
+        (**self).setText(text);
+    }
+
+	C_ABI_GETTER const char32_t* ABI_MessageBox_getText(MessageBox::Ptr* self) {
+        return (**self).getText().data();
+    }
+
+	C_ABI_RAW void ABI_MessageBox_addButton(MessageBox::Ptr* self, char* button) {
+        (**self).addButton(button);
+    }
+
+	// C_ABI_RAW void ABI_MessageBox_changeButtons(MessageBox::Ptr* self, int size, char*(*f)(void)) {
+    //     std::vector<String> vec;
+    //     for(int i = 0;i < size; ++i) {
+    //         vec.push_back(f());
+    //     }
+    //     return (**self).changeButtons(vec);
+    // }
+
+	C_ABI_RAW void ABI_MessageBox_getButtons(MessageBox::Ptr* self, void(*f)(const char32_t*)) {
+        for (auto button : (**self).getButtons()) {
+            f(button.data());
+        }
+    }
+
+	C_ABI_RAW void ABI_MessageBox_setLabelAlignment(MessageBox::Ptr* self, int alignment) {
+        (**self).setLabelAlignment(static_cast<MessageBox::Alignment>(alignment));
+    }
+
+	C_ABI_RAW int ABI_MessageBox_getLabelAlignment(MessageBox::Ptr* self) {
+        return static_cast<int>((**self).getLabelAlignment());
+    }
+
+	C_ABI_RAW void ABI_MessageBox_setButtonAlignment(MessageBox::Ptr* self, int alignment) {
+        (**self).setButtonAlignment(static_cast<MessageBox::Alignment>(alignment));
+    }
+
+	C_ABI_RAW int ABI_MessageBox_getButtonAlignment(MessageBox::Ptr* self) {
+        return static_cast<int>((**self).getButtonAlignment());
+    }
+
+    C_ABI_SIGNAL SignalString* ABI_MessageBox_onButtonPress(MessageBox::Ptr* self) {
+        return &(**self).onButtonPress;
+    }
+
+    // Picture
+
+	C_ABI_MAKE Picture::Ptr* ABI_Picture_new(Texture* texture, int transparent) {
+        auto self = Picture::create(*texture, transparent);
+        auto ptr = new Picture::Ptr(nullptr);
+        ptr->swap(self);
+        return ptr;
+    }
+
+	C_ABI_SETTER void ABI_Picture_ignoreMouseEvents(Picture::Ptr* self, int ignore) {
+        (**self).ignoreMouseEvents(ignore);
+    }
+
+    C_ABI_TESTER bool ABI_Picture_isIgnoringMouseEvents(Picture::Ptr* self) {
+        return (**self).isIgnoringMouseEvents();
+    }
+
+	C_ABI_SIGNAL SignalVector2f* ABI_Picture_onDoubleClick(Picture::Ptr* self) {
+        return &(**self).onDoubleClick;
     }
 }
