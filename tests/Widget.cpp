@@ -361,6 +361,69 @@ TEST_CASE("[Widget]")
         REQUIRE(w2->getWidgetName() == "NewName");
     }
 
+    SECTION("Cast")
+    {
+        auto button = tgui::Button::create();
+        tgui::Widget::Ptr widgetPtr{button};
+
+        REQUIRE(widgetPtr->cast<tgui::EditBox>() == nullptr);
+        REQUIRE(widgetPtr->cast<tgui::Button>() == button);
+        REQUIRE(widgetPtr->cast<tgui::ButtonBase>() == button);
+
+        tgui::Widget::ConstPtr constWidgetPtr{button};
+        REQUIRE(constWidgetPtr->cast<tgui::Button>() == button);
+    }
+
+    SECTION("Arrow navigation")
+    {
+        auto buttonCenter = tgui::Button::create("Click me!");
+        auto buttonLeft = tgui::Button::copy(buttonCenter);
+        auto buttonRight = tgui::Button::copy(buttonCenter);
+        auto buttonTop = tgui::Button::copy(buttonCenter);
+        auto buttonBottom = tgui::Button::copy(buttonCenter);
+
+        GuiNull gui;
+        for (auto& button : {buttonLeft, buttonRight, buttonTop, buttonBottom, buttonCenter})
+            gui.add(button);
+
+        buttonCenter->setNavigationUp(buttonTop);
+        buttonCenter->setNavigationDown(buttonBottom);
+        buttonCenter->setNavigationLeft(buttonLeft);
+        buttonCenter->setNavigationRight(buttonRight);
+
+        tgui::Event::KeyEvent keyEvent;
+        keyEvent.code = tgui::Event::KeyboardKey::Up;
+        keyEvent.alt = false;
+        keyEvent.control = false;
+        keyEvent.shift = false;
+        keyEvent.system = false;
+
+        // Arrow navigation doesn't work when its not explicitly enabled
+        buttonCenter->setFocused(true);
+        gui.getContainer()->keyPressed(keyEvent);
+        REQUIRE(buttonCenter->isFocused());
+
+        gui.setKeyboardNavigationEnabled(true);
+        gui.getContainer()->keyPressed(keyEvent);
+        REQUIRE(!buttonCenter->isFocused());
+        REQUIRE(buttonTop->isFocused());
+
+        buttonCenter->setFocused(true);
+        keyEvent.code = tgui::Event::KeyboardKey::Down;
+        gui.getContainer()->keyPressed(keyEvent);
+        REQUIRE(buttonBottom->isFocused());
+
+        buttonCenter->setFocused(true);
+        keyEvent.code = tgui::Event::KeyboardKey::Left;
+        gui.getContainer()->keyPressed(keyEvent);
+        REQUIRE(buttonLeft->isFocused());
+
+        buttonCenter->setFocused(true);
+        keyEvent.code = tgui::Event::KeyboardKey::Right;
+        gui.getContainer()->keyPressed(keyEvent);
+        REQUIRE(buttonRight->isFocused());
+    }
+
     SECTION("Renderer")
     {
         auto renderer = widget->getRenderer();
@@ -458,6 +521,18 @@ TEST_CASE("[Widget]")
             REQUIRE(clonedRenderer != renderer->getData());
             REQUIRE(clonedRenderer->propertyValuePairs["Opacity"].getNumber() == 0.5f);
             REQUIRE(clonedRenderer->propertyValuePairs["Font"].getFont().getId() == "resources/DejaVuSans.ttf");
+        }
+
+        SECTION("getSharedRenderer exists for both const and non-const widgets")
+        {
+            const auto& widgetTypes = tgui::WidgetFactory::getWidgetTypes();
+            for (const auto& type : widgetTypes)
+            {
+                tgui::Widget::Ptr widget2 = tgui::WidgetFactory::getConstructFunction(type)();
+                tgui::Widget::ConstPtr widget3 = widget2;
+
+                REQUIRE(widget2->getSharedRenderer() == widget3->getSharedRenderer());
+            }
         }
 
         // TODO: Other tests with the renderer class (e.g. sharing and copying a renderer when using multiple widgets)

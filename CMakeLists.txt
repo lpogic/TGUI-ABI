@@ -22,7 +22,7 @@
 
 # If the cmake version is higher than the minimum version then enable all new policies, up to the maximum version specified.
 # When cmake is newer than the highest version then its newest policies will still be set to the old behavior for compatibility.
-cmake_minimum_required(VERSION 3.16...3.26)
+cmake_minimum_required(VERSION 3.16...3.27)
 
 # Include macros such as tgui_set_option
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/Macros.cmake)
@@ -117,7 +117,7 @@ if(TGUI_OS_WINDOWS OR TGUI_OS_LINUX OR TGUI_OS_MACOS)
     list(APPEND TGUI_BACKEND_OPTIONS SDL_TTF_OPENGL3)
     string(APPEND TGUI_BACKEND_OPTIONS_DESC " - SDL_TTF_OPENGL3: SDL2 + OpenGL + SDL2_ttf\n")
 endif()
-if(TGUI_OS_LINUX OR TGUI_OS_ANDROID)
+if(TGUI_OS_LINUX OR TGUI_OS_ANDROID OR TGUI_OS_IOS)
     list(APPEND TGUI_BACKEND_OPTIONS SDL_TTF_GLES2)
     string(APPEND TGUI_BACKEND_OPTIONS_DESC " - SDL_TTF_GLES2: SDL2 + OpenGL ES + SDL2_ttf\n")
 endif()
@@ -148,17 +148,23 @@ string(TOUPPER "${TGUI_BACKEND}" TGUI_BACKEND_UPPERCASE)
 
 # Add an option to build TGUI as a c++20 module (when using CMake >= 3.25)
 if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.25)
-    option(TGUI_BUILD_AS_CXX_MODULE "ON to build TGUI as a c++20 module instead of using header files" OFF)
-    mark_as_advanced(TGUI_BUILD_AS_CXX_MODULE)
+    # We currently don't create the option as it is still too experimental,
+    # it can still be used if the user manually specifies the option though.
+    #option(TGUI_BUILD_AS_CXX_MODULE "ON to build TGUI as a c++20 module instead of using header files" OFF)
+    #mark_as_advanced(TGUI_BUILD_AS_CXX_MODULE)
     if(TGUI_BUILD_AS_CXX_MODULE)
         if(TGUI_CXX_STANDARD LESS 20)
             message(FATAL_ERROR "TGUI_BUILD_AS_CXX_MODULE can only be turned on if TGUI_CXX_STANDARD is set to at least 20")
         endif()
 
         if (NOT CMAKE_EXPERIMENTAL_CXX_MODULE_CMAKE_API)
-            set(CMAKE_EXPERIMENTAL_CXX_MODULE_CMAKE_API "2182bf5c-ef0d-489a-91da-49dbc3090d2a") # CMake 3.26
+            if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.27)
+                set(CMAKE_EXPERIMENTAL_CXX_MODULE_CMAKE_API "aa1f7df0-828a-4fcd-9afc-2dc80491aca7") # CMake 3.27
+            else()
+                set(CMAKE_EXPERIMENTAL_CXX_MODULE_CMAKE_API "2182bf5c-ef0d-489a-91da-49dbc3090d2a") # CMake 3.26
+                set(CMAKE_EXPERIMENTAL_CXX_MODULE_DYNDEP 1)
+            endif()
         endif()
-        set(CMAKE_EXPERIMENTAL_CXX_MODULE_DYNDEP 1)
     endif()
 endif()
 
@@ -230,17 +236,17 @@ add_subdirectory(src)
 # If system dependencies are used instead of the headers from the extlibs directory then locate the header files
 if(TGUI_USE_SYSTEM_STB)
     find_path(TGUI_SYSTEM_STB_IMAGE_INCLUDE_DIR stb_image.h REQUIRED)
-    target_include_directories(tgui PRIVATE "${TGUI_SYSTEM_STB_IMAGE_INCLUDE_DIR}")
+    target_include_directories(tgui SYSTEM PRIVATE "${TGUI_SYSTEM_STB_IMAGE_INCLUDE_DIR}")
 
     find_path(TGUI_SYSTEM_STB_IMAGE_WRITE_INCLUDE_DIR stb_image_write.h REQUIRED)
-    target_include_directories(tgui PRIVATE "${TGUI_SYSTEM_STB_IMAGE_WRITE_INCLUDE_DIR}")
+    target_include_directories(tgui SYSTEM PRIVATE "${TGUI_SYSTEM_STB_IMAGE_WRITE_INCLUDE_DIR}")
 endif()
 if(TGUI_USE_SYSTEM_NANOSVG)
     find_path(TGUI_SYSTEM_NANOSVG_INCLUDE_DIR nanosvg.h REQUIRED)
-    target_include_directories(tgui PRIVATE "${TGUI_SYSTEM_NANOSVG_INCLUDE_DIR}")
+    target_include_directories(tgui SYSTEM PRIVATE "${TGUI_SYSTEM_NANOSVG_INCLUDE_DIR}")
 
     find_path(TGUI_SYSTEM_NANOSVG_RAST_INCLUDE_DIR nanosvgrast.h REQUIRED)
-    target_include_directories(tgui PRIVATE "${TGUI_SYSTEM_NANOSVG_RAST_INCLUDE_DIR}")
+    target_include_directories(tgui SYSTEM PRIVATE "${TGUI_SYSTEM_NANOSVG_RAST_INCLUDE_DIR}")
 endif()
 if(TGUI_USE_SYSTEM_GLAD)
     find_package(glad CONFIG REQUIRED)

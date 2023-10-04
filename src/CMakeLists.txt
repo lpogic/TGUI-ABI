@@ -50,6 +50,7 @@ set(TGUI_SRC
     TwoFingerScrollDetect.cpp
     Widget.cpp
     Abi/Cabi.cpp
+    WindowsIMM.cpp
     Backend/Font/BackendFont.cpp
     Backend/Renderer/BackendRenderTarget.cpp
     Backend/Renderer/BackendText.cpp
@@ -397,11 +398,6 @@ if((TGUI_OS_MACOS OR TGUI_OS_IOS) AND TGUI_SHARED_LIBS)
             set_target_properties(tgui PROPERTIES BUILD_WITH_INSTALL_NAME_DIR TRUE)
         endif()
     endif()
-endif()
-
-# Build tgui-activity on android
-if(TGUI_OS_ANDROID)
-    add_subdirectory(Android)
 endif()
 
 # Generate the Config.hpp header

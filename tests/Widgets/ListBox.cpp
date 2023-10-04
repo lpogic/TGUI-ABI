@@ -53,6 +53,12 @@ TEST_CASE("[ListBox]")
 
         listBox->onScroll([](){});
         listBox->onScroll([](unsigned int){});
+
+        REQUIRE_NOTHROW(tgui::Widget::Ptr(listBox)->getSignal("ItemSelected").connect([]{}));
+        REQUIRE_NOTHROW(tgui::Widget::Ptr(listBox)->getSignal("MousePressed").connect([]{}));
+        REQUIRE_NOTHROW(tgui::Widget::Ptr(listBox)->getSignal("MouseReleased").connect([]{}));
+        REQUIRE_NOTHROW(tgui::Widget::Ptr(listBox)->getSignal("DoubleClicked").connect([]{}));
+        REQUIRE_NOTHROW(tgui::Widget::Ptr(listBox)->getSignal("Scrolled").connect([]{}));
     }
 
     SECTION("WidgetType")
@@ -314,6 +320,22 @@ TEST_CASE("[ListBox]")
         REQUIRE(listBox->getTextAlignment() == tgui::ListBox::TextAlignment::Right);
         listBox->setTextAlignment(tgui::ListBox::TextAlignment::Left);
         REQUIRE(listBox->getTextAlignment() == tgui::ListBox::TextAlignment::Left);
+    }
+
+    SECTION("ScrollbarValue")
+    {
+        REQUIRE(listBox->getScrollbarValue() == 0);
+        listBox->setScrollbarValue(100);
+        REQUIRE(listBox->getScrollbarValue() == 0);
+
+        listBox->setSize(120, 45);
+        listBox->setItemHeight(20);
+        listBox->addItem("Item 1");
+        listBox->addItem("Item 2");
+        listBox->addItem("Item 3");
+
+        listBox->setScrollbarValue(10);
+        REQUIRE(listBox->getScrollbarValue() == 10);
     }
 
     testWidgetSignals(listBox);

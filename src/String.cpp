@@ -2283,16 +2283,64 @@ namespace tgui
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    std::basic_ostream<char>& operator<<(std::basic_ostream<char>& os, const String& str)
+    std::size_t String::count(char ch, std::size_t pos) const noexcept
+    {
+        return count(static_cast<char32_t>(ch), pos);
+    }
+
+    std::size_t String::count(wchar_t ch, std::size_t pos) const noexcept
+    {
+        return count(static_cast<char32_t>(ch), pos);
+    }
+
+    std::size_t String::count(char16_t ch, std::size_t pos) const noexcept
+    {
+        return count(static_cast<char32_t>(ch), pos);
+    }
+
+    std::size_t String::count(char32_t ch, std::size_t pos) const noexcept
+    {
+        std::size_t counter = 0;
+        const std::size_t end = m_string.size();
+        for (std::size_t c = pos; c < end; ++c)
+        {
+            if (m_string[c] == ch)
+                ++counter;
+        }
+
+        return counter;
+    }
+
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    std::ostream& operator<<(std::ostream& os, const String& str)
     {
         os << std::string(str);
         return os;
     }
 
-    std::basic_ostream<wchar_t>& operator<<(std::basic_ostream<wchar_t>& os, const String& str)
+    std::wostream& operator<<(std::wostream& os, const String& str)
     {
         os << std::wstring(str);
         return os;
+    }
+
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    std::istream& operator>>(std::istream& is, String& str)
+    {
+        std::string strVal;
+        is >> strVal;
+        str = std::move(strVal);
+        return is;
+    }
+
+    std::wistream& operator>>(std::wistream& is, String& str)
+    {
+        std::wstring strVal;
+        is >> strVal;
+        str = std::move(strVal);
+        return is;
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -41,24 +41,31 @@ macro(tgui_find_dependency_sfml component optional_quiet)
             set(SFML_DIR "${CMAKE_ANDROID_NDK}/sources/third_party/sfml/lib/${CMAKE_ANDROID_ARCH_ABI}/cmake/SFML")
         endif()
 
-        # Quietly try to find SFML 3 first. If found then we search it again but without the QUIET flag so that it can print
-        # information about the found version. If not found then fall back to SFML 2. If neither version is found then search
-        # for SFML 3 again so that the warnings shows information about the failure with both versions.
+        # Quietly try to find SFML first, to figure out whether SFML 2 or SFML 3 is being used.
+        # Whether found or not, we afterwards search the package again without the QUIET flag,
+        # so that it can print information about the found version.
         # Note that find_package resets SFML_DIR on failure, so we need to reset it when we attempt another search.
+        # We also need to reset the CACHE entry to prevent seaching sfml-main from the root cmake script to fails later on.
         set(sfml_dir_original ${SFML_DIR})
         find_package(SFML 3 CONFIG QUIET COMPONENTS ${component})
         if(SFML_FOUND)
-            find_package(SFML 3 CONFIG ${optional_quiet} COMPONENTS ${component})
+            find_package(SFML 3 CONFIG ${optional_quiet} COMPONENTS ${component} REQUIRED)
         else()
             set(SFML_DIR ${sfml_dir_original})
-            find_package(SFML 2 CONFIG ${optional_quiet} COMPONENTS ${lowercase_component})
-            if (NOT SFML_FOUND)
-                set(SFML_DIR ${sfml_dir_original})
-                find_package(SFML 3 CONFIG ${optional_quiet} COMPONENTS ${component})
+            set(SFML_DIR ${SFML_DIR} CACHE PATH "Path to SFMLConfig.cmake" FORCE)
+            find_package(SFML 2 CONFIG QUIET COMPONENTS ${lowercase_component})
+            if(SFML_FOUND)
+                find_package(SFML 2 CONFIG ${optional_quiet} COMPONENTS ${lowercase_component} REQUIRED)
             else()
-                # The failed find_package(SFML 3) call changed the CACHE entry, so reset it too.
-                # Otherwise seaching sfml-main from the root cmake script fails later on.
+                set(SFML_DIR ${sfml_dir_original})
                 set(SFML_DIR ${SFML_DIR} CACHE PATH "Path to SFMLConfig.cmake" FORCE)
+
+                # Neither SFML 2 or SFML 3 could be found. We need to show information to the user about what fails.
+                message(NOTICE "\nSearching for SFML 2...\n")
+                find_package(SFML 2 CONFIG COMPONENTS ${lowercase_component})
+
+                message(NOTICE "\nSearching for SFML 3...\n")
+                find_package(SFML 3 CONFIG COMPONENTS ${component})
             endif()
         endif()
 
@@ -394,7 +401,7 @@ endfunction()
 # Find SDL_ttf and add it as a dependency
 macro(tgui_add_dependency_sdl_ttf)
     if(TGUI_USE_SDL3)
-        if(NOT TARGET SDL3_ttf::SDL3_ttf AND NOT TARGET SDL3_ttf::SDL3_ttf-static)
+        if(NOT TARGET SDL3_ttf::SDL3_ttf)
             find_package(SDL3_ttf CONFIG)
             if(NOT SDL3_ttf_FOUND)
                 message(FATAL_ERROR
@@ -427,16 +434,17 @@ macro(tgui_add_dependency_sdl_ttf)
             endif()
             target_link_libraries(tgui PUBLIC SDL3_ttf::SDL3_ttf-static)
         else()
-            if(NOT TARGET SDL3_ttf::SDL3_ttf)
-                message(FATAL_ERROR "Couldn't link to SDL3_ttf::SDL3_ttf, no such target exists")
+            if(NOT TARGET SDL3_ttf::SDL3_ttf-shared)
+                message(FATAL_ERROR "Couldn't link to SDL3_ttf::SDL3_ttf-shared, no such target exists")
             endif()
-            target_link_libraries(tgui PUBLIC SDL3_ttf::SDL3_ttf)
+            target_link_libraries(tgui PUBLIC SDL3_ttf::SDL3_ttf-shared)
         endif()
     else() # Using SDL2
         if(NOT TARGET SDL2_ttf::SDL2_ttf AND NOT TARGET SDL2_ttf::SDL2_ttf-static)
-            # First try looking for an SDL2_ttf config file
-            tgui_try_find_sdl2_ttf_config()
-
+            if(NOT TGUI_SKIP_SDL_CONFIG) # e.g. to skip macOS config file when building for iOS
+                # First try looking for an SDL2_ttf config file
+                tgui_try_find_sdl2_ttf_config()
+            endif()
             if(TGUI_FOUND_SDL2_TTF_CONFIG)
                 find_package(SDL2_ttf CONFIG REQUIRED)
             else()

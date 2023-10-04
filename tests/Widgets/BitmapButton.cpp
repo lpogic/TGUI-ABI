@@ -33,6 +33,8 @@ TEST_CASE("[BitmapButton]")
     {
         button->onPress([](){});
         button->onPress([](const tgui::String&){});
+
+        REQUIRE_NOTHROW(tgui::Widget::Ptr(button)->getSignal("Pressed").connect([]{}));
     }
 
     SECTION("WidgetType")
@@ -515,6 +517,15 @@ TEST_CASE("[BitmapButton]")
                     TEST_DRAW("BitmapButton_Disabled_TextureDisabledSet.png")
                 }
             }
+        }
+
+        SECTION("Non-square image")
+        {
+            button->setImage("resources/TextureRect3.png");
+            TEST_DRAW("BitmapButton_NonSquareImage.png")
+
+            button->setText("");
+            TEST_DRAW("BitmapButton_NonSquareImage_NoText.png")
         }
     }
 }

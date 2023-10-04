@@ -39,8 +39,16 @@ TEST_CASE("[ListView]")
         listView->onDoubleClick([](){});
         listView->onDoubleClick([](int){});
 
+        listView->onRightClick([](){});
+        listView->onRightClick([](int){});
+
         listView->onHeaderClick([](){});
         listView->onHeaderClick([](int){});
+
+        REQUIRE_NOTHROW(tgui::Widget::Ptr(listView)->getSignal("ItemSelected").connect([]{}));
+        REQUIRE_NOTHROW(tgui::Widget::Ptr(listView)->getSignal("DoubleClicked").connect([]{}));
+        REQUIRE_NOTHROW(tgui::Widget::Ptr(listView)->getSignal("RightClicked").connect([]{}));
+        REQUIRE_NOTHROW(tgui::Widget::Ptr(listView)->getSignal("HeaderClicked").connect([]{}));
     }
 
     SECTION("WidgetType")
@@ -158,8 +166,7 @@ TEST_CASE("[ListView]")
         listView->removeAllItems();
         REQUIRE(listView->getItemCount() == 0);
 
-        std::vector<std::vector<tgui::String>> items = {{"1,1"}, {"2,1", "2,2", "2,3"}, {"3,1", "3,2"}};
-        listView->addMultipleItems(items);
+        listView->addMultipleItems({{"1,1"}, {"2,1", "2,2", "2,3"}, {"3,1", "3,2"}});
         REQUIRE(listView->getItemCount() == 3);
         REQUIRE(listView->getItemRows() == std::vector<std::vector<tgui::String>>{{"1,1", ""}, {"2,1", "2,2"}, {"3,1", "3,2"}});
 
@@ -172,6 +179,21 @@ TEST_CASE("[ListView]")
         REQUIRE(!listView->changeItem(3, {"d,1"}));
         REQUIRE(!listView->changeSubItem(3, 1, {"d,2"}));
         REQUIRE(listView->getItemRows() == std::vector<std::vector<tgui::String>>{{"1,1", "a,2"}, {"b,1", ""}, {"c,1", "c,2"}});
+
+        listView->insertItem(2, "x,1");
+        REQUIRE(listView->getItemRows() == std::vector<std::vector<tgui::String>>{{"1,1", "a,2"}, {"b,1", ""}, {"x,1", ""}, {"c,1", "c,2"}});
+
+        listView->insertMultipleItems(1, {{"y,1", "y,2", "y,3"}, {"z,1"}});
+        REQUIRE(listView->getItemRows() == std::vector<std::vector<tgui::String>>{{"1,1", "a,2"}, {"y,1", "y,2"}, {"z,1", ""}, {"b,1", ""}, {"x,1", ""}, {"c,1", "c,2"}});
+
+        listView->removeAllItems();
+        listView->insertItem(0, "2,1");
+        listView->insertItem(0, {"1,1", "1,2"});
+        listView->insertItem(2, {"3,1", "3,2", "3,3"});
+        REQUIRE(listView->getItemRows() == std::vector<std::vector<tgui::String>>{{"1,1", "1,2"}, {"2,1", ""}, {"3,1", "3,2"}});
+
+        listView->insertMultipleItems(3, {{"x,1", "x,2"}});
+        REQUIRE(listView->getItemRows() == std::vector<std::vector<tgui::String>>{{"1,1", "1,2"}, {"2,1", ""}, {"3,1", "3,2"}, {"x,1", "x,2"}});
     }
 
     SECTION("Data")
@@ -460,6 +482,43 @@ TEST_CASE("[ListView]")
         REQUIRE(listView->getHorizontalScrollbarPolicy() == tgui::Scrollbar::Policy::Never);
     }
 
+    SECTION("VerticalScrollbarValue")
+    {
+        REQUIRE(listView->getVerticalScrollbarValue() == 0);
+        listView->setVerticalScrollbarValue(100);
+        REQUIRE(listView->getVerticalScrollbarValue() == 0);
+
+        listView->setSize(120, 45);
+        listView->setItemHeight(20);
+        listView->addMultipleItems({{"Item 1", "1,2"}, {"Item 2", "2,2"}, {"Item 3", "3,2"}});
+
+        listView->setVerticalScrollbarValue(10);
+        REQUIRE(listView->getVerticalScrollbarValue() == 10);
+    }
+
+    SECTION("HorizontalScrollbarValue")
+    {
+        REQUIRE(listView->getHorizontalScrollbarValue() == 0);
+        listView->setHorizontalScrollbarValue(100);
+        REQUIRE(listView->getHorizontalScrollbarValue() == 0);
+
+        listView->setSize(120, 60);
+        listView->addColumn("Col 1", 70);
+        listView->addColumn("Col 2", 80);
+
+        listView->setHorizontalScrollbarValue(10);
+        REQUIRE(listView->getHorizontalScrollbarValue() == 10);
+    }
+
+    SECTION("FixedIconSize")
+    {
+        REQUIRE(listView->getFixedIconSize() == tgui::Vector2f{0, 0});
+
+        listView->setFixedIconSize({20, 20});
+        REQUIRE(listView->getFixedIconSize() == tgui::Vector2f{20, 20});
+        listView->setFixedIconSize({20, 20}); // Call with same value is no-op
+    }
+
     SECTION("MultiSelect")
     {
         REQUIRE(!listView->getMultiSelect());
@@ -744,6 +803,67 @@ TEST_CASE("[ListView]")
                 REQUIRE(listView->getColumnWidth(0) == 50);
                 REQUIRE(listView->getColumnWidth(1) == 100);
             }
+        }
+
+        SECTION("Changing selection with arrow keys")
+        {
+            mousePressed({127, 81});
+            mouseReleased({127, 81});
+            REQUIRE(listView->getSelectedItemIndices() == std::set<std::size_t>{2});
+
+            tgui::Event::KeyEvent event;
+            event.alt = false;
+            event.shift = false;
+            event.control = false;
+            event.system = false;
+
+            event.code = tgui::Event::KeyboardKey::Up;
+            listView->keyPressed(event);
+            REQUIRE(listView->getSelectedItemIndices() == std::set<std::size_t>{1});
+
+            event.code = tgui::Event::KeyboardKey::Down;
+            listView->keyPressed(event);
+            REQUIRE(listView->getSelectedItemIndices() == std::set<std::size_t>{2});
+
+            event.shift = true;
+
+            event.code = tgui::Event::KeyboardKey::Up;
+            listView->keyPressed(event);
+            REQUIRE(listView->getSelectedItemIndices() == std::set<std::size_t>{1});
+
+            event.code = tgui::Event::KeyboardKey::Down;
+            listView->keyPressed(event);
+            REQUIRE(listView->getSelectedItemIndices() == std::set<std::size_t>{2});
+
+            listView->setMultiSelect(true);
+
+            event.code = tgui::Event::KeyboardKey::Up;
+            listView->keyPressed(event);
+            REQUIRE(listView->getSelectedItemIndices() == std::set<std::size_t>{1, 2});
+
+            event.shift = false;
+            event.code = tgui::Event::KeyboardKey::Up;
+            listView->keyPressed(event);
+
+            event.shift = true;
+            event.code = tgui::Event::KeyboardKey::Down;
+            listView->keyPressed(event);
+            listView->keyPressed(event);
+            REQUIRE(listView->getSelectedItemIndices() == std::set<std::size_t>{0, 1, 2});
+
+            event.shift = false;
+#ifdef TGUI_SYSTEM_MACOS
+            event.system = true;
+#else
+            event.control = true;
+#endif
+            event.code = tgui::Event::KeyboardKey::Up;
+            listView->keyPressed(event);
+            REQUIRE(listView->getSelectedItemIndices() == std::set<std::size_t>{0, 2});
+
+            event.code = tgui::Event::KeyboardKey::Down;
+            listView->keyPressed(event);
+            REQUIRE(listView->getSelectedItemIndices() == std::set<std::size_t>{0});
         }
     }
 
@@ -1120,6 +1240,22 @@ TEST_CASE("[ListView]")
             listView->setItemIcon(3, {"resources/Texture6.png", {0, 0, 20, 14}});
             listView->setItemIcon(4, {"resources/Texture7.png", {0, 0, 14, 14}});
             TEST_DRAW("ListView_Icons.png")
+
+            listView->setFixedIconSize({10, 10});
+            TEST_DRAW("ListView_Icons_FixedSize.png")
+
+            listView->setFixedIconSize({17, 0});
+            TEST_DRAW("ListView_Icons_FixedWidth.png")
+
+            listView->setFixedIconSize({0, 7});
+            TEST_DRAW("ListView_Icons_FixedHeight.png")
+
+            listView->setFixedIconSize({});
+            TEST_DRAW("ListView_Icons.png")
+
+            listView->setItemIcon(3, {});
+            listView->setItemIcon(4, {});
+            TEST_DRAW("ListView_NoSelectedNoHover.png")
         }
 
         SECTION("Grid lines and separators")
@@ -1208,6 +1344,12 @@ TEST_CASE("[ListView]")
                 TEST_DRAW("ListView_LongestItemAutoWidth_NoScrollbar.png")
 
                 listView->addItem({"+", "Item is too long"});
+                TEST_DRAW("ListView_LongestItemAutoWidth_WithScrollbar.png")
+
+                listView->changeItem(6, {"+", "Short"});
+                TEST_DRAW("ListView_LongestItemAutoWidth_NoScrollbarAgain.png")
+
+                listView->changeSubItem(6, 1, "Item is too long");
                 TEST_DRAW("ListView_LongestItemAutoWidth_WithScrollbar.png")
             }
         }

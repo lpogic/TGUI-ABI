@@ -229,7 +229,10 @@ TGUI_MODULE_EXPORT namespace tgui
         /// @param widgetPtr   Pointer to the widget you would like to add
         /// @param widgetName  If you want to access the widget later then you must do this with this name
         ///
-        /// @warning The widget name should not contain whitespace
+        /// @warning Widgets should be named as if they are C++ variables, i.e. names must not include any whitespace, or most
+        ///          symbols (e.g.: +, -, *, /, ., &), and should not start with a number. If you do not follow these rules,
+        ///          layout expressions may give unexpected results. Alphanumeric characters and underscores are safe to use,
+        ///          and widgets are permitted to have no name.
         ///
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         void add(const Widget::Ptr& widgetPtr, const String& widgetName = "");
@@ -601,6 +604,56 @@ TGUI_MODULE_EXPORT namespace tgui
 
 
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// @brief This function is called by TGUI when focusing a text field (EditBox or TextArea).
+        ///        It may result in the software keyboard being opened.
+        ///
+        /// @param inputRect  The rectangle where text is being inputted
+        /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        virtual void startTextInput(FloatRect inputRect);
+
+
+        /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// @brief This function is called by TGUI when unfocusing a text field (EditBox or TextArea).
+        ///        It may result in the software keyboard being closed.
+        /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        virtual void stopTextInput();
+
+
+        /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// @brief This function is called by TGUI when the position of the caret changes in a text field (EditBox or TextArea).
+        ///        If an IME is used then this function may move the IME candidate list to the text cursor position.
+        ///
+        /// @param inputRect The rectangle where text is being inputted
+        /// @param caretPos  Location of the text cursor, relative to the gui view
+        /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        virtual void updateTextCursorPosition(FloatRect inputRect, Vector2f caretPos);
+
+
+        /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// @brief Changes whether using the arrow keys can be used to navigate between widgets
+        ///
+        /// @param enabled  Should keyboard navigation be enabled?
+        ///
+        /// Even when enabled, you may still need to tell widgets where they need to navigate to when an arrow key is pressed.
+        /// Kayboard navigation is disabled by default.
+        ///
+        /// Note that this option affects the return value of handleEvent for key press events. Normally all key events
+        /// are marked as handled, but by enabling this option handleEvent will only return true if the key was actually handled.
+        /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        void setKeyboardNavigationEnabled(bool enabled);
+
+
+        /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// @brief Returns whether using the arrow keys can be used to navigate between widgets
+        ///
+        /// @return Should keyboard navigation be enabled?
+        ///
+        /// @see setKeyboardNavigationEnabled
+        /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        TGUI_NODISCARD bool isKeyboardNavigationEnabled() const;
+
+
+        /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     protected:
 
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -644,6 +697,7 @@ TGUI_MODULE_EXPORT namespace tgui
 
         bool m_drawUpdatesTime = true;
         bool m_tabKeyUsageEnabled = true;
+        bool m_keyboardNavigationEnabled = false; // TGUI_NEXT: Enable by default?
 
         Cursor::Type m_requestedMouseCursor = Cursor::Type::Arrow;
         std::stack<Cursor::Type> m_overrideMouseCursors;

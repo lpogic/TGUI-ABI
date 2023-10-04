@@ -64,6 +64,8 @@ namespace tgui
             m_renderer = aurora::makeCopied<EditBoxRenderer>();
             setRenderer(Theme::getDefault()->getRendererNoThrow(m_type));
 
+            m_defaultText.setColor(getSharedRenderer()->getDefaultTextColor()); // Needs to be set here in case renderer lacks "DefaultTextColor" property
+
             setTextSize(getGlobalTextSize());
             setSize({m_textFull.getLineHeight() * 10,
                      std::round(m_textFull.getLineHeight() * 1.25f) + m_paddingCached.getTop() + m_paddingCached.getBottom() + m_bordersCached.getTop() + m_bordersCached.getBottom()});
@@ -186,8 +188,8 @@ namespace tgui
 
     void EditBox::selectText(std::size_t start, std::size_t length)
     {
-        m_selStart = start;
-        m_selEnd = std::min(m_text.length(), start + length);
+        m_selStart = std::min(m_text.length(), start);
+        updateSelEnd(length == String::npos ? m_text.length() : std::min(m_text.length(), start + length));
         updateSelection();
     }
 
@@ -195,7 +197,9 @@ namespace tgui
 
     String EditBox::getSelectedText() const
     {
-        return m_text.substr(std::min(m_selStart, m_selEnd), std::max(m_selStart, m_selEnd));
+        const auto startIndex = std::min(m_selStart, m_selEnd);
+        const auto endIndex = std::max(m_selStart, m_selEnd);
+        return m_text.substr(startIndex, endIndex - startIndex);
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -334,7 +338,7 @@ namespace tgui
 
         // Set the caret to the correct position
         m_selStart = charactersBeforeCaret;
-        m_selEnd = charactersBeforeCaret;
+        updateSelEnd(charactersBeforeCaret);
         updateSelection();
     }
 
@@ -389,6 +393,18 @@ namespace tgui
 
     void EditBox::setFocused(bool focused)
     {
+        if (m_parentGui)
+        {
+            if (focused)
+            {
+                const auto absoluteInnerPos = getAbsolutePosition(m_bordersCached.getOffset());
+                const FloatRect inputRect = {absoluteInnerPos, getAbsolutePosition(getInnerSize()) - absoluteInnerPos};
+                m_parentGui->startTextInput(inputRect);
+            }
+            else
+                m_parentGui->stopTextInput();
+        }
+
         if (focused)
         {
             m_caretVisible = true;
@@ -403,13 +419,6 @@ namespace tgui
             if (m_focused)
                 onReturnOrUnfocus.emit(this, m_text);
         }
-
-#if defined (TGUI_SYSTEM_ANDROID) || defined (TGUI_SYSTEM_IOS)
-        if (focused)
-            keyboard::openVirtualKeyboard(this, {{}, getSize()});
-        else
-            keyboard::closeVirtualKeyboard();
-#endif
 
         ClickableWidget::setFocused(focused);
     }
@@ -460,7 +469,7 @@ namespace tgui
 
             // Select the whole text
             m_selStart = 0;
-            m_selEnd = m_text.length();
+            updateSelEnd(m_text.length());
             updateSelection();
         }
         else // No double clicking
@@ -501,7 +510,7 @@ namespace tgui
             if (m_limitTextWidth)
             {
                 // Find out between which characters the mouse is standing
-                m_selEnd = findCaretPosition(pos.x - m_bordersCached.getLeft() - m_paddingCached.getLeft());
+                updateSelEnd(findCaretPosition(pos.x - m_bordersCached.getLeft() - m_paddingCached.getLeft()));
             }
             else // Scrolling is enabled
             {
@@ -545,7 +554,7 @@ namespace tgui
                 }
 
                 // Find out between which characters the mouse is standing
-                m_selEnd = findCaretPosition(pos.x - m_bordersCached.getLeft() - m_paddingCached.getLeft());
+                updateSelEnd(findCaretPosition(pos.x - m_bordersCached.getLeft() - m_paddingCached.getLeft()));
             }
 
             if (m_selEnd != oldSelEnd)
@@ -587,10 +596,10 @@ namespace tgui
                 moveCaretWordEnd();
             else if (keyboard::isKeyPressMoveCaretLineStart(event) || keyboard::isKeyPressMoveCaretUp(event)
                   || keyboard::isKeyPressMoveCaretDocumentBegin(event) || (event.code == Event::KeyboardKey::PageUp))
-                m_selEnd = 0;
+                updateSelEnd(0);
             else if (keyboard::isKeyPressMoveCaretLineEnd(event) || keyboard::isKeyPressMoveCaretDown(event)
                   || keyboard::isKeyPressMoveCaretDocumentEnd(event) || (event.code == Event::KeyboardKey::PageDown))
-                m_selEnd = m_text.length();
+                updateSelEnd(m_text.length());
             else
                 caretMoved = false;
 
@@ -606,6 +615,36 @@ namespace tgui
         // The caret should be visible again
         m_caretVisible = true;
         m_animationTimeElapsed = {};
+    }
+
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    bool EditBox::canHandleKeyPress(const Event::KeyEvent& event)
+    {
+        if ((event.code == Event::KeyboardKey::Enter)
+         || (event.code == Event::KeyboardKey::Backspace)
+         || (event.code == Event::KeyboardKey::Delete)
+         || (event.code == Event::KeyboardKey::PageUp)
+         || (event.code == Event::KeyboardKey::PageDown)
+         || (keyboard::isKeyPressCopy(event))
+         || (keyboard::isKeyPressCut(event))
+         || (keyboard::isKeyPressPaste(event))
+         || (keyboard::isKeyPressSelectAll(event))
+         || (keyboard::isKeyPressMoveCaretLeft(event))
+         || (keyboard::isKeyPressMoveCaretRight(event))
+         || (keyboard::isKeyPressMoveCaretWordBegin(event))
+         || (keyboard::isKeyPressMoveCaretWordEnd(event))
+         || keyboard::isKeyPressMoveCaretLineStart(event)
+         || keyboard::isKeyPressMoveCaretDocumentBegin(event)
+         || keyboard::isKeyPressMoveCaretLineEnd(event)
+         || keyboard::isKeyPressMoveCaretDocumentEnd(event)
+         || (keyboard::isKeyPressMoveCaretUp(event) && !m_navWidgetUp.lock())
+         || (keyboard::isKeyPressMoveCaretDown(event) && !m_navWidgetDown.lock()))
+        {
+            return true;
+        }
+        else
+            return ClickableWidget::canHandleKeyPress(event);
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -686,6 +725,8 @@ namespace tgui
             return onReturnKeyPress;
         else if (signalName == onReturnOrUnfocus.getName())
             return onReturnOrUnfocus;
+        else if (signalName == onCaretPositionChange.getName())
+            return onCaretPositionChange;
         else
             return ClickableWidget::getSignal(std::move(signalName));
     }
@@ -1131,6 +1172,18 @@ namespace tgui
         // Set the position of the caret
         caretLeft += m_textFull.findCharacterPos(m_selEnd).x - (m_caret.getSize().x * 0.5f);
         m_caret.setPosition({caretLeft, m_paddingCached.getTop()});
+
+        if (m_parentGui)
+        {
+            // The SDL backend will place the IME candidate window below the input rectangle, but for some reason, when the first
+            // character is typed it places the window inside the rectangle at the top position. Instead of making the entire
+            // edit box our rectangle, we will only select the area of the text itself, to reduce the distance that the window
+            // position jumps between its initial and later positions. Other backends (SFML and GLFW) currently ignore the rectangle.
+            const Vector2f textPos = {m_bordersCached.getLeft() + m_paddingCached.getLeft(), textY};
+            const auto absoluteTextPos = getAbsolutePosition(textPos);
+            const FloatRect inputRect = {absoluteTextPos, getAbsolutePosition({textPos.x, textPos.y + m_textFull.getSize().y}) - absoluteTextPos};
+            m_parentGui->updateTextCursorPosition(inputRect, getAbsolutePosition({caretLeft + m_caret.getSize().x, textY}));
+        }
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1421,9 +1474,9 @@ namespace tgui
     {
         // If text is selected then move to the cursor to the left side of the selected text
         if ((m_selChars > 0) && !shiftPressed)
-            m_selEnd = std::min(m_selStart, m_selEnd);
+            updateSelEnd(std::min(m_selStart, m_selEnd));
         else if (m_selEnd > 0)
-            m_selEnd--;
+            updateSelEnd(m_selEnd - 1);
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1432,9 +1485,9 @@ namespace tgui
     {
         // If text is selected then move to the cursor to the right side of the selected text
         if ((m_selChars > 0) && !shiftPressed)
-            m_selEnd = std::max(m_selStart, m_selEnd);
+            updateSelEnd(std::max(m_selStart, m_selEnd));
         else if (m_selEnd < m_text.length())
-            m_selEnd++;
+            updateSelEnd(m_selEnd + 1);
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1450,7 +1503,7 @@ namespace tgui
             {
                 if (isWhitespace(m_text[i-1]))
                 {
-                    m_selEnd = i;
+                    updateSelEnd(i);
                     done = true;
                     break;
                 }
@@ -1463,7 +1516,7 @@ namespace tgui
         }
 
         if (!done && skippedWhitespace)
-            m_selEnd = 0;
+            updateSelEnd(0);
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1479,7 +1532,7 @@ namespace tgui
             {
                 if (isWhitespace(m_text[i]))
                 {
-                    m_selEnd = i;
+                    updateSelEnd(i);
                     done = true;
                     break;
                 }
@@ -1492,7 +1545,17 @@ namespace tgui
         }
 
         if (!done && skippedWhitespace)
-            m_selEnd = m_text.length();
+            updateSelEnd(m_text.length());
+    }
+
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void EditBox::updateSelEnd(const std::size_t newValue)
+    {
+        const bool emit = newValue != m_selEnd;
+        m_selEnd = newValue;
+        if (emit)
+            onCaretPositionChange.emit(this, m_selEnd);
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

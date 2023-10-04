@@ -25,6 +25,11 @@
 
 #include <TGUI/Backend/Window/SDL/BackendSDL.hpp>
 
+#if defined TGUI_SYSTEM_WINDOWS && defined _MSC_VER
+    #pragma warning(push)
+    #pragma warning(disable:4121) // alignment of a member was sensitive to packing, in winnt.h
+#endif
+
 #include <TGUI/extlibs/IncludeSDL.hpp>
 #if SDL_MAJOR_VERSION >= 3
     #include <SDL3/SDL_syswm.h>
@@ -34,6 +39,10 @@
 
 #ifdef TGUI_SYSTEM_WINDOWS
     #include <TGUI/extlibs/IncludeWindows.hpp>
+#endif
+
+#if defined TGUI_SYSTEM_WINDOWS && defined _MSC_VER
+    #pragma warning(pop)
 #endif
 
 #if defined(TGUI_SYSTEM_LINUX) && defined(TGUI_USE_X11) && defined(SDL_ENABLE_SYSWM_X11)
@@ -155,7 +164,7 @@ namespace tgui
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
+#ifndef TGUI_REMOVE_DEPRECATED_CODE
     void BackendSDL::openVirtualKeyboard(const FloatRect& rect)
     {
         // We only support high-DPI in this code with SDL 2.26 or newer.
@@ -205,7 +214,7 @@ namespace tgui
     {
         SDL_StopTextInput();
     }
-
+#endif
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     bool BackendSDL::isKeyboardModifierPressed(Event::KeyModifier modifierKey)

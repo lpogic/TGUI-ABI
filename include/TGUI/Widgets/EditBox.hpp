@@ -425,6 +425,15 @@ TGUI_MODULE_EXPORT namespace tgui
         void keyPressed(const Event::KeyEvent& event) override;
 
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// @brief Called by the parent of the widget to check if keyPressed would process the event
+        ///
+        /// @param event  Key event that took place
+        ///
+        /// @return True if the event would be handled by the widget, false if the key event doesn't affect the widget
+        /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        bool canHandleKeyPress(const Event::KeyEvent& event) override;
+
+        /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         /// @internal
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         void textEntered(char32_t key) override;
@@ -544,6 +553,13 @@ TGUI_MODULE_EXPORT namespace tgui
 
 
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        // Updates m_selEnd with a new value and emits the onCaretPositionChange signal
+        // @param newValue the value to assign to m_selEnd.
+        /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        void updateSelEnd(const std::size_t newValue);
+
+
+        /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     private:
 
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -595,9 +611,10 @@ TGUI_MODULE_EXPORT namespace tgui
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     public:
 
-        SignalString onTextChange     = {"TextChanged"};        //!< The text was changed. Optional parameter: new text
-        SignalString onReturnKeyPress = {"ReturnKeyPressed"};   //!< The return key was pressed. Optional parameter: text in the edit box
-        SignalString onReturnOrUnfocus = {"ReturnOrUnfocused"}; //!< The return key was pressed or the edit box was unfocused. Optional parameter: text in the edit box
+        SignalString             onTextChange          = {"TextChanged"};          //!< The text was changed. Optional parameter: new text
+        SignalString             onReturnKeyPress      = {"ReturnKeyPressed"};     //!< The return key was pressed. Optional parameter: text in the edit box
+        SignalString             onReturnOrUnfocus     = {"ReturnOrUnfocused"};    //!< The return key was pressed or the edit box was unfocused. Optional parameter: text in the edit box
+        SignalTyped<std::size_t> onCaretPositionChange = {"CaretPositionChanged"}; //!< The caret's position was changed. Optional parameter: new caret position
 
 
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

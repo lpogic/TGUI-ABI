@@ -144,7 +144,7 @@ TGUI_MODULE_EXPORT namespace tgui
         /// @warning This function does not return the absolute position of the ScrollablePanel. It is implemented in a way
         ///          that allows calling getAbsolutePosition() on a child widget of the ScrollablePanel to work.
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        TGUI_NODISCARD Vector2f getAbsolutePosition() const override;
+        TGUI_NODISCARD Vector2f getAbsolutePosition(Vector2f offset) const override;
 
 
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -152,6 +152,11 @@ TGUI_MODULE_EXPORT namespace tgui
         ///
         /// @param widget      Pointer to the widget you would like to add
         /// @param widgetName  An identifier to access to the widget later
+        ///
+        /// @warning Widgets should be named as if they are C++ variables, i.e. names must not include any whitespace, or most
+        ///          symbols (e.g.: +, -, *, /, ., &), and should not start with a number. If you do not follow these rules,
+        ///          layout expressions may give unexpected results. Alphanumeric characters and underscores are safe to use,
+        ///          and widgets are permitted to have no name.
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         void add(const Widget::Ptr& widget, const String& widgetName = "") override;
 
@@ -299,6 +304,22 @@ TGUI_MODULE_EXPORT namespace tgui
         /// @return Value of the horizontal scrollbar
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         TGUI_NODISCARD unsigned int getHorizontalScrollbarValue() const;
+
+
+        /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// @brief Returns whether the vertical scrollbar is currently visible.
+        ///
+        /// @return Is the scrollbar visible?
+        /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        TGUI_NODISCARD bool isVerticalScrollbarShown() const;
+
+
+        /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// @brief Returns whether the horizontal scrollbar is currently visible.
+        ///
+        /// @return Is the scrollbar visible?
+        /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        TGUI_NODISCARD bool isHorizontalScrollbarShown() const;
 
 
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

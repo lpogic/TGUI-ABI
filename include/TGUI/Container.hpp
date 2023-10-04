@@ -133,7 +133,10 @@ TGUI_MODULE_EXPORT namespace tgui
         /// @param widgetPtr   Pointer to the widget you would like to add
         /// @param widgetName  You can give the widget a unique name to retrieve it from the container later
         ///
-        /// @warning The widget name should not contain whitespace
+        /// @warning Widgets should be named as if they are C++ variables, i.e. names must not include any whitespace, or most
+        ///          symbols (e.g.: +, -, *, /, ., &), and should not start with a number. If you do not follow these rules,
+        ///          layout expressions may give unexpected results. Alphanumeric characters and underscores are safe to use,
+        ///          and widgets are permitted to have no name.
         ///
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         virtual void add(const Widget::Ptr& widgetPtr, const String& widgetName = "");
@@ -345,7 +348,7 @@ TGUI_MODULE_EXPORT namespace tgui
         ///
         /// @return True when the index was changed, false if widget wasn't found in the container or index was too high
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        bool setWidgetIndex(const Widget::Ptr& widget, std::size_t index);
+        virtual bool setWidgetIndex(const Widget::Ptr& widget, std::size_t index);
 
 
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -509,6 +512,15 @@ TGUI_MODULE_EXPORT namespace tgui
         /// @internal
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         void keyPressed(const Event::KeyEvent& event) override;
+
+        /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// @brief Called by the parent of the widget to check if keyPressed would process the event
+        ///
+        /// @param event  Key event that took place
+        ///
+        /// @return True if the event would be handled by the widget, false if the key event doesn't affect the widget
+        /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        bool canHandleKeyPress(const Event::KeyEvent& event) override;
 
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         /// @internal

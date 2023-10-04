@@ -42,15 +42,8 @@ namespace tgui
     namespace keyboard
     {
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-        TGUI_NODISCARD inline bool isShiftPressed()
-        {
-            return getBackend()->isKeyboardModifierPressed(Event::KeyModifier::Shift);
-        }
-
-        /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-        inline void openVirtualKeyboard(const Widget* requestingWidget, FloatRect inputRect)
+#ifndef TGUI_REMOVE_DEPRECATED_CODE
+        TGUI_DEPRECATED("Use BackendGui::startTextInput instead") inline void openVirtualKeyboard(const Widget* requestingWidget, FloatRect inputRect)
         {
             const Widget* widget = requestingWidget;
             while (widget)
@@ -98,14 +91,43 @@ namespace tgui
                 inputRect = {topLeftPos, bottomRightPos - topLeftPos};
             }
 
+            TGUI_IGNORE_DEPRECATED_WARNINGS_START
             getBackend()->openVirtualKeyboard(inputRect);
+            TGUI_IGNORE_DEPRECATED_WARNINGS_END
+        }
+#endif
+        /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        TGUI_NODISCARD inline bool isShiftPressed(const Event::KeyEvent& event)
+        {
+            return event.shift;
         }
 
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        inline void closeVirtualKeyboard()
+        TGUI_NODISCARD inline bool isShiftPressed()
         {
+            return getBackend()->isKeyboardModifierPressed(Event::KeyModifier::Shift);
+        }
+
+        /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#ifndef TGUI_REMOVE_DEPRECATED_CODE
+        TGUI_DEPRECATED("Use BackendGui::stopTextInput instead") inline void closeVirtualKeyboard()
+        {
+            TGUI_IGNORE_DEPRECATED_WARNINGS_START
             getBackend()->closeVirtualKeyboard();
+            TGUI_IGNORE_DEPRECATED_WARNINGS_END
+        }
+#endif
+        /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        TGUI_NODISCARD inline bool isMultiselectModifierPressed(const Event::KeyEvent& event)
+        {
+#ifdef TGUI_SYSTEM_MACOS
+            return event.system;
+#else
+            return event.control;
+#endif
         }
 
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

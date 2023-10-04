@@ -30,10 +30,20 @@
     import tgui;
 #else
     #include <TGUI/Timer.hpp>
+
+    #ifdef TGUI_SYSTEM_WINDOWS
+        #include <TGUI/WindowsIMM.hpp>
+    #endif
 #endif
 
 #define GLFW_INCLUDE_NONE // Don't let GLFW include an OpenGL extention loader
 #include <GLFW/glfw3.h>
+
+#ifdef TGUI_SYSTEM_WINDOWS
+    #define GLFW_EXPOSE_NATIVE_WIN32
+    #define GLFW_NATIVE_INCLUDE_NONE
+    #include <GLFW/glfw3native.h>
+#endif
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -150,6 +160,24 @@ namespace tgui
         default: // We don't process the other keys
             return Event::KeyboardKey::Unknown;
         }
+    }
+
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    BackendGuiGLFW::BackendGuiGLFW()
+    {
+#ifdef TGUI_SYSTEM_WINDOWS
+        WindowsIMM::initialize();
+#endif
+    }
+
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    BackendGuiGLFW::~BackendGuiGLFW()
+    {
+#ifdef TGUI_SYSTEM_WINDOWS
+        WindowsIMM::release();
+#endif
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -405,6 +433,21 @@ namespace tgui
         return m_window;
     }
 
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#ifdef TGUI_SYSTEM_WINDOWS
+    void BackendGuiGLFW::updateTextCursorPosition(FloatRect, Vector2f caretPos)
+    {
+        if (!m_window)
+            return;
+
+        WindowsIMM::setCandidateWindowPosition(glfwGetWin32Window(m_window), mapCoordsToPixel(caretPos));
+    }
+#else
+    void BackendGuiGLFW::updateTextCursorPosition(FloatRect inputRect, Vector2f caretPos)
+    {
+        BackendGui::updateTextCursorPosition(inputRect, caretPos);
+    }
+#endif
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     void BackendGuiGLFW::setGuiWindow(GLFWwindow* window)

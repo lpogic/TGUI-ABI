@@ -44,6 +44,14 @@ TEST_CASE("[EditBox]")
 
         editBox->onReturnOrUnfocus([](){});
         editBox->onReturnOrUnfocus([](const tgui::String&){});
+
+        editBox->onCaretPositionChange([](){});
+        editBox->onCaretPositionChange([](std::size_t){});
+
+        REQUIRE_NOTHROW(tgui::Widget::Ptr(editBox)->getSignal("TextChanged").connect([]{}));
+        REQUIRE_NOTHROW(tgui::Widget::Ptr(editBox)->getSignal("ReturnKeyPressed").connect([]{}));
+        REQUIRE_NOTHROW(tgui::Widget::Ptr(editBox)->getSignal("ReturnOrUnfocused").connect([]{}));
+        REQUIRE_NOTHROW(tgui::Widget::Ptr(editBox)->getSignal("CaretPositionChanged").connect([]{}));
     }
 
     SECTION("WidgetType")
@@ -744,6 +752,24 @@ TEST_CASE("[EditBox]")
             renderer.setDefaultTextStyle(tgui::TextStyle::Italic);
 
             TEST_DRAW("EditBox_DefaultText.png")
+        }
+
+        SECTION("Selected text")
+        {
+            editBox->setText("Hello");
+            REQUIRE(editBox->getSelectedText() == "");
+
+            editBox->selectText(1, 3);
+            REQUIRE(editBox->getSelectedText() == "ell");
+
+            editBox->selectText(3);
+            REQUIRE(editBox->getSelectedText() == "lo");
+
+            editBox->selectText(2, 0);
+            REQUIRE(editBox->getSelectedText() == "");
+
+            editBox->selectText();
+            REQUIRE(editBox->getSelectedText() == "Hello");
         }
 
         SECTION("PasswordCharacter")
