@@ -49,6 +49,9 @@ namespace tgui
 	C_ABI_RAW int ABI_SignalAnimationType_connect(SignalAnimationType* self, void(*f)(int));
 	// SignalItem
 	C_ABI_RAW int ABI_SignalItem_connect(SignalItem* self, void(*f)(const char32_t*, const char32_t*));
+	// SignalItemHierarchy
+	C_ABI_RAW int ABI_SignalItemHierarchy_connect(SignalItemHierarchy* self, void(*f)(void*));
+	C_ABI_STATIC void ABI_SignalItemHierarchy_fetchPath(std::vector< String >* load, void(*f)(const char32_t*));
 	// Window
 	C_ABI_MAKE sf::RenderWindow* ABI_Window_new();
 	C_ABI_METHOD void ABI_Window_close(sf::WindowBase* self);
@@ -328,6 +331,47 @@ namespace tgui
 	C_ABI_RAW Outline* ABI_Grid_getWidgetPadding(Grid::Ptr* self, Widget::Ptr* widget);
 	C_ABI_RAW void ABI_Grid_setWidgetAlignment(Grid::Ptr* self, Widget::Ptr* widget, int alignment);
 	C_ABI_RAW int ABI_Grid_getWidgetAlignment(Grid::Ptr* self, Widget::Ptr* widget);
+	// ListBox
+	C_ABI_MAKE ListBox::Ptr* ABI_ListBox_new();
+	C_ABI_METHOD int ABI_ListBox_addItem(ListBox::Ptr* self, char* itemName, char* id);
+	C_ABI_SETTER bool ABI_ListBox_setSelectedItem(ListBox::Ptr* self, char* itemName);
+	C_ABI_SETTER bool ABI_ListBox_setSelectedItemById(ListBox::Ptr* self, char* id);
+	C_ABI_SETTER bool ABI_ListBox_setSelectedItemByIndex(ListBox::Ptr* self, int index);
+	C_ABI_METHOD void ABI_ListBox_deselectItem(ListBox::Ptr* self);
+	C_ABI_METHOD bool ABI_ListBox_removeItem(ListBox::Ptr* self, char* itemName);
+	C_ABI_METHOD bool ABI_ListBox_removeItemById(ListBox::Ptr* self, char* id);
+	C_ABI_METHOD bool ABI_ListBox_removeItemByIndex(ListBox::Ptr* self, int index);
+	C_ABI_METHOD void ABI_ListBox_removeAllItems(ListBox::Ptr* self);
+	C_ABI_GETTER const char32_t* ABI_ListBox_getItemById(ListBox::Ptr* self, char* id);
+	C_ABI_GETTER const char32_t* ABI_ListBox_getItemByIndex(ListBox::Ptr* self, int index);
+	C_ABI_GETTER int ABI_ListBox_getIndexById(ListBox::Ptr* self, char* id);
+	C_ABI_GETTER const char32_t* ABI_ListBox_getIdByIndex(ListBox::Ptr* self, int index);
+	C_ABI_GETTER const char32_t* ABI_ListBox_getSelectedItem(ListBox::Ptr* self);
+	C_ABI_GETTER const char32_t* ABI_ListBox_getSelectedItemId(ListBox::Ptr* self);
+	C_ABI_GETTER const int ABI_ListBox_getSelectedItemIndex(ListBox::Ptr* self);
+	C_ABI_METHOD bool ABI_ListBox_changeItem(ListBox::Ptr* self, char* originalValue, char* newValue);
+	C_ABI_METHOD bool ABI_ListBox_changeItemById(ListBox::Ptr* self, char* id, char* newValue);
+	C_ABI_METHOD bool ABI_ListBox_changeItemByIndex(ListBox::Ptr* self, int index, char* newValue);
+	C_ABI_GETTER int ABI_ListBox_getItemCount(ListBox::Ptr* self);
+	C_ABI_RAW void ABI_ListBox_getItems(ListBox::Ptr* self, void(*f)(const char32_t*));
+	C_ABI_RAW void ABI_ListBox_getItemIds(ListBox::Ptr* self, void(*f)(const char32_t*));
+	C_ABI_SETTER void ABI_ListBox_setItemHeight(ListBox::Ptr* self, int itemHeight);
+	C_ABI_GETTER int ABI_ListBox_getItemHeight(ListBox::Ptr* self);
+	C_ABI_SETTER void ABI_ListBox_setMaximumItems(ListBox::Ptr* self, int maximumItems);
+	C_ABI_GETTER int ABI_ListBox_getMaximumItems(ListBox::Ptr* self);
+	C_ABI_SETTER void ABI_ListBox_setAutoScroll(ListBox::Ptr* self, int autoScroll);
+	C_ABI_TESTER bool ABI_ListBox_getAutoScroll(ListBox::Ptr* self);
+	C_ABI_RAW void ABI_ListBox_setTextAlignment(ListBox::Ptr* self, int alignment);
+	C_ABI_RAW int ABI_ListBox_getTextAlignment(ListBox::Ptr* self);
+	C_ABI_TESTER bool ABI_ListBox_contains(ListBox::Ptr* self, char* item);
+	C_ABI_TESTER bool ABI_ListBox_containsId(ListBox::Ptr* self, char* id);
+	C_ABI_SETTER void ABI_ListBox_setScrollbarValue(ListBox::Ptr* self, int value);
+	C_ABI_GETTER int ABI_ListBox_getScrollbarValue(ListBox::Ptr* self);
+	C_ABI_SIGNAL SignalItem* onItemSelect(ListBox::Ptr* self);
+	C_ABI_SIGNAL SignalItem* onMousePress(ListBox::Ptr* self);
+	C_ABI_SIGNAL SignalItem* onMouseRelease(ListBox::Ptr* self);
+	C_ABI_SIGNAL SignalItem* onDoubleClick(ListBox::Ptr* self);
+	C_ABI_SIGNAL Signal* onScroll(ListBox::Ptr* self);
 	// ListView
 	C_ABI_MAKE ListView::Ptr* ABI_ListView_make();
 	C_ABI_METHOD int ABI_ListView_addColumn(ListView::Ptr* self);
@@ -430,12 +474,44 @@ namespace tgui
 	C_ABI_GETTER Color* ABI_ColorPicker_getColor(ColorPicker::Ptr* self);
 	C_ABI_SIGNAL SignalColor* ABI_ColorPicker_onColorChange(ColorPicker::Ptr* self);
 	C_ABI_SIGNAL SignalColor* ABI_ColorPicker_onOkPress(ColorPicker::Ptr* self);
+	// FileDialog
+	C_ABI_MAKE FileDialog::Ptr* ABI_FileDialog_new();
+	C_ABI_RAW void ABI_FileDialog_getSelectedPaths(FileDialog::Ptr* self, void(*f)(char32_t*));
+	C_ABI_SETTER void ABI_FileDialog_setPath(FileDialog::Ptr* self, char* path);
+	C_ABI_GETTER const char32_t* ABI_FileDialog_getPath(FileDialog::Ptr* self);
+	C_ABI_SETTER void ABI_FileDialog_setFilename(FileDialog::Ptr* self, char* filename);
+	C_ABI_GETTER const char32_t* ABI_FileDialog_getFilename(FileDialog::Ptr* self);
+	C_ABI_RAW void ABI_FileDialog_setFileTypeFilters(FileDialog::Ptr* self, int size, int(*f)(void), char*(*f1)(void), int defaultFilterIndex);
+	C_ABI_RAW void ABI_FileDialog_getFileTypeFilters(FileDialog::Ptr* self, void(*f)(int, const char32_t*, const char32_t*));
+	C_ABI_GETTER int ABI_FileDialog_getFileTypeFiltersIndex(FileDialog::Ptr* self);
+	C_ABI_SETTER void ABI_FileDialog_setConfirmButtonText(FileDialog::Ptr* self, char* text);
+	C_ABI_GETTER const char32_t* ABI_FileDialog_getConfirmButtonText(FileDialog::Ptr* self);
+	C_ABI_SETTER void ABI_FileDialog_setCancelButtonText(FileDialog::Ptr* self, char* text);
+	C_ABI_GETTER const char32_t* ABI_FileDialog_getCancelButtonText(FileDialog::Ptr* self);
+	C_ABI_SETTER void ABI_FileDialog_setCreateFolderButtonText(FileDialog::Ptr* self, char* text);
+	C_ABI_GETTER const char32_t* ABI_FileDialog_getCreateFolderButtonText(FileDialog::Ptr* self);
+	C_ABI_SETTER void ABI_FileDialog_setAllowCreateFolder(FileDialog::Ptr* self, int allowCreateFolder);
+	C_ABI_TESTER bool ABI_FileDialog_getAllowCreateFolder(FileDialog::Ptr* self);
+	C_ABI_SETTER void ABI_FileDialog_setFilenameLabelText(FileDialog::Ptr* self, char* labelText);
+	C_ABI_GETTER const char32_t* ABI_FileDialog_getFilenameLabelText(FileDialog::Ptr* self);
+	C_ABI_SETTER void ABI_FileDialog_setListViewColumnCaptions(FileDialog::Ptr* self, char* nameColumnText, char* sizeColumnText, char* modifiedColumnText);
+	C_ABI_RAW void ABI_FileDialog_getListViewColumnCaptions(FileDialog::Ptr* self, void(*f)(const char32_t*));
+	C_ABI_SETTER void ABI_FileDialog_setFileMustExist(FileDialog::Ptr* self, int enforceExistence);
+	C_ABI_TESTER bool ABI_FileDialog_getFileMustExist(FileDialog::Ptr* self);
+	C_ABI_SETTER void ABI_FileDialog_setSelectingDirectory(FileDialog::Ptr* self, int selectDirectories);
+	C_ABI_TESTER bool ABI_FileDialog_getSelectingDirectory(FileDialog::Ptr* self);
+	C_ABI_SETTER void ABI_FileDialog_setMultiSelect(FileDialog::Ptr* self, int multiSelect);
+	C_ABI_TESTER bool ABI_FileDialog_getMultiSelect(FileDialog::Ptr* self);
+	// C_ABI_SETTER void ABI_FileDialog_setIconLoader(FileDialog::Ptr* self, std::shared_ptr< FileDialogIconLoader >* iconLoader);
+	// C_ABI_GETTER std::shared_ptr< FileDialogIconLoader >* ABI_FileDialog_getIconLoader(FileDialog::Ptr* self);
+	C_ABI_SIGNAL Signal* ABI_FileDialog_onFileSelect(FileDialog::Ptr* self);
+	C_ABI_SIGNAL Signal* ABI_FileDialog_onCancel(FileDialog::Ptr* self);
 	// MessageBox
 	C_ABI_MAKE MessageBox::Ptr* ABI_MessageBox_new();
 	C_ABI_SETTER void ABI_MessageBox_setText(MessageBox::Ptr* self, char* text);
 	C_ABI_GETTER const char32_t* ABI_MessageBox_getText(MessageBox::Ptr* self);
 	C_ABI_RAW void ABI_MessageBox_addButton(MessageBox::Ptr* self, char* button);
-	// C_ABI_RAW void ABI_MessageBox_changeButtons(MessageBox::Ptr* self, int size, char*(*f)(void));
+	C_ABI_RAW void ABI_MessageBox_changeButtons(MessageBox::Ptr* self, int size, char*(*f)(void));
 	C_ABI_RAW void ABI_MessageBox_getButtons(MessageBox::Ptr* self, void(*f)(const char32_t*));
 	C_ABI_RAW void ABI_MessageBox_setLabelAlignment(MessageBox::Ptr* self, int alignment);
 	C_ABI_RAW int ABI_MessageBox_getLabelAlignment(MessageBox::Ptr* self);
@@ -447,6 +523,58 @@ namespace tgui
 	C_ABI_SETTER void ABI_Picture_ignoreMouseEvents(Picture::Ptr* self, int ignore);
 	C_ABI_TESTER bool ABI_Picture_isIgnoringMouseEvents(Picture::Ptr* self);
 	C_ABI_SIGNAL SignalVector2f* ABI_Picture_onDoubleClick(Picture::Ptr* self);
+	// MenuBar
+	C_ABI_MAKE MenuBar::Ptr* ABI_MenuBar_new();
+	C_ABI_METHOD void ABI_MenuBar_addMenu(MenuBar::Ptr* self, char* text);
+	C_ABI_RAW int ABI_MenuBar_connectMenuItem(MenuBar::Ptr* self, int hierarchySize, char*(*hierarchy)(), void(*handler)());
+	C_ABI_RAW bool ABI_MenuBar_addMenuItem(MenuBar::Ptr* self, int hierarchySize, char*(*hierarchy)());
+	C_ABI_RAW bool ABI_MenuBar_changeMenuItem(MenuBar::Ptr* self, int hierarchySize, char*(*hierarchy)(), char* text);
+	C_ABI_METHOD void ABI_MenuBar_removeAllMenus(MenuBar::Ptr* self);
+	C_ABI_METHOD bool ABI_MenuBar_removeMenu(MenuBar::Ptr* self, char* menu);
+	C_ABI_RAW bool ABI_MenuBar_removeMenuItem(MenuBar::Ptr* self, int hierarchySize, char*(*hierarchy)());
+	C_ABI_RAW bool ABI_MenuBar_removeSubMenuItems(MenuBar::Ptr* self, int hierarchySize, char*(*hierarchy)());
+	C_ABI_SETTER bool ABI_MenuBar_setMenuEnabled(MenuBar::Ptr* self, char* menu, int enabled);
+	C_ABI_TESTER bool ABI_MenuBar_getMenuEnabled(MenuBar::Ptr* self, char* menu);
+	C_ABI_RAW bool ABI_MenuBar_setMenuItemEnabled(MenuBar::Ptr* self, int hierarchySize, char*(*hierarchy)(), int enabled);
+	C_ABI_RAW bool ABI_MenuBar_getMenuItemEnabled(MenuBar::Ptr* self, int hierarchySize, char*(*hierarchy)());
+	C_ABI_SETTER void ABI_MenuBar_setMinimumSubMenuWidth(MenuBar::Ptr* self, float minimumWidth);
+	C_ABI_GETTER float ABI_MenuBar_getMinimumSubMenuWidth(MenuBar::Ptr* self);
+	C_ABI_SETTER void ABI_MenuBar_setInvertedMenuDirection(MenuBar::Ptr* self, int invertDirection);
+	C_ABI_TESTER bool ABI_MenuBar_getInvertedMenuDirection(MenuBar::Ptr* self);
+	C_ABI_RAW void ABI_MenuBar_getMenus(MenuBar::Ptr* self, void(*m)(const char32_t*, int), void(*up)());
+	C_ABI_METHOD void ABI_MenuBar_closeMenu(MenuBar::Ptr* self);
+	C_ABI_SIGNAL SignalItemHierarchy* ABI_MenuBar_onMenuItemClick(MenuBar::Ptr* self);
+	// PanelListBox
+	C_ABI_MAKE PanelListBox::Ptr* ABI_PanelListBox_new();
+	C_ABI_METHOD Panel::Ptr* ABI_PanelListBox_addItem(PanelListBox::Ptr* self, char* id, int index);
+	C_ABI_GETTER Panel::Ptr* ABI_PanelListBox_getPanelTemplate(PanelListBox::Ptr* self);
+	C_ABI_GETTER float ABI_PanelListBox_getItemsWidth(PanelListBox::Ptr* self);
+	C_ABI_SETTER void ABI_PanelListBox_setItemsHeight(PanelListBox::Ptr* self, float height);
+	C_ABI_GETTER float ABI_PanelListBox_getItemsHeight(PanelListBox::Ptr* self);
+	C_ABI_SETTER bool ABI_PanelListBox_setSelectedItem(PanelListBox::Ptr* self, Panel::Ptr* panel);
+	C_ABI_SETTER bool ABI_PanelListBox_setSelectedItemById(PanelListBox::Ptr* self, char* id);
+	C_ABI_SETTER bool ABI_PanelListBox_setSelectedItemByIndex(PanelListBox::Ptr* self, int index);
+	C_ABI_METHOD void ABI_PanelListBox_deselectItem(PanelListBox::Ptr* self);
+	C_ABI_METHOD bool ABI_PanelListBox_removeItem(PanelListBox::Ptr* self, Panel::Ptr* panel);
+	C_ABI_METHOD bool ABI_PanelListBox_removeItemById(PanelListBox::Ptr* self, char* id);
+	C_ABI_METHOD bool ABI_PanelListBox_removeItemByIndex(PanelListBox::Ptr* self, int index);
+	C_ABI_METHOD void ABI_PanelLIstBox_removeAllItems(PanelListBox::Ptr* self);
+	C_ABI_GETTER Panel::Ptr* ABI_PanelListBox_getItemById(PanelListBox::Ptr* self, char* id);
+	C_ABI_GETTER Panel::Ptr* ABI_PanelListBox_getItemByIndex(PanelListBox::Ptr* self, int index);
+	C_ABI_GETTER int ABI_PanelListBox_getIndexById(PanelListBox::Ptr* self, char* id);
+	C_ABI_GETTER int ABI_PanelListBox_getIndexByItem(PanelListBox::Ptr* self, Panel::Ptr* panel);
+	C_ABI_GETTER const char32_t* ABI_PanelListBox_getIdByIndex(PanelListBox::Ptr* self, int index);
+	C_ABI_GETTER Panel::Ptr* ABI_PanelListBox_getSelectedItem(PanelListBox::Ptr* self);
+	C_ABI_GETTER const char32_t* ABI_PanelListBox_getSelectedItemId(PanelListBox::Ptr* self);
+	C_ABI_GETTER int ABI_PanelListBox_getSelectedItemIndex(PanelListBox::Ptr* self);
+	C_ABI_GETTER int ABI_PanelListBox_getItemCount(PanelListBox::Ptr* self);
+	C_ABI_RAW void ABI_PanelListBox_getItems(PanelListBox::Ptr* self, void(*f)(Panel::Ptr*));
+	C_ABI_RAW void ABI_PanelListBox_getItemIds(PanelListBox::Ptr* self, void(*f)(const char32_t*));
+	C_ABI_SETTER void ABI_PanelListBox_setMaximumItems(PanelListBox::Ptr* self, int maximumItems);
+	C_ABI_GETTER int ABI_PanelListBox_getMaximumItems(PanelListBox::Ptr* self);
+	C_ABI_TESTER bool ABI_PanelListBox_contains(PanelListBox::Ptr* self, Panel::Ptr* panel);
+	C_ABI_TESTER bool ABI_PanelListBox_containsId(PanelListBox::Ptr* self, char* id);
+	C_ABI_SIGNAL SignalPanelListBoxItem* ABI_PanelListBox_onItemSelect(PanelListBox::Ptr* self);
+	
 }
-
 #endif //CABI_HPP

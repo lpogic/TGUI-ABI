@@ -80,7 +80,7 @@ namespace tgui {
         return self->connect([=](Color col) {
             auto color = new Color(col);
             f(color);
-            });
+        });
     }
 
     // SignalVector2f
@@ -89,7 +89,7 @@ namespace tgui {
         return self->connect([=](Vector2f vec) {
             auto vector = new Vector2f(vec);
             f(vector);
-            });
+        });
     }
 
     // SignalPointer
@@ -103,7 +103,7 @@ namespace tgui {
     C_ABI_RAW int ABI_SignalShowEffect_connect(SignalShowEffect* self, void(*f)(int, int)) {
         return self->connect([=](ShowEffectType showEffectType, bool show) {
             f(static_cast<int>(showEffectType), static_cast<int>(show));
-            });
+        });
     }
 
     // SignalAnimationType
@@ -111,7 +111,7 @@ namespace tgui {
     C_ABI_RAW int ABI_SignalAnimationType_connect(SignalAnimationType* self, void(*f)(int)) {
         return self->connect([=](AnimationType animationType) {
             f(static_cast<int>(animationType));
-            });
+        });
     }
 
     // SignalItem
@@ -119,7 +119,31 @@ namespace tgui {
     C_ABI_RAW int ABI_SignalItem_connect(SignalItem* self, void(*f)(const char32_t*, const char32_t*)) {
         return self->connect([=](const String& str1, const String& str2) {
             f(str1.data(), str2.data());
-            });
+        });
+    }
+
+    // SignalItemHierarchy
+
+    C_ABI_RAW int ABI_SignalItemHierarchy_connect(SignalItemHierarchy* self, void(*f)(void*)) {
+        return self->connect([=](const std::vector< String > &fullItem) {
+            f((void*)&fullItem);
+        });
+    }
+
+    C_ABI_STATIC void ABI_SignalItemHierarchy_fetchPath(std::vector< String >* load, void(*f)(const char32_t*)) {
+        for(auto str : *load) {
+            f(str.data());
+        }
+    }
+
+    // SignalPanelListBoxItem
+
+    C_ABI_RAW int ABI_SignalPanelListBoxItem_connect(SignalPanelListBoxItem* self, void(*f)(Panel::Ptr*)) {
+        return self->connect([=](Panel::Ptr panel) {
+            auto ptr = new Panel::Ptr(nullptr);
+            ptr->swap(panel);
+            f(ptr);
+        });
     }
 
     // Window
@@ -1225,6 +1249,185 @@ namespace tgui {
         return static_cast<int>((**self).getWidgetAlignment(*widget));
     }
 
+    // ListBox
+
+    C_ABI_MAKE ListBox::Ptr* ABI_ListBox_new() {
+        auto view = ListBox::create();
+        auto ptr = new ListBox::Ptr(nullptr);
+        ptr->swap(view);
+        return ptr;
+    }
+
+	C_ABI_METHOD int ABI_ListBox_addItem(ListBox::Ptr* self, char* itemName, char* id) {
+        return static_cast<int>((**self).addItem(itemName, id));
+    }
+
+	C_ABI_SETTER bool ABI_ListBox_setSelectedItem(ListBox::Ptr* self, char* itemName) {
+        return (**self).setSelectedItem(itemName);
+    }
+
+	C_ABI_SETTER bool ABI_ListBox_setSelectedItemById(ListBox::Ptr* self, char* id) {
+        return (**self).setSelectedItemById(id);
+    }
+
+	C_ABI_SETTER bool ABI_ListBox_setSelectedItemByIndex(ListBox::Ptr* self, int index) {
+        return (**self).setSelectedItemByIndex(index);
+    }
+
+	C_ABI_METHOD void ABI_ListBox_deselectItem(ListBox::Ptr* self) {
+        (**self).deselectItem();
+    }
+
+	C_ABI_METHOD bool ABI_ListBox_removeItem(ListBox::Ptr* self, char* itemName) {
+        return (**self).removeItem(itemName);
+    }
+
+	C_ABI_METHOD bool ABI_ListBox_removeItemById(ListBox::Ptr* self, char* id) {
+        return (**self).removeItemById(id);
+    }
+
+	C_ABI_METHOD bool ABI_ListBox_removeItemByIndex(ListBox::Ptr* self, int index) {
+        return (**self).removeItemByIndex(index);
+    }
+
+	C_ABI_METHOD void ABI_ListBox_removeAllItems(ListBox::Ptr* self) {
+        (**self).removeAllItems();
+    }
+
+	C_ABI_GETTER const char32_t* ABI_ListBox_getItemById(ListBox::Ptr* self, char* id) {
+        auto str = new String((**self).getItemById(id));
+        autoclean.push_back(str);
+        return str->data();
+    }
+
+	C_ABI_GETTER const char32_t* ABI_ListBox_getItemByIndex(ListBox::Ptr* self, int index) {
+        auto str = new String((**self).getItemByIndex(index));
+        autoclean.push_back(str);
+        return str->data();
+    }
+
+	C_ABI_GETTER int ABI_ListBox_getIndexById(ListBox::Ptr* self, char* id) {
+        return (**self).getIndexById(id);
+    }
+
+	C_ABI_GETTER const char32_t* ABI_ListBox_getIdByIndex(ListBox::Ptr* self, int index) {
+        auto str = new String((**self).getIdByIndex(index));
+        autoclean.push_back(str);
+        return str->data();
+    }
+
+	C_ABI_GETTER const char32_t* ABI_ListBox_getSelectedItem(ListBox::Ptr* self) {
+        auto str = new String((**self).getSelectedItem());
+        autoclean.push_back(str);
+        return str->data();
+    }
+
+	C_ABI_GETTER const char32_t* ABI_ListBox_getSelectedItemId(ListBox::Ptr* self) {
+        auto str = new String((**self).getSelectedItemId());
+        autoclean.push_back(str);
+        return str->data();
+    }
+
+	C_ABI_GETTER const int ABI_ListBox_getSelectedItemIndex(ListBox::Ptr* self) {
+        return (**self).getSelectedItemIndex();
+    }
+
+	C_ABI_METHOD bool ABI_ListBox_changeItem(ListBox::Ptr* self, char* originalValue, char* newValue) {
+        return (**self).changeItem(originalValue, newValue);
+    }
+
+	C_ABI_METHOD bool ABI_ListBox_changeItemById(ListBox::Ptr* self, char* id, char* newValue) {
+        return (**self).changeItemById(id, newValue);
+    }
+
+	C_ABI_METHOD bool ABI_ListBox_changeItemByIndex(ListBox::Ptr* self, int index, char* newValue) {
+        return (**self).changeItemByIndex(index, newValue);
+    }
+
+	C_ABI_GETTER int ABI_ListBox_getItemCount(ListBox::Ptr* self) {
+        return static_cast<int>((**self).getItemCount());
+    }
+
+	C_ABI_RAW void ABI_ListBox_getItems(ListBox::Ptr* self, void(*f)(const char32_t*)) {
+        for(auto item : (**self).getItems()) {
+            f(item.data());
+        }
+    }
+
+	C_ABI_RAW void ABI_ListBox_getItemIds(ListBox::Ptr* self, void(*f)(const char32_t*)) {
+        for(auto item : (**self).getItemIds()) {
+            f(item.data());
+        }
+    }
+
+	C_ABI_SETTER void ABI_ListBox_setItemHeight(ListBox::Ptr* self, int itemHeight) {
+        (**self).setItemHeight(itemHeight);
+    }
+
+	C_ABI_GETTER int ABI_ListBox_getItemHeight(ListBox::Ptr* self) {
+        return (**self).getItemHeight();
+    }
+
+	C_ABI_SETTER void ABI_ListBox_setMaximumItems(ListBox::Ptr* self, int maximumItems) {
+        (**self).setMaximumItems(maximumItems);
+    }
+
+	C_ABI_GETTER int ABI_ListBox_getMaximumItems(ListBox::Ptr* self) {
+        return static_cast<int>((**self).getMaximumItems());
+    }
+
+	C_ABI_SETTER void ABI_ListBox_setAutoScroll(ListBox::Ptr* self, int autoScroll) {
+        (**self).setAutoScroll(autoScroll);
+    }
+
+	C_ABI_TESTER bool ABI_ListBox_getAutoScroll(ListBox::Ptr* self){
+        return (**self).getAutoScroll();
+    }
+
+	C_ABI_RAW void ABI_ListBox_setTextAlignment(ListBox::Ptr* self, int alignment) {
+        (**self).setTextAlignment(static_cast<ListBox::TextAlignment>(alignment));
+    }
+
+	C_ABI_RAW int ABI_ListBox_getTextAlignment(ListBox::Ptr* self) {
+        return static_cast<int>((**self).getTextAlignment());
+    }
+
+	C_ABI_TESTER bool ABI_ListBox_contains(ListBox::Ptr* self, char* item) {
+        return (**self).contains(item);
+    }
+
+	C_ABI_TESTER bool ABI_ListBox_containsId(ListBox::Ptr* self, char* id) {
+        return (**self).containsId(id);
+    }
+
+	C_ABI_SETTER void ABI_ListBox_setScrollbarValue(ListBox::Ptr* self, int value) {
+        (**self).setScrollbarValue(value);
+    }
+
+	C_ABI_GETTER int ABI_ListBox_getScrollbarValue(ListBox::Ptr* self) {
+        return (**self).getScrollbarValue();
+    }
+
+	C_ABI_SIGNAL SignalItem* onItemSelect(ListBox::Ptr* self) {
+        return &(**self).onItemSelect;
+    }
+
+	C_ABI_SIGNAL SignalItem* onMousePress(ListBox::Ptr* self) {
+        return &(**self).onMousePress;
+    }
+
+	C_ABI_SIGNAL SignalItem* onMouseRelease(ListBox::Ptr* self) {
+        return &(**self).onMouseRelease;
+    }
+
+	C_ABI_SIGNAL SignalItem* onDoubleClick(ListBox::Ptr* self) {
+        return &(**self).onDoubleClick;
+    }
+
+	C_ABI_SIGNAL Signal* onScroll(ListBox::Ptr* self) {
+        return &(**self).onScroll;
+    }
+
     // ListView
 
 	C_ABI_MAKE ListView::Ptr* ABI_ListView_make() {
@@ -1680,6 +1883,155 @@ namespace tgui {
         return &(**self).onOkPress;
     }
 
+    // FileDialog
+
+    C_ABI_MAKE FileDialog::Ptr* ABI_FileDialog_new() {
+        auto self = FileDialog::create();
+        auto ptr = new FileDialog::Ptr(nullptr);
+        ptr->swap(self);
+        return ptr;
+    }
+
+	C_ABI_RAW void ABI_FileDialog_getSelectedPaths(FileDialog::Ptr* self, void(*f)(char32_t*)) {
+        for (auto path : (**self).getSelectedPaths()) {
+            f(path.asString().data());
+        }
+    }
+
+	C_ABI_SETTER void ABI_FileDialog_setPath(FileDialog::Ptr* self, char* path) {
+        (**self).setPath(path);
+    }
+
+	C_ABI_GETTER const char32_t* ABI_FileDialog_getPath(FileDialog::Ptr* self) {
+        auto path = new String((**self).getPath().asString());
+        autoclean.push_back(path);
+        return path->data();
+    }
+
+	C_ABI_SETTER void ABI_FileDialog_setFilename(FileDialog::Ptr* self, char* filename) {
+        (**self).setFilename(filename);
+    }
+
+	C_ABI_GETTER const char32_t* ABI_FileDialog_getFilename(FileDialog::Ptr* self) {
+        return (**self).getFilename().data();
+    }
+
+	C_ABI_RAW void ABI_FileDialog_setFileTypeFilters(FileDialog::Ptr* self, int size, int(*f)(void), char*(*f1)(void), int defaultFilterIndex) {
+        std::vector< std::pair< String, std::vector< String > > > vec;
+        for(int i = 0;i < size; ++i) {
+            String base(f1());
+            int length = f();
+            std::vector<String> vec1;
+            for(int j = 0; j < length; ++j) {
+                vec1.push_back(f1());
+            }
+            std::pair pair(base, vec1);
+            vec.push_back(pair);
+        }
+        return (**self).setFileTypeFilters(vec, defaultFilterIndex);
+    }
+
+	C_ABI_RAW void ABI_FileDialog_getFileTypeFilters(FileDialog::Ptr* self, void(*f)(int, const char32_t*, const char32_t*)) {
+        int i = 0;
+        for(auto pair : (**self).getFileTypeFilters()) {
+            auto base = pair.first.data();
+            for(auto filters : pair.second) {
+                f(i, base, filters.data());
+            }
+            ++i;
+        }
+    }
+
+	C_ABI_GETTER int ABI_FileDialog_getFileTypeFiltersIndex(FileDialog::Ptr* self) {
+        return static_cast<int>((**self).getFileTypeFiltersIndex());
+    }
+
+	C_ABI_SETTER void ABI_FileDialog_setConfirmButtonText(FileDialog::Ptr* self, char* text) {
+        (**self).setConfirmButtonText(text);
+    }
+
+	C_ABI_GETTER const char32_t* ABI_FileDialog_getConfirmButtonText(FileDialog::Ptr* self) {
+        return (**self).getConfirmButtonText().data();
+    }
+
+	C_ABI_SETTER void ABI_FileDialog_setCancelButtonText(FileDialog::Ptr* self, char* text) {
+        (**self).setCancelButtonText(text);
+    }
+
+	C_ABI_GETTER const char32_t* ABI_FileDialog_getCancelButtonText(FileDialog::Ptr* self) {
+        return (**self).getCancelButtonText().data();
+    }
+
+	C_ABI_SETTER void ABI_FileDialog_setCreateFolderButtonText(FileDialog::Ptr* self, char* text) {
+        (**self).setCreateFolderButtonText(text);
+    }
+
+	C_ABI_GETTER const char32_t* ABI_FileDialog_getCreateFolderButtonText(FileDialog::Ptr* self) {
+        return (**self).getCreateFolderButtonText().data();
+    }
+
+	C_ABI_SETTER void ABI_FileDialog_setAllowCreateFolder(FileDialog::Ptr* self, int allowCreateFolder) {
+        (**self).setAllowCreateFolder(allowCreateFolder);
+    }
+
+	C_ABI_TESTER bool ABI_FileDialog_getAllowCreateFolder(FileDialog::Ptr* self) {
+        return (**self).getAllowCreateFolder();
+    }
+
+	C_ABI_SETTER void ABI_FileDialog_setFilenameLabelText(FileDialog::Ptr* self, char* labelText) {
+        (**self).setFilenameLabelText(labelText);
+    }
+
+	C_ABI_GETTER const char32_t* ABI_FileDialog_getFilenameLabelText(FileDialog::Ptr* self) {
+        return (**self).getFilenameLabelText().data();
+    }
+
+	C_ABI_SETTER void ABI_FileDialog_setListViewColumnCaptions(FileDialog::Ptr* self, char* nameColumnText, char* sizeColumnText, char* modifiedColumnText) {
+        (**self).setListViewColumnCaptions(nameColumnText, sizeColumnText, modifiedColumnText);
+    }
+
+	C_ABI_RAW void ABI_FileDialog_getListViewColumnCaptions(FileDialog::Ptr* self, void(*f)(const char32_t*)) {
+        auto captions = (**self).getListViewColumnCaptions();
+        f(std::get<0>(captions).data());
+        f(std::get<1>(captions).data());
+        f(std::get<2>(captions).data());
+    }
+
+	C_ABI_SETTER void ABI_FileDialog_setFileMustExist(FileDialog::Ptr* self, int enforceExistence) {
+        (**self).setFileMustExist(enforceExistence);
+    }
+
+	C_ABI_TESTER bool ABI_FileDialog_getFileMustExist(FileDialog::Ptr* self) {
+        return (**self).getFileMustExist();
+    }
+
+	C_ABI_SETTER void ABI_FileDialog_setSelectingDirectory(FileDialog::Ptr* self, int selectDirectories) {
+        (**self).setSelectingDirectory(selectDirectories);
+    }
+
+	C_ABI_TESTER bool ABI_FileDialog_getSelectingDirectory(FileDialog::Ptr* self) {
+        return (**self).getSelectingDirectory();
+    }
+
+	C_ABI_SETTER void ABI_FileDialog_setMultiSelect(FileDialog::Ptr* self, int multiSelect) {
+        (**self).setMultiSelect(multiSelect);
+    }
+
+	C_ABI_TESTER bool ABI_FileDialog_getMultiSelect(FileDialog::Ptr* self) {
+        return (**self).getMultiSelect();
+    }
+
+	// C_ABI_SETTER void ABI_FileDialog_setIconLoader(FileDialog::Ptr* self, std::shared_ptr< FileDialogIconLoader >* iconLoader);
+	// C_ABI_GETTER std::shared_ptr< FileDialogIconLoader >* ABI_FileDialog_getIconLoader(FileDialog::Ptr* self);
+
+	C_ABI_SIGNAL Signal* ABI_FileDialog_onFileSelect(FileDialog::Ptr* self) {
+        return &(**self).onFileSelect;
+    }
+
+	C_ABI_SIGNAL Signal* ABI_FileDialog_onCancel(FileDialog::Ptr* self) {
+        return &(**self).onCancel;
+    }
+    
     // MessageBox
 
 	C_ABI_MAKE MessageBox::Ptr* ABI_MessageBox_new() {
@@ -1701,13 +2053,13 @@ namespace tgui {
         (**self).addButton(button);
     }
 
-	// C_ABI_RAW void ABI_MessageBox_changeButtons(MessageBox::Ptr* self, int size, char*(*f)(void)) {
-    //     std::vector<String> vec;
-    //     for(int i = 0;i < size; ++i) {
-    //         vec.push_back(f());
-    //     }
-    //     return (**self).changeButtons(vec);
-    // }
+	C_ABI_RAW void ABI_MessageBox_changeButtons(MessageBox::Ptr* self, int size, char*(*f)(void)) {
+        std::vector<String> vec;
+        for(int i = 0;i < size; ++i) {
+            vec.push_back(f());
+        }
+        return (**self).changeButtons(vec);
+    }
 
 	C_ABI_RAW void ABI_MessageBox_getButtons(MessageBox::Ptr* self, void(*f)(const char32_t*)) {
         for (auto button : (**self).getButtons()) {
@@ -1754,5 +2106,276 @@ namespace tgui {
 
 	C_ABI_SIGNAL SignalVector2f* ABI_Picture_onDoubleClick(Picture::Ptr* self) {
         return &(**self).onDoubleClick;
+    }
+
+    // MenuBar
+
+	C_ABI_MAKE MenuBar::Ptr* ABI_MenuBar_new() {
+        auto self = MenuBar::create();
+        auto ptr = new MenuBar::Ptr(nullptr);
+        ptr->swap(self);
+        return ptr;
+    }
+
+    C_ABI_METHOD void ABI_MenuBar_addMenu(MenuBar::Ptr* self, char* text) {
+        (**self).addMenu(text);
+    }
+
+	C_ABI_RAW int ABI_MenuBar_connectMenuItem(MenuBar::Ptr* self, int hierarchySize, char*(*hierarchy)(), void(*handler)()) {
+        std::vector<String> vec;
+        for(int i = 0;i < hierarchySize; ++i) {
+            vec.push_back(hierarchy());
+        }
+        return (**self).connectMenuItem(vec, handler);
+    }
+
+	C_ABI_RAW bool ABI_MenuBar_addMenuItem(MenuBar::Ptr* self, int hierarchySize, char*(*hierarchy)()) {
+        std::vector<String> vec;
+        for(int i = 0;i < hierarchySize; ++i) {
+            vec.push_back(hierarchy());
+        }
+        return (**self).addMenuItem(vec);
+    }
+
+	C_ABI_RAW bool ABI_MenuBar_changeMenuItem(MenuBar::Ptr* self, int hierarchySize, char*(*hierarchy)(), char* text) {
+        std::vector<String> vec;
+        for(int i = 0;i < hierarchySize; ++i) {
+            vec.push_back(hierarchy());
+        }
+        return (**self).changeMenuItem(vec, text);
+    }
+
+	C_ABI_METHOD void ABI_MenuBar_removeAllMenus(MenuBar::Ptr* self) {
+        (**self).removeAllMenus();
+    }
+
+	C_ABI_METHOD bool ABI_MenuBar_removeMenu(MenuBar::Ptr* self, char* menu) {
+        return (**self).removeMenu(menu);
+    }
+
+	C_ABI_RAW bool ABI_MenuBar_removeMenuItem(MenuBar::Ptr* self, int hierarchySize, char*(*hierarchy)()) {
+        std::vector<String> vec;
+        for(int i = 0;i < hierarchySize; ++i) {
+            vec.push_back(hierarchy());
+        }
+        return (**self).removeMenuItem(vec);
+    }
+
+	C_ABI_RAW bool ABI_MenuBar_removeSubMenuItems(MenuBar::Ptr* self, int hierarchySize, char*(*hierarchy)()) {
+        std::vector<String> vec;
+        for(int i = 0;i < hierarchySize; ++i) {
+            vec.push_back(hierarchy());
+        }
+        return (**self).removeSubMenuItems(vec);
+    }
+
+	C_ABI_SETTER bool ABI_MenuBar_setMenuEnabled(MenuBar::Ptr* self, char* menu, int enabled) {
+        return (**self).setMenuEnabled(menu, enabled);
+    }
+
+	C_ABI_TESTER bool ABI_MenuBar_getMenuEnabled(MenuBar::Ptr* self, char* menu) {
+        return (**self).getMenuEnabled(menu);
+    }
+
+	C_ABI_RAW bool ABI_MenuBar_setMenuItemEnabled(MenuBar::Ptr* self, int hierarchySize, char*(*hierarchy)(), int enabled) {
+        std::vector<String> vec;
+        for(int i = 0;i < hierarchySize; ++i) {
+            vec.push_back(hierarchy());
+        }
+        return (**self).setMenuItemEnabled(vec, enabled);
+    }
+
+	C_ABI_RAW bool ABI_MenuBar_getMenuItemEnabled(MenuBar::Ptr* self, int hierarchySize, char*(*hierarchy)()) {
+        std::vector<String> vec;
+        for(int i = 0;i < hierarchySize; ++i) {
+            vec.push_back(hierarchy());
+        }
+        return (**self).getMenuItemEnabled(vec);
+    }
+
+	C_ABI_SETTER void ABI_MenuBar_setMinimumSubMenuWidth(MenuBar::Ptr* self, float minimumWidth) {
+        (**self).setMinimumSubMenuWidth(minimumWidth);
+    }
+
+	C_ABI_GETTER float ABI_MenuBar_getMinimumSubMenuWidth(MenuBar::Ptr* self) {
+        return (**self).getMinimumSubMenuWidth();
+    }
+
+	C_ABI_SETTER void ABI_MenuBar_setInvertedMenuDirection(MenuBar::Ptr* self, int invertDirection) {
+        (**self).setInvertedMenuDirection(invertDirection);
+    }
+
+	C_ABI_TESTER bool ABI_MenuBar_getInvertedMenuDirection(MenuBar::Ptr* self) {
+        return (**self).getInvertedMenuDirection();
+    }
+
+    void yieldGetMenusElement(std::vector<MenuBar::GetMenusElement> elements, void(*m)(const char32_t*, int), void(*up)()) {
+        for(auto element : elements) {
+            m(element.text.data(), element.enabled);
+            yieldGetMenusElement(element.menuItems, m, up);
+            up();
+        }
+    }
+
+	C_ABI_RAW void ABI_MenuBar_getMenus(MenuBar::Ptr* self, void(*m)(const char32_t*, int), void(*up)()) {
+        yieldGetMenusElement((**self).getMenus(), m, up);
+    }
+
+	C_ABI_METHOD void ABI_MenuBar_closeMenu(MenuBar::Ptr* self) {
+        (**self).closeMenu();
+    }
+
+    C_ABI_SIGNAL SignalItemHierarchy* ABI_MenuBar_onMenuItemClick(MenuBar::Ptr* self) {
+        return &(**self).onMenuItemClick;
+    }
+
+    // PanelListBox
+
+    C_ABI_MAKE PanelListBox::Ptr* ABI_PanelListBox_new() {
+        auto self = PanelListBox::create();
+        auto ptr = new PanelListBox::Ptr(nullptr);
+        ptr->swap(self);
+        return ptr;
+    }
+
+	C_ABI_METHOD Panel::Ptr* ABI_PanelListBox_addItem(PanelListBox::Ptr* self, char* id, int index) {
+        auto panel = (**self).addItem(id, index);
+        auto ptr = new Panel::Ptr(nullptr);
+        ptr->swap(panel);
+        return ptr;
+    }
+
+	C_ABI_GETTER Panel::Ptr* ABI_PanelListBox_getPanelTemplate(PanelListBox::Ptr* self) {
+        auto panel = (**self).getPanelTemplate();
+        auto ptr = new Panel::Ptr(nullptr);
+        ptr->swap(panel);
+        return ptr;
+    }
+
+	C_ABI_GETTER float ABI_PanelListBox_getItemsWidth(PanelListBox::Ptr* self) {
+        return (**self).getItemsWidth().getValue();
+    }
+
+	C_ABI_SETTER void ABI_PanelListBox_setItemsHeight(PanelListBox::Ptr* self, float height) {
+        (**self).setItemsHeight(height);
+    }
+
+	C_ABI_GETTER float ABI_PanelListBox_getItemsHeight(PanelListBox::Ptr* self) {
+        return (**self).getItemsHeight().getValue();
+    }
+
+	C_ABI_SETTER bool ABI_PanelListBox_setSelectedItem(PanelListBox::Ptr* self, Panel::Ptr* panel) {
+        return (**self).setSelectedItem(*panel);
+    }
+
+	C_ABI_SETTER bool ABI_PanelListBox_setSelectedItemById(PanelListBox::Ptr* self, char* id) {
+        return (**self).setSelectedItemById(id);
+    }
+
+	C_ABI_SETTER bool ABI_PanelListBox_setSelectedItemByIndex(PanelListBox::Ptr* self, int index) {
+        return (**self).setSelectedItemByIndex(index);
+    }
+
+	C_ABI_METHOD void ABI_PanelListBox_deselectItem(PanelListBox::Ptr* self) {
+        (**self).deselectItem();
+    }
+
+	C_ABI_METHOD bool ABI_PanelListBox_removeItem(PanelListBox::Ptr* self, Panel::Ptr* panel) {
+        return (**self).removeItem(*panel);
+    }
+
+	C_ABI_METHOD bool ABI_PanelListBox_removeItemById(PanelListBox::Ptr* self, char* id) {
+        return (**self).removeItemById(id);
+    }
+
+	C_ABI_METHOD bool ABI_PanelListBox_removeItemByIndex(PanelListBox::Ptr* self, int index) {
+        return (**self).removeItemByIndex(index);
+    }
+
+	C_ABI_METHOD void ABI_PanelLIstBox_removeAllItems(PanelListBox::Ptr* self) {
+        (**self).removeAllItems();
+    }
+
+	C_ABI_GETTER Panel::Ptr* ABI_PanelListBox_getItemById(PanelListBox::Ptr* self, char* id) {
+        auto panel = (**self).getItemById(id);
+        auto ptr = new Panel::Ptr(nullptr);
+        ptr->swap(panel);
+        return ptr;
+    }
+
+	C_ABI_GETTER Panel::Ptr* ABI_PanelListBox_getItemByIndex(PanelListBox::Ptr* self, int index) {
+        auto panel = (**self).getItemByIndex(index);
+        auto ptr = new Panel::Ptr(nullptr);
+        ptr->swap(panel);
+        return ptr;
+    }
+
+	C_ABI_GETTER int ABI_PanelListBox_getIndexById(PanelListBox::Ptr* self, char* id) {
+        return (**self).getIndexById(id);
+    }
+
+	C_ABI_GETTER int ABI_PanelListBox_getIndexByItem(PanelListBox::Ptr* self, Panel::Ptr* panel) {
+        return (**self).getIndexByItem(*panel);
+    }
+
+	C_ABI_GETTER const char32_t* ABI_PanelListBox_getIdByIndex(PanelListBox::Ptr* self, int index) {
+        auto str = new String((**self).getIdByIndex(index));
+        autoclean.push_back(str);
+        return str->data();
+    }
+
+	C_ABI_GETTER Panel::Ptr* ABI_PanelListBox_getSelectedItem(PanelListBox::Ptr* self) {
+        auto panel = (**self).getSelectedItem();
+        auto ptr = new Panel::Ptr(nullptr);
+        ptr->swap(panel);
+        return ptr;
+    }
+
+	C_ABI_GETTER const char32_t* ABI_PanelListBox_getSelectedItemId(PanelListBox::Ptr* self) {
+        auto str = new String((**self).getSelectedItemId());
+        autoclean.push_back(str);
+        return str->data();
+    }
+
+	C_ABI_GETTER int ABI_PanelListBox_getSelectedItemIndex(PanelListBox::Ptr* self) {
+        return (**self).getSelectedItemIndex();
+    }
+
+	C_ABI_GETTER int ABI_PanelListBox_getItemCount(PanelListBox::Ptr* self) {
+        return static_cast<int>((**self).getItemCount());
+    }
+
+	C_ABI_RAW void ABI_PanelListBox_getItems(PanelListBox::Ptr* self, void(*f)(Panel::Ptr*)) {
+        for(auto it : (**self).getItems()) {
+            auto ptr = new Panel::Ptr(nullptr);
+            ptr->swap(it);
+            f(ptr);
+        }
+    }
+
+	C_ABI_RAW void ABI_PanelListBox_getItemIds(PanelListBox::Ptr* self, void(*f)(const char32_t*)) {
+        for(auto it : (**self).getItemIds()) {
+            f(it.data());
+        }
+    }
+
+	C_ABI_SETTER void ABI_PanelListBox_setMaximumItems(PanelListBox::Ptr* self, int maximumItems) {
+        (**self).setMaximumItems(maximumItems);
+    }
+
+	C_ABI_GETTER int ABI_PanelListBox_getMaximumItems(PanelListBox::Ptr* self) {
+        return static_cast<int>((**self).getMaximumItems());
+    }
+
+	C_ABI_TESTER bool ABI_PanelListBox_contains(PanelListBox::Ptr* self, Panel::Ptr* panel) {
+        return (**self).contains(*panel);
+    }
+
+	C_ABI_TESTER bool ABI_PanelListBox_containsId(PanelListBox::Ptr* self, char* id) {
+        return (**self).containsId(id);
+    }
+
+	C_ABI_SIGNAL SignalPanelListBoxItem* ABI_PanelListBox_onItemSelect(PanelListBox::Ptr* self) {
+        return &(**self).onItemSelect;
     }
 }
