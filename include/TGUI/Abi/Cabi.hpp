@@ -35,8 +35,12 @@ namespace tgui
 	C_ABI_RAW int ABI_SignalBool_connect(SignalBool* self, void(*f)(int));
 	// SignalInt
 	C_ABI_RAW int ABI_SignalInt_connect(SignalInt* self, void(*f)(int));
+	// SignalUInt
+	C_ABI_RAW int ABI_SignalUInt_connect(SignalUInt* self, void(*f)(unsigned int));
 	// SignalFloat
 	C_ABI_RAW int ABI_SignalFloat_connect(SignalFloat* self, void(*f)(float));
+	// SignalRange
+	C_ABI_RAW int ABI_SignalRange_connect(SignalRange* self, void(*f)(float, float));
 	// SignalPointer
 	C_ABI_RAW int ABI_SignalPointer_connect(SignalTyped<void*>* self, void(*f)(void*));
 	// SignalColor
@@ -575,6 +579,111 @@ namespace tgui
 	C_ABI_TESTER bool ABI_PanelListBox_contains(PanelListBox::Ptr* self, Panel::Ptr* panel);
 	C_ABI_TESTER bool ABI_PanelListBox_containsId(PanelListBox::Ptr* self, char* id);
 	C_ABI_SIGNAL SignalPanelListBoxItem* ABI_PanelListBox_onItemSelect(PanelListBox::Ptr* self);
-	
+	// ProgressBar
+	C_ABI_MAKE ProgressBar::Ptr* ABI_ProgressBar_new();
+	C_ABI_SETTER void ABI_ProgressBar_setMinimum(ProgressBar::Ptr* self, int minimum);
+	C_ABI_GETTER int ABI_ProgressBar_getMinimum(ProgressBar::Ptr* self);
+	C_ABI_SETTER void ABI_ProgressBar_setMaximum(ProgressBar::Ptr* self, int maximum);
+	C_ABI_GETTER int ABI_ProgressBar_getMaximum(ProgressBar::Ptr* self);
+	C_ABI_SETTER void ABI_ProgressBar_setValue(ProgressBar::Ptr* self, int value);
+	C_ABI_GETTER int ABI_ProgressBar_getValue(ProgressBar::Ptr* self);
+	C_ABI_METHOD int ABI_ProgressBar_incrementValue(ProgressBar::Ptr* self);
+	C_ABI_SETTER void ABI_ProgressBar_setText(ProgressBar::Ptr* self, char* text);
+	C_ABI_GETTER const char32_t* ABI_ProgressBar_getText(ProgressBar::Ptr* self);
+	C_ABI_RAW void ABI_ProgressBar_setFillDirection(ProgressBar::Ptr* self, int direction);
+	C_ABI_RAW int ABI_ProgressBar_getFillDirection(ProgressBar::Ptr* self);
+	C_ABI_SIGNAL SignalUInt* ABI_ProgressBar_onValueChange(ProgressBar::Ptr* self);
+	C_ABI_SIGNAL Signal* ABI_ProgressBar_onFull(ProgressBar::Ptr* self);
+	// RangeSlider
+	C_ABI_MAKE RangeSlider::Ptr* ABI_RangeSlider_new();
+	C_ABI_SETTER void ABI_RangeSlider_setMinimum(RangeSlider::Ptr* self, float minimum);
+	C_ABI_GETTER float ABI_RangeSlider_getMinimum(RangeSlider::Ptr* self);
+	C_ABI_SETTER void ABI_RangeSlider_setMaximum(RangeSlider::Ptr* self, float maximum);
+	C_ABI_GETTER float ABI_RangeSlider_getMaximum(RangeSlider::Ptr* self);
+	C_ABI_SETTER void ABI_RangeSlider_setSelectionStart(RangeSlider::Ptr* self, float value);
+	C_ABI_GETTER float ABI_RangeSlider_getSelectionStart(RangeSlider::Ptr* self);
+	C_ABI_SETTER void ABI_RangeSlider_setSelectionEnd(RangeSlider::Ptr* self, float value);
+	C_ABI_GETTER float ABI_RangeSlider_getSelectionEnd(RangeSlider::Ptr* self);
+	C_ABI_SETTER void ABI_RangeSlider_setStep(RangeSlider::Ptr* self, float step);
+	C_ABI_GETTER float ABI_RangeSlider_getStep(RangeSlider::Ptr* self);
+	C_ABI_SIGNAL SignalRange* ABI_RangeSlider_onRangeChange(RangeSlider::Ptr* self);
+	// RichTextLabel
+	C_ABI_MAKE RichTextLabel::Ptr* ABI_RichTextLabel_new();
+	// SeparatorLine
+	C_ABI_MAKE SeparatorLine::Ptr* ABI_SeparatorLine_new();
+	// Slider
+	C_ABI_MAKE Slider::Ptr* ABI_Slider_new();
+	C_ABI_SETTER void ABI_Slider_setMinimum(Slider::Ptr* self, float minimum);
+	C_ABI_GETTER float ABI_Slider_getMinimum(Slider::Ptr* self);
+	C_ABI_SETTER void ABI_Slider_setMaximum(Slider::Ptr* self, float maximum);
+	C_ABI_GETTER float ABI_Slider_getMaximum(Slider::Ptr* self);
+	C_ABI_SETTER void ABI_Slider_setValue(Slider::Ptr* self, float value);
+	C_ABI_GETTER float ABI_Slider_getValue(Slider::Ptr* self);
+	C_ABI_SETTER void ABI_Slider_setStep(Slider::Ptr* self, float step);
+	C_ABI_GETTER float ABI_Slider_getStep(Slider::Ptr* self);
+	C_ABI_SETTER void ABI_Slider_setVerticalScroll(Slider::Ptr* self, int vertical);
+	C_ABI_TESTER bool ABI_Slider_getVerticalScroll(Slider::Ptr* self);
+	C_ABI_SETTER void ABI_Slider_setInvertedDirection(Slider::Ptr* self, int invertedDirection);
+	C_ABI_TESTER bool ABI_Slider_getInvertedDirection(Slider::Ptr* self);
+	C_ABI_SETTER void ABI_Slider_setChangeValueOnScroll(Slider::Ptr* self, int changeValueOnScroll);
+	C_ABI_TESTER bool ABI_Slider_getChangeValueOnScroll(Slider::Ptr* self);
+	C_ABI_SIGNAL SignalFloat* ABI_Slider_onValueChange(Slider::Ptr* self);
+	// SpinButton
+	C_ABI_MAKE SpinButton::Ptr* ABI_SpinButton_new();
+	C_ABI_SETTER void ABI_SpinButton_setMinimum(SpinButton::Ptr* self, float minimum);
+	C_ABI_GETTER float ABI_SpinButton_getMinimum(SpinButton::Ptr* self);
+	C_ABI_SETTER void ABI_SpinButton_setMaximum(SpinButton::Ptr* self, float maximum);
+	C_ABI_GETTER float ABI_SpinButton_getMaximum(SpinButton::Ptr* self);
+	C_ABI_SETTER void ABI_SpinButton_setValue(SpinButton::Ptr* self, float value);
+	C_ABI_GETTER float ABI_SpinButton_getValue(SpinButton::Ptr* self);
+	C_ABI_SETTER void ABI_SpinButton_setStep(SpinButton::Ptr* self, float step);
+	C_ABI_GETTER float ABI_SpinButton_getStep(SpinButton::Ptr* self);
+	C_ABI_SETTER void ABI_SpinButton_setVerticalScroll(SpinButton::Ptr* self, int vertical);
+	C_ABI_TESTER bool ABI_SpinButton_getVerticalScroll(SpinButton::Ptr* self);
+	C_ABI_SIGNAL SignalFloat* ABI_SpinButton_onValueChange(SpinButton::Ptr* self);
+	// SubwidgetContainer
+	C_ABI_GETTER Container::Ptr* ABI_SubwidgetContainer_getContainer(SubwidgetContainer::Ptr* self);
+	// SpinControl
+	C_ABI_MAKE SpinControl::Ptr* ABI_SpinControl_new();
+	C_ABI_SETTER void ABI_SpinControl_setMinimum(SpinControl::Ptr* self, float minimum);
+	C_ABI_GETTER float ABI_SpinControl_getMinimum(SpinControl::Ptr* self);
+	C_ABI_SETTER void ABI_SpinControl_setMaximum(SpinControl::Ptr* self, float maximum);
+	C_ABI_GETTER float ABI_SpinControl_getMaximum(SpinControl::Ptr* self);
+	C_ABI_SETTER void ABI_SpinControl_setValue(SpinControl::Ptr* self, float value);
+	C_ABI_GETTER float ABI_SpinControl_getValue(SpinControl::Ptr* self);
+	C_ABI_SETTER void ABI_SpinControl_setStep(SpinControl::Ptr* self, float step);
+	C_ABI_GETTER float ABI_SpinControl_getStep(SpinControl::Ptr* self);
+	C_ABI_SETTER void ABI_SpinControl_setDecimalPlaces(SpinControl::Ptr* self, int decimalPlaces);
+	C_ABI_GETTER int ABI_SpinControl_getDecimalPlaces(SpinControl::Ptr* self);
+	C_ABI_SETTER void ABI_SpinControl_setUseWideArrows(SpinControl::Ptr* self, int useWideArrows);
+	C_ABI_GETTER bool ABI_SpinControl_getUseWideArrows(SpinControl::Ptr* self);
+	C_ABI_SIGNAL SignalFloat* ABI_SpinControl_onValueChange(SpinControl::Ptr* self);
+	// Tabs
+	C_ABI_MAKE Tabs::Ptr* ABI_Tabs_new();
+	C_ABI_SETTER void ABI_Tabs_setAutoSize(Tabs::Ptr* self, int autoSize);
+	C_ABI_TESTER bool ABI_Tabs_getAutoSize(Tabs::Ptr* self);
+	C_ABI_METHOD int ABI_Tabs_add(Tabs::Ptr* self, char* text, int select);
+	C_ABI_METHOD void ABI_Tabs_insert(Tabs::Ptr* self, int index, char* text, int select);
+	C_ABI_GETTER const char32_t* ABI_Tabs_getText(Tabs::Ptr* self, int index);
+	C_ABI_METHOD bool ABI_Tabs_changeText(Tabs::Ptr* self, int index, char* text);
+	C_ABI_METHOD bool ABI_Tabs_select(Tabs::Ptr* self, char* text);
+	C_ABI_METHOD bool ABI_Tabs_selectByIndex(Tabs::Ptr* self, int index);
+	C_ABI_METHOD void ABI_Tabs_deselect(Tabs::Ptr* self);
+	C_ABI_METHOD bool ABI_Tabs_remove(Tabs::Ptr* self, char* text);
+	C_ABI_METHOD bool ABI_Tabs_removeByIndex(Tabs::Ptr* self, int index);
+	C_ABI_METHOD void ABI_Tabs_removeAll(Tabs::Ptr* self);
+	C_ABI_GETTER const char32_t* ABI_Tabs_getSelected(Tabs::Ptr* self);
+	C_ABI_GETTER int ABI_Tabs_getSelectedIndex(Tabs::Ptr* self);
+	C_ABI_SETTER void ABI_Tabs_setTabVisible(Tabs::Ptr* self, int index, int visible);
+	C_ABI_GETTER bool ABI_Tabs_getTabVisible(Tabs::Ptr* self, int index);
+	C_ABI_SETTER void ABI_Tabs_setTabEnabled(Tabs::Ptr* self, int index, int enabled);
+	C_ABI_GETTER bool ABI_Tabs_getTabEnabled(Tabs::Ptr* self, int index);
+	C_ABI_SETTER void ABI_Tabs_setTabHeight(Tabs::Ptr* self, float height);
+	C_ABI_SETTER void ABI_Tabs_setMaximumTabWidth(Tabs::Ptr* self, float maximumWidth);
+	C_ABI_GETTER float ABI_Tabs_getMaximumTabWidth(Tabs::Ptr* self);
+	C_ABI_SETTER void ABI_Tabs_setMinimumTabWidth(Tabs::Ptr* self, float minimumWidth);
+	C_ABI_GETTER float ABI_Tabs_getMinimumTabWidth(Tabs::Ptr* self);
+	C_ABI_GETTER int ABI_Tabs_getTabsCount(Tabs::Ptr* self);
+	C_ABI_SIGNAL SignalString* ABI_Tabs_onTabSelect(Tabs::Ptr* self);
 }
 #endif //CABI_HPP
