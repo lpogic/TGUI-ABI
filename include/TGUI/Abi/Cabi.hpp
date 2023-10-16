@@ -64,6 +64,11 @@ namespace tgui
 	C_ABI_MAKE sf::RenderWindow* ABI_Window_new();
 	C_ABI_METHOD void ABI_Window_close(sf::WindowBase* self);
 	C_ABI_TESTER bool ABI_Window_isOpen(sf::WindowBase* self);
+	// BackendGui
+	C_ABI_SETTER void ABI_BackendGui_setTextSize(BackendGui* self, int textSize);
+	C_ABI_GETTER int ABI_BackendGui_getTextSize(BackendGui* self);
+	C_ABI_RAW void ABI_BackendGui_getView(BackendGui* self, void(*f)(float, float, float, float));
+	C_ABI_SIGNAL Signal* ABI_BackendGui_onViewChange(BackendGui* self);
 	// Gui
 	C_ABI_MAKE Gui* ABI_Gui_new(sf::RenderWindow* window);
 	C_ABI_TESTER bool ABI_Gui_isActive(Gui* self);
@@ -124,10 +129,10 @@ namespace tgui
 	C_ABI_SIGNAL SignalVector2f* ABI_ClickableWidget_onRightClick(ClickableWidget::Ptr* self);
 	// ButtonBase
 	C_ABI_RAW void ABI_ButtonBase_setTextPosition(ButtonBase::Ptr* self, const char* position, const char* origin);
+	C_ABI_SETTER void ABI_ButtonBase_setText(ButtonBase::Ptr* self, const char* text);
+	C_ABI_GETTER const char32_t* ABI_ButtonBase_getText(ButtonBase::Ptr* self);
 	// Button
 	C_ABI_MAKE Button::Ptr* ABI_Button_new();
-	C_ABI_SETTER void ABI_Button_setText(Button::Ptr* self, const char* text);
-	C_ABI_GETTER const char32_t* ABI_Button_getText(Button::Ptr* self);
 	C_ABI_SIGNAL Signal* ABI_Button_onPress(Button::Ptr* self);
 	// BitmapButton
 	C_ABI_MAKE BitmapButton::Ptr* ABI_BitmapButton_new();
@@ -745,5 +750,57 @@ namespace tgui
 	C_ABI_SIGNAL SignalString* ABI_TextArea_onTextChange(TextArea::Ptr* self);
 	C_ABI_SIGNAL Signal* ABI_TextArea_onSelectionChange(TextArea::Ptr* self);
 	C_ABI_SIGNAL Signal* ABI_TextArea_onCaretPositionChange(TextArea::Ptr* self);
+	// ToggleButton
+	C_ABI_MAKE ToggleButton::Ptr* ABI_ToggleButton_new();
+	C_ABI_SETTER void ABI_ToggleButton_setDown(ToggleButton::Ptr* self, int down);
+	C_ABI_TESTER bool ABI_ToggleButton_isDown(ToggleButton::Ptr* self);
+	C_ABI_SIGNAL SignalBool* ABI_ToggleButton_onToggle(ToggleButton::Ptr* self);
+	// ToolTip
+	C_ABI_STATIC void ABI_ToolTip_setInitialDelay(int delay);
+	C_ABI_STATIC int ABI_ToolTip_getInitialDelay();
+	C_ABI_STATIC void ABI_ToolTip_setDistanceToMouse(float distanceX, float distanceY);
+	C_ABI_STATIC Vector2f* ABI_ToolTip_getDistanceToMouse();
+	C_ABI_STATIC void ABI_ToolTip_setShowOnDisabledWidget(int show);
+	C_ABI_STATIC bool ABI_ToolTip_getShowOnDisabledWidget();
+	// TreeView
+	C_ABI_MAKE TreeView::Ptr* ABI_TreeView_new();
+	C_ABI_RAW bool ABI_TreeView_addItem(TreeView::Ptr* self, int hierarchySize, char*(*f)(void), int createParents);
+	C_ABI_RAW void ABI_TreeView_expand(TreeView::Ptr* self, int hierarchySize, char*(*f)(void));
+	C_ABI_METHOD void ABI_TreeView_expandAll(TreeView::Ptr* self);
+	C_ABI_RAW void ABI_TreeView_collapse(TreeView::Ptr* self, int hierarchySize, char*(*f)(void));
+	C_ABI_METHOD void ABI_TreeView_collapseAll(TreeView::Ptr* self);
+	C_ABI_RAW bool ABI_TreeView_selectItem(TreeView::Ptr* self, int hierarchySize, char*(*f)(void));
+	C_ABI_METHOD void ABI_TreeView_deselectItem(TreeView::Ptr* self);
+	C_ABI_RAW bool ABI_TreeView_removeItem(TreeView::Ptr* self, int hierarchySize, char*(*f)(void), int removeParentsWhenEmpty);
+	C_ABI_METHOD void ABI_TreeView_removeAllItems(TreeView::Ptr* self);
+	C_ABI_RAW void ABI_TreeView_getSelectedItem(TreeView::Ptr* self, void(*f)(const char32_t*));
+	C_ABI_RAW void ABI_TreeView_getNodes(TreeView::Ptr* self, void(*m)(const char32_t*, int), void(*up)());
+	C_ABI_SETTER void ABI_TreeView_setItemHeight(TreeView::Ptr* self, int itemHeight);
+	C_ABI_GETTER int ABI_TreeView_getItemHeight(TreeView::Ptr* self);
+	C_ABI_SETTER void ABI_TreeView_setVerticalScrollbarValue(TreeView::Ptr* self, int value);
+	C_ABI_GETTER int ABI_TreeView_getVerticalScrollbarValue(TreeView::Ptr* self);
+	C_ABI_SETTER void ABI_TreeView_setHorizontalScrollbarValue(TreeView::Ptr* self, int value);
+	C_ABI_GETTER int ABI_TreeView_getHorizontalScrollbarValue(TreeView::Ptr* self);
+	C_ABI_SIGNAL SignalItemHierarchy* ABI_TreeView_onItemSelect(TreeView::Ptr* self);
+	C_ABI_SIGNAL SignalItemHierarchy* ABI_TreeView_onDoubleClick(TreeView::Ptr* self);
+	C_ABI_SIGNAL SignalItemHierarchy* ABI_TreeView_onExpand(TreeView::Ptr* self);
+	C_ABI_SIGNAL SignalItemHierarchy* ABI_TreeView_onCollapse(TreeView::Ptr* self);
+	C_ABI_SIGNAL SignalItemHierarchy* ABI_TreeView_onRightClick(TreeView::Ptr* self);
+	// Scrollbar
+	C_ABI_MAKE Scrollbar::Ptr* ABI_Scrollbar_new();
+	C_ABI_SETTER void ABI_Scrollbar_setMaximum(Scrollbar::Ptr* self, int maximum);
+	C_ABI_GETTER int ABI_Scrollbar_getMaximum(Scrollbar::Ptr* self);
+	C_ABI_SETTER void ABI_Scrollbar_setValue(Scrollbar::Ptr* self, int value);
+	C_ABI_GETTER int ABI_Scrollbar_getValue(Scrollbar::Ptr* self);
+	C_ABI_SETTER void ABI_Scrollbar_setViewportSize(Scrollbar::Ptr* self, int viewport);
+	C_ABI_GETTER int ABI_Scrollbar_getViewportSize(Scrollbar::Ptr* self);
+	C_ABI_SETTER void ABI_Scrollbar_setScrollAmount(Scrollbar::Ptr* self, int scrollAmount);
+	C_ABI_GETTER int ABI_Scrollbar_getScrollAmount(Scrollbar::Ptr* self);
+	C_ABI_SETTER void ABI_Scrollbar_setAutoHide(Scrollbar::Ptr* self, int autoHide);
+	C_ABI_TESTER bool ABI_Scrollbar_getAutoHide(Scrollbar::Ptr* self);
+	C_ABI_SETTER void ABI_Scrollbar_setVerticalScroll(Scrollbar::Ptr* self, int vertical);
+	C_ABI_TESTER bool ABI_Scrollbar_getVerticalScroll(Scrollbar::Ptr* self);
+	C_ABI_GETTER float ABI_Scrollbar_getDefaultWidth(Scrollbar::Ptr* self);
+	C_ABI_SIGNAL SignalUInt* ABI_Scrollbar_onValueChange(Scrollbar::Ptr* self);
 }
 #endif //CABI_HPP

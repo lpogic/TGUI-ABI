@@ -186,6 +186,27 @@ namespace tgui {
         return self->isOpen();
     }
 
+    // BackendGui
+    
+	C_ABI_SETTER void ABI_BackendGui_setTextSize(BackendGui* self, int textSize) {
+        self->setTextSize(textSize);
+    }
+
+	C_ABI_GETTER int ABI_BackendGui_getTextSize(BackendGui* self) {
+        return self->getTextSize();
+    }
+
+    C_ABI_RAW void ABI_BackendGui_getView(BackendGui* self, void(*f)(float, float, float, float)) {
+        auto view = self->getView();
+        auto position = view.getPosition();
+        auto size = view.getSize();
+        f(position.x, position.y, size.x, size.y);
+    }
+
+    C_ABI_SIGNAL Signal* ABI_BackendGui_onViewChange(BackendGui* self) {
+        return &self->onViewChange;
+    }
+
     // Gui
 
     C_ABI_MAKE Gui* ABI_Gui_new(sf::RenderWindow* window) {
@@ -447,6 +468,14 @@ namespace tgui {
         (**self).setTextPosition(position, origin);
     }
 
+    C_ABI_SETTER void ABI_ButtonBase_setText(ButtonBase::Ptr* self, const char* text) {
+        (**self).setText(text);
+    }
+
+    C_ABI_GETTER const char32_t* ABI_ButtonBase_getText(ButtonBase::Ptr* self) {
+        return (**self).getText().data();
+    }
+
     // Button
 
     C_ABI_MAKE Button::Ptr* ABI_Button_new() {
@@ -454,14 +483,6 @@ namespace tgui {
         auto ptr = new Button::Ptr(nullptr);
         ptr->swap(self);
         return ptr;
-    }
-
-    C_ABI_SETTER void ABI_Button_setText(Button::Ptr* self, const char* text) {
-        (**self).setText(text);
-    }
-
-    C_ABI_GETTER const char32_t* ABI_Button_getText(Button::Ptr* self) {
-        return (**self).getText().data();
     }
 
     C_ABI_SIGNAL Signal* ABI_Button_onPress(Button::Ptr* self) {
@@ -2229,16 +2250,16 @@ namespace tgui {
         return (**self).getInvertedMenuDirection();
     }
 
-    void yieldGetMenusElement(std::vector<MenuBar::GetMenusElement> elements, void(*m)(const char32_t*, int), void(*up)()) {
+    void MenuBar_yieldGetMenusElement(std::vector<MenuBar::GetMenusElement> elements, void(*m)(const char32_t*, int), void(*up)()) {
         for(auto element : elements) {
             m(element.text.data(), element.enabled);
-            yieldGetMenusElement(element.menuItems, m, up);
+            MenuBar_yieldGetMenusElement(element.menuItems, m, up);
             up();
         }
     }
 
 	C_ABI_RAW void ABI_MenuBar_getMenus(MenuBar::Ptr* self, void(*m)(const char32_t*, int), void(*up)()) {
-        yieldGetMenusElement((**self).getMenus(), m, up);
+        MenuBar_yieldGetMenusElement((**self).getMenus(), m, up);
     }
 
 	C_ABI_METHOD void ABI_MenuBar_closeMenu(MenuBar::Ptr* self) {
@@ -3082,4 +3103,244 @@ namespace tgui {
 	C_ABI_SIGNAL Signal* ABI_TextArea_onCaretPositionChange(TextArea::Ptr* self) {
         return &(**self).onCaretPositionChange;
     }
+
+    // ToggleButton
+
+	C_ABI_MAKE ToggleButton::Ptr* ABI_ToggleButton_new() {
+        auto self = ToggleButton::create();
+        auto ptr = new ToggleButton::Ptr(nullptr);
+        ptr->swap(self);
+        return ptr;
+    }
+
+	C_ABI_SETTER void ABI_ToggleButton_setDown(ToggleButton::Ptr* self, int down) {
+        (**self).setDown(down);
+    }
+
+	C_ABI_TESTER bool ABI_ToggleButton_isDown(ToggleButton::Ptr* self) {
+        return (**self).isDown();
+    }
+
+	C_ABI_SIGNAL SignalBool* ABI_ToggleButton_onToggle(ToggleButton::Ptr* self) {
+        return &(**self).onToggle;
+    }
+
+    // ToolTip
+
+	C_ABI_STATIC void ABI_ToolTip_setInitialDelay(int delay) {
+        ToolTip::setInitialDelay(delay);
+    }
+
+	C_ABI_STATIC int ABI_ToolTip_getInitialDelay() {
+        return sf::Time(ToolTip::getInitialDelay()).asMilliseconds();
+    }
+
+	C_ABI_STATIC void ABI_ToolTip_setDistanceToMouse(float distanceX, float distanceY) {
+        ToolTip::setDistanceToMouse({distanceX, distanceY});
+    }
+
+	C_ABI_STATIC Vector2f* ABI_ToolTip_getDistanceToMouse() {
+        return new Vector2f(ToolTip::getDistanceToMouse());
+    }
+
+	C_ABI_STATIC void ABI_ToolTip_setShowOnDisabledWidget(int show) {
+        ToolTip::setShowOnDisabledWidget(show);
+    }
+
+	C_ABI_STATIC bool ABI_ToolTip_getShowOnDisabledWidget() {
+        return ToolTip::getShowOnDisabledWidget();
+    }
+
+    // TreeView
+
+	C_ABI_MAKE TreeView::Ptr* ABI_TreeView_new() {
+        auto self = TreeView::create();
+        auto ptr = new TreeView::Ptr(nullptr);
+        ptr->swap(self);
+        return ptr;
+    }
+
+	C_ABI_RAW bool ABI_TreeView_addItem(TreeView::Ptr* self, int hierarchySize, char*(*f)(void), int createParents) {
+        std::vector<String> vec;
+        for(int i = 0; i < hierarchySize; ++i) {
+            vec.push_back(f());
+        }
+        return (**self).addItem(vec, createParents);
+    }
+
+	C_ABI_RAW void ABI_TreeView_expand(TreeView::Ptr* self, int hierarchySize, char*(*f)(void)) {
+        std::vector<String> vec;
+        for(int i = 0; i < hierarchySize; ++i) {
+            vec.push_back(f());
+        }
+        (**self).expand(vec);
+    }
+
+	C_ABI_METHOD void ABI_TreeView_expandAll(TreeView::Ptr* self) {
+        (**self).expandAll();
+    }
+
+	C_ABI_RAW void ABI_TreeView_collapse(TreeView::Ptr* self, int hierarchySize, char*(*f)(void)) {
+        std::vector<String> vec;
+        for(int i = 0; i < hierarchySize; ++i) {
+            vec.push_back(f());
+        }
+        (**self).collapse(vec);
+    }
+
+	C_ABI_METHOD void ABI_TreeView_collapseAll(TreeView::Ptr* self) {
+        (**self).collapseAll();
+    }
+
+	C_ABI_RAW bool ABI_TreeView_selectItem(TreeView::Ptr* self, int hierarchySize, char*(*f)(void)) {
+        std::vector<String> vec;
+        for(int i = 0; i < hierarchySize; ++i) {
+            vec.push_back(f());
+        }
+        return (**self).selectItem(vec);
+    }
+
+	C_ABI_METHOD void ABI_TreeView_deselectItem(TreeView::Ptr* self) {
+        (**self).deselectItem();
+    }
+
+	C_ABI_RAW bool ABI_TreeView_removeItem(TreeView::Ptr* self, int hierarchySize, char*(*f)(void), int removeParentsWhenEmpty) {
+        std::vector<String> vec;
+        for(int i = 0; i < hierarchySize; ++i) {
+            vec.push_back(f());
+        }
+        return (**self).removeItem(vec, removeParentsWhenEmpty);
+    }
+
+	C_ABI_METHOD void ABI_TreeView_removeAllItems(TreeView::Ptr* self) {
+        (**self).removeAllItems();
+    }
+
+	C_ABI_RAW void ABI_TreeView_getSelectedItem(TreeView::Ptr* self, void(*f)(const char32_t*)) {
+        for(auto text : (**self).getSelectedItem()) {
+            f(text.data());
+        }
+    }
+
+    void TreeView_yieldNodes(std::vector<TreeView::ConstNode> nodes, void(*m)(const char32_t*, int), void(*up)()) {
+        for(auto node : nodes) {
+            m(node.text.data(), node.expanded);
+            TreeView_yieldNodes(node.nodes, m, up);
+            up();
+        }
+    }
+
+	C_ABI_RAW void ABI_TreeView_getNodes(TreeView::Ptr* self, void(*m)(const char32_t*, int), void(*up)()) {
+        TreeView_yieldNodes((**self).getNodes(), m, up);
+    }
+
+	C_ABI_SETTER void ABI_TreeView_setItemHeight(TreeView::Ptr* self, int itemHeight) {
+        (**self).setItemHeight(itemHeight);
+    }
+
+	C_ABI_GETTER int ABI_TreeView_getItemHeight(TreeView::Ptr* self) {
+        return (**self).getItemHeight();
+    }
+
+	C_ABI_SETTER void ABI_TreeView_setVerticalScrollbarValue(TreeView::Ptr* self, int value) {
+        (**self).setVerticalScrollbarValue(value);
+    }
+
+	C_ABI_GETTER int ABI_TreeView_getVerticalScrollbarValue(TreeView::Ptr* self) {
+        return (**self).getVerticalScrollbarValue();
+    }
+
+	C_ABI_SETTER void ABI_TreeView_setHorizontalScrollbarValue(TreeView::Ptr* self, int value) {
+        (**self).setHorizontalScrollbarValue(value);
+    }
+
+	C_ABI_GETTER int ABI_TreeView_getHorizontalScrollbarValue(TreeView::Ptr* self) {
+        return (**self).getHorizontalScrollbarValue();
+    }
+
+	C_ABI_SIGNAL SignalItemHierarchy* ABI_TreeView_onItemSelect(TreeView::Ptr* self) {
+        return &(**self).onItemSelect;
+    }
+
+	C_ABI_SIGNAL SignalItemHierarchy* ABI_TreeView_onDoubleClick(TreeView::Ptr* self) {
+        return &(**self).onDoubleClick;
+    }
+
+	C_ABI_SIGNAL SignalItemHierarchy* ABI_TreeView_onExpand(TreeView::Ptr* self) {
+        return &(**self).onExpand;
+    }
+
+	C_ABI_SIGNAL SignalItemHierarchy* ABI_TreeView_onCollapse(TreeView::Ptr* self) {
+        return &(**self).onCollapse;
+    }
+
+	C_ABI_SIGNAL SignalItemHierarchy* ABI_TreeView_onRightClick(TreeView::Ptr* self) {
+        return &(**self).onRightClick;
+    }
+
+    // Scrollbar
+
+	C_ABI_MAKE Scrollbar::Ptr* ABI_Scrollbar_new() {
+        auto self = Scrollbar::create();
+        auto ptr = new Scrollbar::Ptr(nullptr);
+        ptr->swap(self);
+        return ptr;
+    }
+
+	C_ABI_SETTER void ABI_Scrollbar_setMaximum(Scrollbar::Ptr* self, int maximum) {
+        (**self).setMaximum(maximum);
+    }
+
+	C_ABI_GETTER int ABI_Scrollbar_getMaximum(Scrollbar::Ptr* self) {
+        return (**self).getMaximum();
+    }
+
+	C_ABI_SETTER void ABI_Scrollbar_setValue(Scrollbar::Ptr* self, int value) {
+        (**self).setValue(value);
+    }
+
+	C_ABI_GETTER int ABI_Scrollbar_getValue(Scrollbar::Ptr* self) {
+        return (**self).getValue();
+    }
+
+	C_ABI_SETTER void ABI_Scrollbar_setViewportSize(Scrollbar::Ptr* self, int viewport) {
+        (**self).setViewportSize(viewport);
+    }
+
+	C_ABI_GETTER int ABI_Scrollbar_getViewportSize(Scrollbar::Ptr* self) {
+        return (**self).getViewportSize();
+    }
+
+	C_ABI_SETTER void ABI_Scrollbar_setScrollAmount(Scrollbar::Ptr* self, int scrollAmount) {
+        (**self).setScrollAmount(scrollAmount);
+    }
+
+	C_ABI_GETTER int ABI_Scrollbar_getScrollAmount(Scrollbar::Ptr* self) {
+        return (**self).getScrollAmount();
+    }
+
+	C_ABI_SETTER void ABI_Scrollbar_setAutoHide(Scrollbar::Ptr* self, int autoHide) {
+        (**self).setAutoHide(autoHide);
+    }
+
+	C_ABI_TESTER bool ABI_Scrollbar_getAutoHide(Scrollbar::Ptr* self) {
+        return (**self).getAutoHide();
+    }
+
+	C_ABI_SETTER void ABI_Scrollbar_setVerticalScroll(Scrollbar::Ptr* self, int vertical) {
+        (**self).setVerticalScroll(vertical);
+    }
+
+	C_ABI_TESTER bool ABI_Scrollbar_getVerticalScroll(Scrollbar::Ptr* self) {
+        return (**self).getVerticalScroll();
+    }
+
+	C_ABI_GETTER float ABI_Scrollbar_getDefaultWidth(Scrollbar::Ptr* self) {
+        return (**self).getDefaultWidth();
+    }
+
+	C_ABI_SIGNAL SignalUInt* ABI_Scrollbar_onValueChange(Scrollbar::Ptr* self) {
+        return &(**self).onValueChange;
+    }
+
 }
