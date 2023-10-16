@@ -148,6 +148,14 @@ namespace tgui {
         }
     }
 
+    // SignalTypedIntBoolPtr
+
+	C_ABI_RAW int ABI_SignalTypedIntBoolPtr_connect(SignalTypedIntBoolPtr* self, void(*f)(int, bool*)) {
+        return self->connect([=](int index, bool* shouldChange) {
+            f(index, shouldChange);
+        });
+    }
+
     // SignalPanelListBoxItem
 
     C_ABI_RAW int ABI_SignalPanelListBoxItem_connect(SignalPanelListBoxItem* self, void(*f)(Panel::Ptr*)) {
@@ -2824,5 +2832,254 @@ namespace tgui {
 
 	C_ABI_SIGNAL SignalString* ABI_Tabs_onTabSelect(Tabs::Ptr* self) {
         return &(**self).onTabSelect;
+    }
+
+    // TabContainer
+
+	C_ABI_MAKE TabContainer::Ptr* ABI_TabContainer_new() {
+        auto self = TabContainer::create();
+        auto ptr = new TabContainer::Ptr(nullptr);
+        ptr->swap(self);
+        return ptr;
+    }
+
+	C_ABI_SETTER void ABI_TabContainer_setTabsHeight(TabContainer::Ptr* self, char* height) {
+        (**self).setTabsHeight(height);
+    }
+
+	C_ABI_METHOD Panel::Ptr* ABI_TabContainer_addTab(TabContainer::Ptr* self, char* name, int select) {
+        auto panel = (**self).addTab(name, select);
+        auto ptr = new Panel::Ptr(nullptr);
+        ptr->swap(panel);
+        return ptr;
+    }
+
+	C_ABI_METHOD Panel::Ptr* ABI_TabContainer_insertTab(TabContainer::Ptr* self, int index, char* name, int select) {
+        auto panel = (**self).insertTab(index, name, select);
+        auto ptr = new Panel::Ptr(nullptr);
+        ptr->swap(panel);
+        return ptr;
+    }
+
+	C_ABI_METHOD bool ABI_TabContainer_removeTab(TabContainer::Ptr* self, char* text) {
+        return (**self).removeTab(text);
+    }
+
+	C_ABI_METHOD bool ABI_TabContainer_removeTabByIndex(TabContainer::Ptr* self, int index) {
+        return (**self).removeTab(index);
+    }
+
+	C_ABI_METHOD void ABI_TabContainer_select(TabContainer::Ptr* self, int index) {
+        (**self).select(index);
+    }
+
+	C_ABI_GETTER int ABI_TabContainer_getPanelCount(TabContainer::Ptr* self) {
+        return static_cast<int>((**self).getPanelCount());
+    }
+
+	C_ABI_GETTER int ABI_TabContainer_getIndex(TabContainer::Ptr* self, Panel::Ptr* ptr) {
+        return (**self).getIndex(*ptr);
+    }
+
+	C_ABI_GETTER Panel::Ptr* ABI_TabContainer_getSelected(TabContainer::Ptr* self) {
+        auto panel = (**self).getSelected();
+        auto ptr = new Panel::Ptr(nullptr);
+        ptr->swap(panel);
+        return ptr;
+    }
+
+	C_ABI_GETTER int ABI_TabContainer_getSelectedIndex(TabContainer::Ptr* self){
+        return (**self).getSelectedIndex();
+    }
+
+	C_ABI_GETTER Panel::Ptr* ABI_TabContainer_getPanel(TabContainer::Ptr* self, int index) {
+        auto panel = (**self).getPanel(index);
+        auto ptr = new Panel::Ptr(nullptr);
+        ptr->swap(panel);
+        return ptr;
+    }
+
+	C_ABI_GETTER Tabs::Ptr* ABI_TabContainer_getTabs(TabContainer::Ptr* self) {
+        auto tabs = (**self).getTabs();
+        auto ptr = new Tabs::Ptr(nullptr);
+        ptr->swap(tabs);
+        return ptr;
+    }
+
+	C_ABI_GETTER const char32_t* ABI_TabContainer_getTabText(TabContainer::Ptr* self, int index) {
+        auto str = new String((**self).getTabText(index));
+        autoclean.push_back(str);
+        return str->data();
+    }
+
+	C_ABI_METHOD bool ABI_TabContainer_changeTabText(TabContainer::Ptr* self, int index, char* text) {
+        return (**self).changeTabText(index, text);
+    }
+
+	C_ABI_SETTER void ABI_TabContainer_setTabAlignment(TabContainer::Ptr* self, int align) {
+        (**self).setTabAlignment(static_cast<TabContainer::TabAlign>(align));
+    }
+
+	C_ABI_GETTER int ABI_TabContainer_getTabAlignment(TabContainer::Ptr* self) {
+        return static_cast<TabContainer::TabAlign>((**self).getTabAlignment());
+    }
+
+	C_ABI_SETTER void ABI_TabContainer_setTabFixedSize(TabContainer::Ptr* self, float fixedSize) {
+        (**self).setTabFixedSize(fixedSize);
+    }
+
+	C_ABI_GETTER float ABI_TabContainer_getTabFixedSize(TabContainer::Ptr* self) {
+        return (**self).getTabFixedSize();
+    }
+
+	C_ABI_SIGNAL SignalInt* ABI_TabContainer_onSelectionChange(TabContainer::Ptr* self) {
+        return &(**self).onSelectionChange;
+    }
+
+	C_ABI_SIGNAL SignalTypedIntBoolPtr* ABI_TabContainer_onSelectionChanging(TabContainer::Ptr* self) {
+        return &(**self).onSelectionChanging;
+    }
+
+    // TextArea
+
+	C_ABI_MAKE TextArea::Ptr* ABI_TextArea_new() {
+        auto self = TextArea::create();
+        auto ptr = new TextArea::Ptr(nullptr);
+        ptr->swap(self);
+        return ptr;
+    }
+
+	C_ABI_SETTER void ABI_TextArea_setText(TextArea::Ptr* self, char* text) {
+        (**self).setText(text);
+    }
+
+	C_ABI_METHOD void ABI_TextArea_addText(TextArea::Ptr* self, char* text) {
+        (**self).addText(text);
+    }
+
+	C_ABI_GETTER const char32_t* ABI_TextArea_getText(TextArea::Ptr* self) {
+        auto str = new String((**self).getText());
+        autoclean.push_back(str);
+        return str->data();
+    }
+
+	C_ABI_SETTER void ABI_TextArea_setDefaultText(TextArea::Ptr* self, char* text) {
+        (**self).setDefaultText(text);
+    }
+
+	C_ABI_GETTER const char32_t* ABI_TextArea_getDefaultText(TextArea::Ptr* self) {
+        return (**self).getDefaultText().data();
+    }
+    
+	C_ABI_SETTER void ABI_TextArea_setSelectedText(TextArea::Ptr* self, int selectionStartIndex, int selectionEndIndex) {
+        (**self).setSelectedText(selectionStartIndex, selectionEndIndex);
+    }
+
+	C_ABI_GETTER const char32_t* ABI_TextArea_getSelectedText(TextArea::Ptr* self) {
+        auto str = new String((**self).getSelectedText());
+        autoclean.push_back(str);
+        return str->data();
+    }
+
+	C_ABI_GETTER int ABI_TextArea_getSelectionStart(TextArea::Ptr* self) {
+        return static_cast<int>((**self).getSelectionStart());
+    }
+
+	C_ABI_GETTER int ABI_TextArea_getSelectionEnd(TextArea::Ptr* self) {
+        return static_cast<int>((**self).getSelectionEnd());
+    }
+
+	C_ABI_SETTER void ABI_TextArea_setMaximumCharacters(TextArea::Ptr* self, int maxChars) {
+        (**self).setMaximumCharacters(maxChars);
+    }
+
+	C_ABI_GETTER int ABI_TextArea_getMaximumCharacters(TextArea::Ptr* self) {
+        return static_cast<int>((**self).getMaximumCharacters());
+    }
+
+	C_ABI_SETTER void ABI_TextArea_setTabString(TextArea::Ptr* self, char* tabText) {
+        (**self).setTabString(tabText);
+    }
+
+	C_ABI_GETTER const char32_t* ABI_TextArea_getTabString(TextArea::Ptr* self) {
+        auto str = new String((**self).getTabString());
+        autoclean.push_back(str);
+        return str->data();
+    }
+    
+	C_ABI_SETTER void ABI_TextArea_setCaretPosition(TextArea::Ptr* self, int charactersBeforeCaret) {
+        (**self).setCaretPosition(charactersBeforeCaret);
+    }
+
+	C_ABI_GETTER int ABI_TextArea_getCaretPosition(TextArea::Ptr* self) {
+        return static_cast<int>((**self).getCaretPosition());
+    }
+
+	C_ABI_GETTER int ABI_TextArea_getCaretLine(TextArea::Ptr* self) {
+        return static_cast<int>((**self).getCaretLine());
+    }
+
+	C_ABI_GETTER int ABI_TextArea_getCaretColumn(TextArea::Ptr* self) {
+        return static_cast<int>((**self).getCaretColumn());
+    }
+
+	C_ABI_SETTER void ABI_TextArea_setReadOnly(TextArea::Ptr* self, int readOnly) {
+        (**self).setReadOnly(readOnly);
+    }
+
+	C_ABI_TESTER bool ABI_TextArea_isReadOnly(TextArea::Ptr* self) {
+        return (**self).isReadOnly();
+    }
+
+	C_ABI_GETTER int ABI_TextArea_getLinesCount(TextArea::Ptr* self) {
+        return static_cast<int>((**self).getLinesCount());
+    }
+
+	C_ABI_SETTER void ABI_TextArea_enableMonospacedFontOptimization(TextArea::Ptr* self, int enable) {
+        (**self).enableMonospacedFontOptimization(enable);
+    }
+
+    C_ABI_SETTER void ABI_TextArea_setVerticalScrollbarPolicy(TextArea::Ptr* self, int policy) {
+        (**self).setVerticalScrollbarPolicy(static_cast<Scrollbar::Policy>(policy));
+    }
+
+	C_ABI_GETTER int ABI_TextArea_getVerticalScrollbarPolicy(TextArea::Ptr* self) {
+        return static_cast<int>((**self).getVerticalScrollbarPolicy());
+    }
+
+	C_ABI_SETTER void ABI_TextArea_setHorizontalScrollbarPolicy(TextArea::Ptr* self, int policy) {
+        (**self).setHorizontalScrollbarPolicy(static_cast<Scrollbar::Policy>(policy));
+    }
+
+	C_ABI_GETTER int ABI_TextArea_getHorizontalScrollbarPolicy(TextArea::Ptr* self) {
+        return static_cast<int>((**self).getHorizontalScrollbarPolicy());
+    }
+
+	C_ABI_SETTER void ABI_TextArea_setVerticalScrollbarValue(TextArea::Ptr* self, int value) {
+        (**self).setVerticalScrollbarValue(value);
+    }
+
+	C_ABI_GETTER int ABI_TextArea_getVerticalScrollbarValue(TextArea::Ptr* self) {
+        return (**self).getVerticalScrollbarValue();
+    }
+
+    C_ABI_SETTER void ABI_TextArea_setHorizontalScrollbarValue(TextArea::Ptr* self, int value) {
+        (**self).setHorizontalScrollbarValue(value);
+    }
+
+	C_ABI_GETTER int ABI_TextArea_getHorizontalScrollbarValue(TextArea::Ptr* self) {
+        return (**self).getHorizontalScrollbarValue();
+    }
+
+	C_ABI_SIGNAL SignalString* ABI_TextArea_onTextChange(TextArea::Ptr* self) {
+        return &(**self).onTextChange;
+    }
+
+	C_ABI_SIGNAL Signal* ABI_TextArea_onSelectionChange(TextArea::Ptr* self) {
+        return &(**self).onSelectionChange;
+    }
+
+	C_ABI_SIGNAL Signal* ABI_TextArea_onCaretPositionChange(TextArea::Ptr* self) {
+        return &(**self).onCaretPositionChange;
     }
 }

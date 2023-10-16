@@ -17,6 +17,8 @@
 
 namespace tgui
 {
+	typedef SignalTyped2<int, bool*> SignalTypedIntBoolPtr;
+
 	// Util
 	C_ABI_STATIC void ABI_Util_free(void* pointer);
 	// Color
@@ -56,6 +58,8 @@ namespace tgui
 	// SignalItemHierarchy
 	C_ABI_RAW int ABI_SignalItemHierarchy_connect(SignalItemHierarchy* self, void(*f)(void*));
 	C_ABI_STATIC void ABI_SignalItemHierarchy_fetchPath(std::vector< String >* load, void(*f)(const char32_t*));
+	// SignalTypedIntBoolPtr
+	C_ABI_RAW int ABI_SignalTypedIntBoolPtr_connect(SignalTypedIntBoolPtr* self, void(*f)(int, bool*));
 	// Window
 	C_ABI_MAKE sf::RenderWindow* ABI_Window_new();
 	C_ABI_METHOD void ABI_Window_close(sf::WindowBase* self);
@@ -685,5 +689,61 @@ namespace tgui
 	C_ABI_GETTER float ABI_Tabs_getMinimumTabWidth(Tabs::Ptr* self);
 	C_ABI_GETTER int ABI_Tabs_getTabsCount(Tabs::Ptr* self);
 	C_ABI_SIGNAL SignalString* ABI_Tabs_onTabSelect(Tabs::Ptr* self);
+	// TabContainer
+	C_ABI_MAKE TabContainer::Ptr* ABI_TabContainer_new();
+	C_ABI_SETTER void ABI_TabContainer_setTabsHeight(TabContainer::Ptr* self, char* height);
+	C_ABI_METHOD Panel::Ptr* ABI_TabContainer_addTab(TabContainer::Ptr* self, char* name, int select);
+	C_ABI_METHOD Panel::Ptr* ABI_TabContainer_insertTab(TabContainer::Ptr* self, int index, char* name, int select);
+	C_ABI_METHOD bool ABI_TabContainer_removeTab(TabContainer::Ptr* self, char* text);
+	C_ABI_METHOD bool ABI_TabContainer_removeTabByIndex(TabContainer::Ptr* self, int index);
+	C_ABI_METHOD void ABI_TabContainer_select(TabContainer::Ptr* self, int index);
+	C_ABI_GETTER int ABI_TabContainer_getPanelCount(TabContainer::Ptr* self);
+	C_ABI_GETTER int ABI_TabContainer_getIndex(TabContainer::Ptr* self, Panel::Ptr* ptr);
+	C_ABI_GETTER Panel::Ptr* ABI_TabContainer_getSelected(TabContainer::Ptr* self);
+	C_ABI_GETTER int ABI_TabContainer_getSelectedIndex(TabContainer::Ptr* self);
+	C_ABI_GETTER Panel::Ptr* ABI_TabContainer_getPanel(TabContainer::Ptr* self, int index);
+	C_ABI_GETTER Tabs::Ptr* ABI_TabContainer_getTabs(TabContainer::Ptr* self);
+	C_ABI_GETTER const char32_t* ABI_TabContainer_getTabText(TabContainer::Ptr* self, int index);
+	C_ABI_METHOD bool ABI_TabContainer_changeTabText(TabContainer::Ptr* self, int index, char* text);
+	C_ABI_RAW void ABI_TabContainer_setTabAlignment(TabContainer::Ptr* self, int align);
+	C_ABI_RAW int ABI_TabContainer_getTabAlignment(TabContainer::Ptr* self);
+	C_ABI_SETTER void ABI_TabContainer_setTabFixedSize(TabContainer::Ptr* self, float fixedSize);
+	C_ABI_GETTER float ABI_TabContainer_getTabFixedSize(TabContainer::Ptr* self);
+	C_ABI_SIGNAL SignalInt* ABI_TabContainer_onSelectionChange(TabContainer::Ptr* self);
+	C_ABI_SIGNAL SignalTypedIntBoolPtr* ABI_TabContainer_onSelectionChanging(TabContainer::Ptr* self);
+	// TextArea
+	C_ABI_MAKE TextArea::Ptr* ABI_TextArea_new();
+	C_ABI_SETTER void ABI_TextArea_setText(TextArea::Ptr* self, char* text);
+	C_ABI_METHOD void ABI_TextArea_addText(TextArea::Ptr* self, char* text);
+	C_ABI_GETTER const char32_t* ABI_TextArea_getText(TextArea::Ptr* self);
+	C_ABI_SETTER void ABI_TextArea_setDefaultText(TextArea::Ptr* self, char* text);
+	C_ABI_GETTER const char32_t* ABI_TextArea_getDefaultText(TextArea::Ptr* self);
+	C_ABI_SETTER void ABI_TextArea_setSelectedText(TextArea::Ptr* self, int selectionStartIndex, int selectionEndIndex);
+	C_ABI_GETTER const char32_t* ABI_TextArea_getSelectedText(TextArea::Ptr* self);
+	C_ABI_GETTER int ABI_TextArea_getSelectionStart(TextArea::Ptr* self);
+	C_ABI_GETTER int ABI_TextArea_getSelectionEnd(TextArea::Ptr* self);
+	C_ABI_SETTER void ABI_TextArea_setMaximumCharacters(TextArea::Ptr* self, int maxChars);
+	C_ABI_GETTER int ABI_TextArea_getMaximumCharacters(TextArea::Ptr* self);
+	C_ABI_SETTER void ABI_TextArea_setTabString(TextArea::Ptr* self, char* tabText);
+	C_ABI_GETTER const char32_t* ABI_TextArea_getTabString(TextArea::Ptr* self);
+	C_ABI_SETTER void ABI_TextArea_setCaretPosition(TextArea::Ptr* self, int charactersBeforeCaret);
+	C_ABI_GETTER int ABI_TextArea_getCaretPosition(TextArea::Ptr* self);
+	C_ABI_GETTER int ABI_TextArea_getCaretLine(TextArea::Ptr* self);
+	C_ABI_GETTER int ABI_TextArea_getCaretColumn(TextArea::Ptr* self);
+	C_ABI_SETTER void ABI_TextArea_setReadOnly(TextArea::Ptr* self, int readOnly);
+	C_ABI_TESTER bool ABI_TextArea_isReadOnly(TextArea::Ptr* self);
+	C_ABI_GETTER int ABI_TextArea_getLinesCount(TextArea::Ptr* self);
+	C_ABI_SETTER void ABI_TextArea_enableMonospacedFontOptimization(TextArea::Ptr* self, int enable);
+	C_ABI_SETTER void ABI_TextArea_setVerticalScrollbarPolicy(TextArea::Ptr* self, int policy);
+	C_ABI_GETTER int ABI_TextArea_getVerticalScrollbarPolicy(TextArea::Ptr* self);
+	C_ABI_SETTER void ABI_TextArea_setHorizontalScrollbarPolicy(TextArea::Ptr* self, int policy);
+	C_ABI_GETTER int ABI_TextArea_getHorizontalScrollbarPolicy(TextArea::Ptr* self);
+	C_ABI_SETTER void ABI_TextArea_setVerticalScrollbarValue(TextArea::Ptr* self, int value);
+	C_ABI_GETTER int ABI_TextArea_getVerticalScrollbarValue(TextArea::Ptr* self);
+	C_ABI_SETTER void ABI_TextArea_setHorizontalScrollbarValue(TextArea::Ptr* self, int value);
+	C_ABI_GETTER int ABI_TextArea_getHorizontalScrollbarValue(TextArea::Ptr* self);
+	C_ABI_SIGNAL SignalString* ABI_TextArea_onTextChange(TextArea::Ptr* self);
+	C_ABI_SIGNAL Signal* ABI_TextArea_onSelectionChange(TextArea::Ptr* self);
+	C_ABI_SIGNAL Signal* ABI_TextArea_onCaretPositionChange(TextArea::Ptr* self);
 }
 #endif //CABI_HPP
