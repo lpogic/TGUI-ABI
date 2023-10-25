@@ -156,6 +156,14 @@ namespace tgui {
         });
     }
 
+    // SignalTypedSizeT
+    
+	C_ABI_RAW int ABI_SignalTypedSizeT_connect(SignalTypedSizeT* self, void(*f)(int)) {
+        return self->connect([=](std::size_t size) {
+            f(static_cast<int>(size));
+        });
+    }
+
     // SignalPanelListBoxItem
 
     C_ABI_RAW int ABI_SignalPanelListBoxItem_connect(SignalPanelListBoxItem* self, void(*f)(Panel::Ptr*)) {
@@ -203,7 +211,7 @@ namespace tgui {
         f(position.x, position.y, size.x, size.y);
     }
 
-    C_ABI_SIGNAL Signal* ABI_BackendGui_onViewChange(BackendGui* self) {
+    C_ABI_RAW Signal* ABI_BackendGui_onViewChange(BackendGui* self) {
         return &self->onViewChange;
     }
 
@@ -323,142 +331,212 @@ namespace tgui {
         return (**self).getWidgetType().data();
     }
 
-    C_ABI_GETTER const char32_t* ABI_Widget_getName(Widget::Ptr* self) {
+    C_ABI_RAW const char32_t* ABI_Widget_getName(Widget::Ptr* self) {
         auto name = new String((**self).getWidgetName());
         autoclean.push_back(name);
         return name->data();
     }
 
-    C_ABI_SETTER void ABI_Widget_setSize(Widget::Ptr* self, const char* width, const char* height) {
+    C_ABI_RAW void ABI_Widget_setSize(Widget::Ptr* self, const char* width, const char* height) {
         (**self).setSize(width, height);
     }
 
-    C_ABI_GETTER Vector2f* ABI_Widget_getSize(Widget::Ptr* self) {
+    C_ABI_RAW Vector2f* ABI_Widget_getSize(Widget::Ptr* self) {
         return new Vector2f((**self).getSize());
     }
 
-    C_ABI_GETTER Vector2f* ABI_Widget_getFullSize(Widget::Ptr* self) {
+    C_ABI_RAW Vector2f* ABI_Widget_getFullSize(Widget::Ptr* self) {
         return new Vector2f((**self).getFullSize());
     }
 
-    C_ABI_SETTER void ABI_Widget_setPosition(Widget::Ptr* self, const char* x, const char* y) {
+    C_ABI_RAW void ABI_Widget_setPosition(Widget::Ptr* self, const char* x, const char* y) {
         (**self).setPosition(x, y);
     }
 
-    C_ABI_GETTER Vector2f* ABI_Widget_getPosition(Widget::Ptr* self) {
+    C_ABI_RAW Vector2f* ABI_Widget_getPosition(Widget::Ptr* self) {
         return new Vector2f((**self).getPosition());
     }
 
-    C_ABI_GETTER Vector2f* ABI_Widget_getAbsolutePosition(Widget::Ptr* self) {
+    C_ABI_RAW Vector2f* ABI_Widget_getAbsolutePosition(Widget::Ptr* self) {
         return new Vector2f((**self).getAbsolutePosition());
     }
 
-    C_ABI_SETTER void ABI_Widget_setWidth(Widget::Ptr* self, const char* width) {
+    C_ABI_RAW void ABI_Widget_setTextSize(Widget::Ptr* self, int textSize) {
+        (**self).setTextSize(textSize);
+    }
+
+	C_ABI_RAW int ABI_Widget_getTextSize(Widget::Ptr* self) {
+        return (**self).getTextSize();
+    }
+
+    C_ABI_RAW void ABI_Widget_setWidth(Widget::Ptr* self, char* width) {
         (**self).setWidth(width);
     }
 
-    C_ABI_SETTER void ABI_Widget_setHeight(Widget::Ptr* self, const char* height) {
+    C_ABI_RAW void ABI_Widget_setHeight(Widget::Ptr* self, char* height) {
         (**self).setHeight(height);
     }
 
-    C_ABI_SETTER void ABI_Widget_setVisible(Widget::Ptr* self, int visible) {
+    C_ABI_RAW void ABI_Widget_setVisible(Widget::Ptr* self, int visible) {
         (**self).setVisible(visible);
     }
 
-    C_ABI_TESTER bool ABI_Widget_isVisible(Widget::Ptr* self) {
+    C_ABI_RAW bool ABI_Widget_isVisible(Widget::Ptr* self) {
         return (**self).isVisible();
     }
 
-    C_ABI_SETTER void ABI_Widget_setEnabled(Widget::Ptr* self, int enabled) {
+    C_ABI_RAW void ABI_Widget_setEnabled(Widget::Ptr* self, int enabled) {
         (**self).setEnabled(enabled);
     }
 
-    C_ABI_TESTER bool ABI_Widget_isEnabled(Widget::Ptr* self) {
+    C_ABI_RAW bool ABI_Widget_isEnabled(Widget::Ptr* self) {
         return (**self).isEnabled();
     }
 
-    C_ABI_SETTER void ABI_Widget_setFocused(Widget::Ptr* self, int focused) {
+    C_ABI_RAW void ABI_Widget_setFocused(Widget::Ptr* self, int focused) {
         (**self).setFocused(focused);
 
     }
 
-    C_ABI_TESTER bool ABI_Widget_isFocused(Widget::Ptr* self) {
+    C_ABI_RAW bool ABI_Widget_isFocused(Widget::Ptr* self) {
         return (**self).isFocused();
     }
 
-    C_ABI_SETTER void ABI_Widget_setFocusable(Widget::Ptr* self, int focusable) {
+    C_ABI_RAW void ABI_Widget_setFocusable(Widget::Ptr* self, int focusable) {
         (**self).setFocusable(focusable);
 
     }
 
-    C_ABI_TESTER bool ABI_Widget_isFocusable(Widget::Ptr* self) {
+    C_ABI_RAW bool ABI_Widget_isFocusable(Widget::Ptr* self) {
         return (**self).isFocusable();
     }
 
-    C_ABI_TESTER bool ABI_Widget_canGainFocus(Widget::Ptr* self) {
+    C_ABI_RAW bool ABI_Widget_canGainFocus(Widget::Ptr* self) {
         return (**self).canGainFocus();
     }
 
-    C_ABI_TESTER bool ABI_Widget_isContainer(Widget::Ptr* self) {
+    C_ABI_RAW bool ABI_Widget_isContainer(Widget::Ptr* self) {
         return (**self).isContainer();
     }
 
-    C_ABI_SIGNAL SignalVector2f* ABI_Widget_onPositionChange(Widget::Ptr* self) {
+    C_ABI_RAW void ABI_Widget_setToolTip(Widget::Ptr* self, Widget::Ptr* tooltip) {
+        (**self).setToolTip(*tooltip);
+    }
+
+	C_ABI_RAW Widget::Ptr* ABI_Widget_getToolTip(Widget::Ptr* self) {
+        auto shared = (**self).getToolTip();
+        if (shared == nullptr) {
+            return nullptr;
+        }
+        auto ptr = new Widget::Ptr(nullptr);
+        ptr->swap(shared);
+        return ptr;
+    }
+
+    C_ABI_RAW void ABI_Widget_setMouseCursor(Widget::Ptr* self, int cursor) {
+        (**self).setMouseCursor(static_cast<Cursor::Type>(cursor));
+    }
+
+	C_ABI_RAW int ABI_Widget_getMouseCursor(Widget::Ptr* self) {
+        return static_cast<int>((**self).getMouseCursor());
+    }
+
+    // C_ABI_RAW bool ABI_Widget_isDraggableWidget(Widget::Ptr* self) {
+    //     return (**self).isDraggableWidget();
+    // }
+
+	C_ABI_RAW bool ABI_Widget_isMouseDown(Widget::Ptr* self) {
+        return (**self).isMouseDown();
+    }
+
+    C_ABI_RAW void ABI_Widget_showWithEffect(Widget::Ptr* self, int effect, int duration) {
+        (**self).showWithEffect(static_cast<ShowEffectType>(effect), duration);
+    }
+
+	C_ABI_RAW void ABI_Widget_hideWithEffect(Widget::Ptr* self, int effect, int duration) {
+        (**self).hideWithEffect(static_cast<ShowEffectType>(effect), duration);
+    }
+
+	C_ABI_RAW void ABI_Widget_moveWithAnimation(Widget::Ptr* self, char* x, char* y, int duration) {
+        (**self).moveWithAnimation({x, y}, duration);
+    }
+
+    C_ABI_RAW void ABI_Widget_resizeWithAnimation(Widget::Ptr* self, char* width, char* height, int duration) {
+        (**self).resizeWithAnimation({width, height}, duration);
+    }
+
+    C_ABI_RAW bool ABI_Widget_isAnimationPlaying(Widget::Ptr* self) {
+        return (**self).isAnimationPlaying();
+    }
+
+	C_ABI_RAW void ABI_Widget_moveToFront(Widget::Ptr* self) {
+        (**self).moveToFront();
+    }
+
+	C_ABI_RAW void ABI_Widget_moveToBack(Widget::Ptr* self) {
+        (**self).moveToBack();
+    }
+
+    C_ABI_RAW void ABI_Widget_finishAllAnimations(Widget::Ptr* self) {
+        (**self).finishAllAnimations();
+    }
+
+    C_ABI_RAW SignalVector2f* ABI_Widget_onPositionChange(Widget::Ptr* self) {
         return &(**self).onPositionChange;
     }
 
-    C_ABI_SIGNAL SignalVector2f* ABI_Widget_onSizeChange(Widget::Ptr* self) {
+    C_ABI_RAW SignalVector2f* ABI_Widget_onSizeChange(Widget::Ptr* self) {
         return &(**self).onSizeChange;
     }
 
-    C_ABI_SIGNAL Signal* ABI_Widget_onFocus(Widget::Ptr* self) {
+    C_ABI_RAW Signal* ABI_Widget_onFocus(Widget::Ptr* self) {
         return &(**self).onFocus;
     }
 
-    C_ABI_SIGNAL Signal* ABI_Widget_onUnfocus(Widget::Ptr* self) {
+    C_ABI_RAW Signal* ABI_Widget_onUnfocus(Widget::Ptr* self) {
         return &(**self).onUnfocus;
     }
 
-    C_ABI_SIGNAL Signal* ABI_Widget_onMouseEnter(Widget::Ptr* self) {
+    C_ABI_RAW Signal* ABI_Widget_onMouseEnter(Widget::Ptr* self) {
         return &(**self).onMouseEnter;
     }
 
-    C_ABI_SIGNAL Signal* ABI_Widget_onMouseLeave(Widget::Ptr* self) {
+    C_ABI_RAW Signal* ABI_Widget_onMouseLeave(Widget::Ptr* self) {
         return &(**self).onMouseLeave;
     }
 
-    C_ABI_SIGNAL SignalShowEffect* ABI_Widget_onShowEffectFinish(Widget::Ptr* self) {
+    C_ABI_RAW SignalShowEffect* ABI_Widget_onShowEffectFinish(Widget::Ptr* self) {
         return &(**self).onShowEffectFinish;
     }
 
-    C_ABI_SIGNAL SignalAnimationType* ABI_Widget_onAnimationFinish(Widget::Ptr* self) {
+    C_ABI_RAW SignalAnimationType* ABI_Widget_onAnimationFinish(Widget::Ptr* self) {
         return &(**self).onAnimationFinish;
     }
 
 
     // ClickableWidget
 
-    C_ABI_SIGNAL SignalVector2f* ABI_ClickableWidget_onMousePress(ClickableWidget::Ptr* self) {
+    C_ABI_RAW SignalVector2f* ABI_ClickableWidget_onMousePress(ClickableWidget::Ptr* self) {
         return &(**self).onMousePress;
     }
 
-    C_ABI_SIGNAL SignalVector2f* ABI_ClickableWidget_onMouseRelease(ClickableWidget::Ptr* self) {
+    C_ABI_RAW SignalVector2f* ABI_ClickableWidget_onMouseRelease(ClickableWidget::Ptr* self) {
         return &(**self).onMouseRelease;
     }
 
-    C_ABI_SIGNAL SignalVector2f* ABI_ClickableWidget_onClick(ClickableWidget::Ptr* self) {
+    C_ABI_RAW SignalVector2f* ABI_ClickableWidget_onClick(ClickableWidget::Ptr* self) {
         return &(**self).onClick;
     }
 
-    C_ABI_SIGNAL SignalVector2f* ABI_ClickableWidget_onRightMousePress(ClickableWidget::Ptr* self) {
+    C_ABI_RAW SignalVector2f* ABI_ClickableWidget_onRightMousePress(ClickableWidget::Ptr* self) {
         return &(**self).onRightMousePress;
     }
 
-    C_ABI_SIGNAL SignalVector2f* ABI_ClickableWidget_onRightMouseRelease(ClickableWidget::Ptr* self) {
+    C_ABI_RAW SignalVector2f* ABI_ClickableWidget_onRightMouseRelease(ClickableWidget::Ptr* self) {
         return &(**self).onRightMouseRelease;
     }
 
-    C_ABI_SIGNAL SignalVector2f* ABI_ClickableWidget_onRightClick(ClickableWidget::Ptr* self) {
+    C_ABI_RAW SignalVector2f* ABI_ClickableWidget_onRightClick(ClickableWidget::Ptr* self) {
         return &(**self).onRightClick;
     }
 
@@ -468,11 +546,11 @@ namespace tgui {
         (**self).setTextPosition(position, origin);
     }
 
-    C_ABI_SETTER void ABI_ButtonBase_setText(ButtonBase::Ptr* self, const char* text) {
+    C_ABI_RAW void ABI_ButtonBase_setText(ButtonBase::Ptr* self, const char* text) {
         (**self).setText(text);
     }
 
-    C_ABI_GETTER const char32_t* ABI_ButtonBase_getText(ButtonBase::Ptr* self) {
+    C_ABI_RAW const char32_t* ABI_ButtonBase_getText(ButtonBase::Ptr* self) {
         return (**self).getText().data();
     }
 
@@ -485,7 +563,7 @@ namespace tgui {
         return ptr;
     }
 
-    C_ABI_SIGNAL Signal* ABI_Button_onPress(Button::Ptr* self) {
+    C_ABI_RAW Signal* ABI_Button_onPress(Button::Ptr* self) {
         return &(**self).onPress;
     }
 
@@ -501,15 +579,15 @@ namespace tgui {
         (**self).setImage(*texture);
     }
 
-	C_ABI_GETTER Texture* ABI_BitmapButton_getImage(BitmapButton::Ptr* self) {
+	C_ABI_RAW Texture* ABI_BitmapButton_getImage(BitmapButton::Ptr* self) {
         return new Texture((**self).getImage());
     }
 
-	C_ABI_SETTER void ABI_BitmapButton_setImageScaling(BitmapButton::Ptr* self, float relativeHeight) {
+	C_ABI_RAW void ABI_BitmapButton_setImageScaling(BitmapButton::Ptr* self, float relativeHeight) {
         (**self).setImageScaling(relativeHeight);
     }
 
-	C_ABI_GETTER float ABI_BitmapButton_getImageScaling(BitmapButton::Ptr* self) {
+	C_ABI_RAW float ABI_BitmapButton_getImageScaling(BitmapButton::Ptr* self) {
         return (**self).getImageScaling();
     }
 
@@ -522,45 +600,45 @@ namespace tgui {
         return ptr;
     }
 
-    C_ABI_SETTER void ABI_EditBox_setText(EditBox::Ptr* self, const char* text) {
+    C_ABI_RAW void ABI_EditBox_setText(EditBox::Ptr* self, const char* text) {
         (**self).setText(text);
     }
 
-    C_ABI_GETTER const char32_t* ABI_EditBox_getText(EditBox::Ptr* self) {
+    C_ABI_RAW const char32_t* ABI_EditBox_getText(EditBox::Ptr* self) {
         return (**self).getText().data();
     }
 
-    C_ABI_SETTER void ABI_EditBox_setDefaultText(EditBox::Ptr* self, const char* text) {
+    C_ABI_RAW void ABI_EditBox_setDefaultText(EditBox::Ptr* self, const char* text) {
         (**self).setDefaultText(text);
     }
 
-    C_ABI_GETTER const char32_t* ABI_EditBox_getDefaultText(EditBox::Ptr* self) {
+    C_ABI_RAW const char32_t* ABI_EditBox_getDefaultText(EditBox::Ptr* self) {
         return (**self).getDefaultText().data();
     }
 
-    C_ABI_METHOD void ABI_EditBox_selectText(EditBox::Ptr* self, int start, int length) {
+    C_ABI_RAW void ABI_EditBox_selectText(EditBox::Ptr* self, int start, int length) {
         (**self).selectText(start, length);
     }
 
-    C_ABI_GETTER const char32_t* ABI_EditBox_getSelectedText(EditBox::Ptr* self) {
+    C_ABI_RAW const char32_t* ABI_EditBox_getSelectedText(EditBox::Ptr* self) {
         auto text = new String((**self).getSelectedText());
         autoclean.push_back(text);
         return text->data();
     }
 
-    C_ABI_SETTER void ABI_EditBox_setPasswordCharacter(EditBox::Ptr* self, char* character) {
+    C_ABI_RAW void ABI_EditBox_setPasswordCharacter(EditBox::Ptr* self, char* character) {
         (**self).setPasswordCharacter(*character);
     }
 
-    C_ABI_GETTER char ABI_EditBox_getPasswordCharacter(EditBox::Ptr* self) {
+    C_ABI_RAW char ABI_EditBox_getPasswordCharacter(EditBox::Ptr* self) {
         return static_cast<char>((**self).getPasswordCharacter());
     }
 
-    C_ABI_SETTER void ABI_EditBox_setMaximumCharacters(EditBox::Ptr* self, unsigned int max) {
+    C_ABI_RAW void ABI_EditBox_setMaximumCharacters(EditBox::Ptr* self, unsigned int max) {
         (**self).setMaximumCharacters(max);
     }
 
-    C_ABI_GETTER unsigned int ABI_EditBox_getMaximumCharacters(EditBox::Ptr* self) {
+    C_ABI_RAW unsigned int ABI_EditBox_getMaximumCharacters(EditBox::Ptr* self) {
         return (**self).getMaximumCharacters();
     }
 
@@ -572,53 +650,58 @@ namespace tgui {
         return static_cast<int>((**self).getAlignment());
     }
 
-    C_ABI_SETTER void ABI_EditBox_limitTextWidth(EditBox::Ptr* self, int limit) {
+    C_ABI_RAW void ABI_EditBox_limitTextWidth(EditBox::Ptr* self, int limit) {
         (**self).limitTextWidth(limit);
     }
 
-    C_ABI_TESTER bool ABI_EditBox_isTextWidthLimited(EditBox::Ptr* self) {
+    C_ABI_RAW bool ABI_EditBox_isTextWidthLimited(EditBox::Ptr* self) {
         return (**self).isTextWidthLimited();
     }
 
-    C_ABI_SETTER void ABI_EditBox_setReadOnly(EditBox::Ptr* self, int readOnly) {
+    C_ABI_RAW void ABI_EditBox_setReadOnly(EditBox::Ptr* self, int readOnly) {
         (**self).setReadOnly(readOnly);
     }
 
-    C_ABI_TESTER bool ABI_EditBox_isReadOnly(EditBox::Ptr* self) {
+    C_ABI_RAW bool ABI_EditBox_isReadOnly(EditBox::Ptr* self) {
         return (**self).isReadOnly();
     }
 
-    C_ABI_SETTER void ABI_EditBox_setCaretPosition(EditBox::Ptr* self, int caretPosition) {
+    C_ABI_RAW void ABI_EditBox_setCaretPosition(EditBox::Ptr* self, int caretPosition) {
         (**self).setCaretPosition(caretPosition);
     }
-    C_ABI_GETTER int ABI_EditBox_getCaretPosition(EditBox::Ptr* self) {
+
+    C_ABI_RAW int ABI_EditBox_getCaretPosition(EditBox::Ptr* self) {
         return static_cast<int>((**self).getCaretPosition());
     }
 
-    C_ABI_SETTER void ABI_EditBox_setSuffix(EditBox::Ptr* self, char* suffix) {
+    C_ABI_RAW void ABI_EditBox_setSuffix(EditBox::Ptr* self, char* suffix) {
         (**self).setSuffix(suffix);
     }
 
-    C_ABI_GETTER const char32_t* ABI_EditBox_getSuffix(EditBox::Ptr* self) {
+    C_ABI_RAW const char32_t* ABI_EditBox_getSuffix(EditBox::Ptr* self) {
         return (**self).getSuffix().data();
     }
 
-    C_ABI_SIGNAL SignalString* ABI_EditBox_onTextChange(EditBox::Ptr* self) {
+    C_ABI_RAW SignalString* ABI_EditBox_onTextChange(EditBox::Ptr* self) {
         return &(**self).onTextChange;
     }
 
-    C_ABI_SIGNAL SignalString* ABI_EditBox_onReturnKeyPress(EditBox::Ptr* self) {
+    C_ABI_RAW SignalString* ABI_EditBox_onReturnKeyPress(EditBox::Ptr* self) {
         return &(**self).onReturnKeyPress;
     }
 
-    C_ABI_SIGNAL SignalString* ABI_EditBox_onReturnOrUnfocus(EditBox::Ptr* self) {
+    C_ABI_RAW SignalString* ABI_EditBox_onReturnOrUnfocus(EditBox::Ptr* self) {
         return &(**self).onReturnOrUnfocus;
+    }
+
+    C_ABI_RAW SignalTypedSizeT* ABI_EditBox_onCaretPositionChange(EditBox::Ptr* self) {
+        return &(**self).onCaretPositionChange;
     }
 
     // Label
 
-    C_ABI_MAKE Label::Ptr* ABI_Label_new(char* text) {
-        auto self = Label::create(text);
+    C_ABI_MAKE Label::Ptr* ABI_Label_new() {
+        auto self = Label::create();
         auto ptr = new Label::Ptr(nullptr);
         ptr->swap(self);
         return ptr;
@@ -813,7 +896,7 @@ namespace tgui {
         }
     }
 
-    C_ABI_METHOD void ABI_Container_add(Container::Ptr* self, Widget::Ptr* widget, char* name) {
+    C_ABI_RAW void ABI_Container_add(Container::Ptr* self, Widget::Ptr* widget, char* name) {
         (**self).add(*widget, name);
     }
 
@@ -919,8 +1002,8 @@ namespace tgui {
         return ptr;
     }
 
-    C_ABI_SETTER void ABI_ChildWindow_setClientSize(ChildWindow::Ptr* self, char* size) {
-        (**self).setClientSize(size);
+    C_ABI_RAW void ABI_ChildWindow_setClientSize(ChildWindow::Ptr* self, char* width, char* height) {
+        (**self).setClientSize({width, height});
     }
 
     C_ABI_GETTER Vector2f* ABI_ChildWindow_getClientSize(ChildWindow::Ptr* self) {
@@ -1793,15 +1876,15 @@ namespace tgui {
         return ptr;
     }
 
-	C_ABI_SETTER void ABI_ComboBox_setItemsToDisplay(ComboBox::Ptr* self, int itemsToDisplay) {
+	C_ABI_RAW void ABI_ComboBox_setItemsToDisplay(ComboBox::Ptr* self, int itemsToDisplay) {
         (**self).setItemsToDisplay(itemsToDisplay);
     }
 
-	C_ABI_GETTER int ABI_ComboBox_getItemsToDisplay(ComboBox::Ptr* self) {
+	C_ABI_RAW int ABI_ComboBox_getItemsToDisplay(ComboBox::Ptr* self) {
         return static_cast<int>((**self).getItemsToDisplay());
     }
 
-	C_ABI_METHOD void ABI_ComboBox_addItem(ComboBox::Ptr* self, char* name, char* id) {
+	C_ABI_RAW void ABI_ComboBox_addItem(ComboBox::Ptr* self, char* name, char* id) {
         (**self).addItem(name, id);
     }
 
@@ -1813,7 +1896,7 @@ namespace tgui {
         return (**self).setSelectedItemByIndex(index);
     }
 
-	C_ABI_METHOD void ABI_ComboBox_deselectItem(ComboBox::Ptr* self) {
+	C_ABI_RAW void ABI_ComboBox_deselectItem(ComboBox::Ptr* self) {
         (**self).deselectItem();
     }
 
@@ -1825,7 +1908,7 @@ namespace tgui {
         return (**self).removeItemByIndex(index);
     }
 
-	C_ABI_METHOD void ABI_ComboBox_removeAllItems(ComboBox::Ptr* self) {
+	C_ABI_RAW void ABI_ComboBox_removeAllItems(ComboBox::Ptr* self) {
         (**self).removeAllItems();
     }
 
@@ -1841,15 +1924,15 @@ namespace tgui {
         return id->data();
     }
 
-	C_ABI_METHOD bool ABI_ComboBox_changeItemById(ComboBox::Ptr* self, char* id, char* newValue) {
+	C_ABI_RAW bool ABI_ComboBox_changeItemById(ComboBox::Ptr* self, char* id, char* newValue) {
         return (**self).changeItemById(id, newValue);
     }
 
-	C_ABI_METHOD bool ABI_ComboBox_changeItemByIndex(ComboBox::Ptr* self, int index, char* newValue) {
+	C_ABI_RAW bool ABI_ComboBox_changeItemByIndex(ComboBox::Ptr* self, int index, char* newValue) {
         return (**self).changeItemByIndex(index, newValue);
     }
 
-	C_ABI_GETTER int ABI_ComboBox_getItemCount(ComboBox::Ptr* self) {
+	C_ABI_RAW int ABI_ComboBox_getItemCount(ComboBox::Ptr* self) {
         return static_cast<int>((**self).getItemCount());
     }
 
@@ -1859,43 +1942,43 @@ namespace tgui {
         }
     }
 
-	C_ABI_SETTER void ABI_ComboBox_setMaximumItems(ComboBox::Ptr* self, int maximumItems) {
+	C_ABI_RAW void ABI_ComboBox_setMaximumItems(ComboBox::Ptr* self, int maximumItems) {
         (**self).setMaximumItems(maximumItems);
     }
 
-	C_ABI_GETTER int ABI_ComboBox_getMaximumItems(ComboBox::Ptr* self) {
+	C_ABI_RAW int ABI_ComboBox_getMaximumItems(ComboBox::Ptr* self) {
         return static_cast<int>((**self).getMaximumItems());
     }
 
-	C_ABI_SETTER void ABI_ComboBox_setDefaultText(ComboBox::Ptr* self, char* defaultText) {
+	C_ABI_RAW void ABI_ComboBox_setDefaultText(ComboBox::Ptr* self, char* defaultText) {
         (**self).setDefaultText(defaultText);
     }
 
-	C_ABI_GETTER const char32_t* ABI_ComboBox_getDefaultText(ComboBox::Ptr* self) {
+	C_ABI_RAW const char32_t* ABI_ComboBox_getDefaultText(ComboBox::Ptr* self) {
         return (**self).getDefaultText().data();
     }
 
-	C_ABI_SETTER void ABI_ComboBox_setExpandDirection(ComboBox::Ptr* self, int expandDirection) {
+	C_ABI_RAW void ABI_ComboBox_setExpandDirection(ComboBox::Ptr* self, int expandDirection) {
         (**self).setExpandDirection(static_cast<ComboBox::ExpandDirection>(expandDirection));
     }
 
-	C_ABI_GETTER int ABI_ComboBox_getExpandDirection(ComboBox::Ptr* self) {
+	C_ABI_RAW int ABI_ComboBox_getExpandDirection(ComboBox::Ptr* self) {
         return static_cast<int>((**self).getExpandDirection());
     }
 
-	C_ABI_METHOD bool ABI_ComboBox_containsId(ComboBox::Ptr* self, char* id) {
+	C_ABI_RAW bool ABI_ComboBox_containsId(ComboBox::Ptr* self, char* id) {
         return (**self).containsId(id);
     }
 
-	C_ABI_SETTER void ABI_ComboBox_setChangeItemOnScroll(ComboBox::Ptr* self, int changeItemOnScroll) {
+	C_ABI_RAW void ABI_ComboBox_setChangeItemOnScroll(ComboBox::Ptr* self, int changeItemOnScroll) {
         (**self).setChangeItemOnScroll(changeItemOnScroll);
     }
 
-	C_ABI_GETTER bool ABI_ComboBox_getChangeItemOnScroll(ComboBox::Ptr* self) {
+	C_ABI_RAW bool ABI_ComboBox_getChangeItemOnScroll(ComboBox::Ptr* self) {
         return (**self).getChangeItemOnScroll();
     }
 
-	C_ABI_SIGNAL SignalItem* ABI_ComboBox_onItemSelect(ComboBox::Ptr* self) {
+	C_ABI_RAW SignalItem* ABI_ComboBox_onItemSelect(ComboBox::Ptr* self) {
         return &(**self).onItemSelect;
     }
     
@@ -3113,15 +3196,15 @@ namespace tgui {
         return ptr;
     }
 
-	C_ABI_SETTER void ABI_ToggleButton_setDown(ToggleButton::Ptr* self, int down) {
+	C_ABI_RAW void ABI_ToggleButton_setDown(ToggleButton::Ptr* self, int down) {
         (**self).setDown(down);
     }
 
-	C_ABI_TESTER bool ABI_ToggleButton_isDown(ToggleButton::Ptr* self) {
+	C_ABI_RAW bool ABI_ToggleButton_isDown(ToggleButton::Ptr* self) {
         return (**self).isDown();
     }
 
-	C_ABI_SIGNAL SignalBool* ABI_ToggleButton_onToggle(ToggleButton::Ptr* self) {
+	C_ABI_RAW SignalBool* ABI_ToggleButton_onToggle(ToggleButton::Ptr* self) {
         return &(**self).onToggle;
     }
 
