@@ -25,9 +25,7 @@
 #include <TGUI/Backend/Window/SFML/BackendGuiSFML.hpp>
 #include <TGUI/Backend/Window/SFML/BackendSFML.hpp>
 
-#if TGUI_BUILD_AS_CXX_MODULE
-    import tgui;
-#else
+#if !TGUI_BUILD_AS_CXX_MODULE
     #include <TGUI/ToolTip.hpp>
     #include <TGUI/Timer.hpp>
 
@@ -261,7 +259,7 @@ namespace tgui
                         windowOpen = false;
                         eventProcessed = true;
                     }
-                    else if (event.type == sf::Event::Resized)
+                    else if ((event.type == sf::Event::Resized) || (event.type == sf::Event::MouseLeft))
                     {
                         eventProcessed = true;
                     }
@@ -395,6 +393,16 @@ namespace tgui
                 eventTGUI.type = Event::Type::MouseMoved;
                 eventTGUI.mouseMove.x = eventSFML.mouseMove.x;
                 eventTGUI.mouseMove.y = eventSFML.mouseMove.y;
+                return true;
+            }
+            case sf::Event::MouseEntered:
+            {
+                eventTGUI.type = Event::Type::MouseEntered;
+                return true;
+            }
+            case sf::Event::MouseLeft:
+            {
+                eventTGUI.type = Event::Type::MouseLeft;
                 return true;
             }
             case sf::Event::TouchMoved:

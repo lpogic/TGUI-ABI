@@ -84,6 +84,10 @@ TEST_CASE("[ListView]")
         REQUIRE(listView->getColumnWidth(1) == 60);
         REQUIRE(listView->getColumnWidth(2) == 100);
 
+        REQUIRE(listView->getColumnWidth(0) > 0);
+        REQUIRE(listView->getColumnDesignWidth(0) == 0);
+        REQUIRE(listView->getColumnDesignWidth(1) == 60);
+
         REQUIRE(listView->getColumnAlignment(0) == tgui::ListView::ColumnAlignment::Left);
         REQUIRE(listView->getColumnAlignment(1) == tgui::ListView::ColumnAlignment::Right);
         REQUIRE(listView->getColumnAlignment(2) == tgui::ListView::ColumnAlignment::Center);
@@ -442,13 +446,91 @@ TEST_CASE("[ListView]")
         REQUIRE(!listView->getShowHorizontalGridLines());
     }
 
-    SECTION("Expand last column")
+    SECTION("Expanded columns")
     {
+        listView->addColumn("C1", 10);
+
+        REQUIRE(!listView->getColumnExpanded(0));
+        listView->setColumnExpanded(0, true);
+        REQUIRE(listView->getColumnExpanded(0));
+        listView->setColumnExpanded(0, false);
+        REQUIRE(!listView->getColumnExpanded(0));
+    }
+
+    SECTION("AutoResize columns")
+    {
+        listView->addColumn("C1", 10);
+
+        REQUIRE(!listView->getColumnAutoResize(0));
+        listView->setColumnAutoResize(0, true);
+        REQUIRE(listView->getColumnAutoResize(0));
+        listView->setColumnAutoResize(0, false);
+        REQUIRE(!listView->getColumnAutoResize(0));
+    }
+
+    SECTION("Expanded + AutoResize columns")
+    {
+        listView->getRenderer()->setPadding({0});
+        listView->getRenderer()->setBorders({1});
+        listView->setGridLinesWidth(1);
+        listView->setSize(250 + 2, 200 + 2);
+        listView->addColumn("C1", 0);
+        listView->addColumn("C2", 10);
+        listView->addColumn("C3", 50);
+
+        REQUIRE(listView->getColumnWidth(0) > 0);
+        REQUIRE(listView->getColumnWidth(1) == 10);
+        REQUIRE(listView->getColumnWidth(2) == 50);
+
+        listView->setColumnAutoResize(1, true);
+        REQUIRE(listView->getColumnWidth(1) == 10);
+        listView->addItem({"val1", "val2", "val3"});
+        REQUIRE(listView->getColumnWidth(1) > 10);
+
+        const float autoSizeC1 = listView->getColumnWidth(0);
+        const float autoSizeC2 = listView->getColumnWidth(1);
+
+        listView->setColumnExpanded(2, true);
+        REQUIRE(listView->getColumnWidth(0) == autoSizeC1);
+        REQUIRE(listView->getColumnWidth(1) == autoSizeC2);
+        REQUIRE_THAT(listView->getColumnWidth(2), Catch::WithinRel(250 - autoSizeC1 - autoSizeC2 - 2));
+
+        const float spaceToExpand = 250 - autoSizeC1 - autoSizeC2 - 50 - 2;
+        listView->setColumnExpanded(0, true);
+        listView->setColumnExpanded(1, true);
+        REQUIRE_THAT(listView->getColumnWidth(0), Catch::WithinRel(autoSizeC1 + (spaceToExpand / 3.f)));
+        REQUIRE_THAT(listView->getColumnWidth(1), Catch::WithinRel(autoSizeC2 + (spaceToExpand / 3.f)));
+        REQUIRE_THAT(listView->getColumnWidth(2), Catch::WithinRel(50 + (spaceToExpand / 3.f)));
+    }
+
+    SECTION("Expand last column (deprecated)")
+    {
+        TGUI_IGNORE_DEPRECATED_WARNINGS_START
+
+        // Works even when no columns exist yet
         REQUIRE(!listView->getExpandLastColumn());
         listView->setExpandLastColumn(true);
         REQUIRE(listView->getExpandLastColumn());
         listView->setExpandLastColumn(false);
         REQUIRE(!listView->getExpandLastColumn());
+
+        listView->addColumn("C1", 0);
+        listView->addColumn("C2", 10);
+        listView->addColumn("C3", 50);
+
+        // Adding columns does not influence the result
+        REQUIRE(!listView->getExpandLastColumn());
+        listView->setExpandLastColumn(true);
+        REQUIRE(listView->getExpandLastColumn());
+        listView->setExpandLastColumn(false);
+        REQUIRE(!listView->getExpandLastColumn());
+
+        // Even though ExpandLastColumn has the same effect as setting both ColumnExpanded and ColumnAutoResize,
+        // it doesn't actually change those properties.
+        REQUIRE(!listView->getColumnExpanded(2));
+        REQUIRE(!listView->getColumnAutoResize(2));
+
+        TGUI_IGNORE_DEPRECATED_WARNINGS_END
     }
 
     SECTION("AutoScroll")
@@ -1015,9 +1097,14 @@ TEST_CASE("[ListView]")
         listView->setAutoScroll(false);
         listView->setShowVerticalGridLines(false);
         listView->setShowHorizontalGridLines(true);
-        listView->setExpandLastColumn(true);
+        listView->setColumnAutoResize(0, true);
+        listView->setColumnExpanded(1, true);
         listView->setVerticalScrollbarPolicy(tgui::Scrollbar::Policy::Never);
         listView->setHorizontalScrollbarPolicy(tgui::Scrollbar::Policy::Always);
+
+        TGUI_IGNORE_DEPRECATED_WARNINGS_START
+        listView->setExpandLastColumn(true);
+        TGUI_IGNORE_DEPRECATED_WARNINGS_END
 
         testSavingWidget("ListView", listView);
     }
@@ -1316,11 +1403,47 @@ TEST_CASE("[ListView]")
                 listView->addColumn("C1", 40);
                 listView->addColumn("C2", 50);
 
-                listView->setExpandLastColumn(true);
-                TEST_DRAW("ListView_ExpandLastColumnTrue_NoScrollbar.png")
+                SECTION("Using setColumnExpanded (first column)")
+                {
+                    listView->setColumnExpanded(0, true);
+                    TEST_DRAW("ListView_ColumnExpanded_0_True.png")
 
-                listView->setExpandLastColumn(false);
-                TEST_DRAW("ListView_ExpandLastColumnFalse_NoScrollbar.png")
+                    listView->setColumnExpanded(0, false);
+                    TEST_DRAW("ListView_ColumnExpanded_0_False.png")
+                }
+
+                SECTION("Using setColumnExpanded (second column)")
+                {
+                    listView->setColumnExpanded(1, true);
+                    TEST_DRAW("ListView_ColumnExpanded_1_True.png")
+
+                    listView->setColumnExpanded(1, false);
+                    TEST_DRAW("ListView_ColumnExpanded_1_False.png")
+                }
+
+                SECTION("Using setColumnExpanded (both columns)")
+                {
+                    listView->setColumnExpanded(0, true);
+                    listView->setColumnExpanded(1, true);
+                    TEST_DRAW("ListView_ColumnExpanded_Both_True.png")
+
+                    listView->setColumnExpanded(0, false);
+                    listView->setColumnExpanded(1, false);
+                    TEST_DRAW("ListView_ColumnExpanded_Both_False.png")
+                }
+
+                SECTION("Using deprecated setExpandLastColumn")
+                {
+                    TGUI_IGNORE_DEPRECATED_WARNINGS_START
+
+                    listView->setExpandLastColumn(true);
+                    TEST_DRAW("ListView_ExpandLastColumnTrue_NoScrollbar.png")
+
+                    listView->setExpandLastColumn(false);
+                    TEST_DRAW("ListView_ExpandLastColumnFalse_NoScrollbar.png")
+
+                    TGUI_IGNORE_DEPRECATED_WARNINGS_END
+                }
             }
 
             SECTION("Horizontal scrollbar needed for column")
@@ -1328,18 +1451,46 @@ TEST_CASE("[ListView]")
                 listView->addColumn("C1", 70);
                 listView->addColumn("C2", 90);
 
-                listView->setExpandLastColumn(true);
-                TEST_DRAW("ListView_ExpandLastColumnTrue_WithScrollbar.png")
+                SECTION("Using setColumnAutoResize")
+                {
+                    listView->setColumnAutoResize(1, true);
+                    TEST_DRAW("ListView_ExpandLastColumnTrue_WithScrollbar.png")
 
-                listView->setExpandLastColumn(false);
-                TEST_DRAW("ListView_ExpandLastColumnFalse_WithScrollbar.png")
+                    listView->setColumnAutoResize(1, false);
+                    TEST_DRAW("ListView_ExpandLastColumnFalse_WithScrollbar.png")
+                }
+
+                SECTION("Using deprecated setExpandLastColumn")
+                {
+                    TGUI_IGNORE_DEPRECATED_WARNINGS_START
+
+                    listView->setExpandLastColumn(true);
+                    TEST_DRAW("ListView_ExpandLastColumnTrue_WithScrollbar.png")
+
+                    listView->setExpandLastColumn(false);
+                    TEST_DRAW("ListView_ExpandLastColumnFalse_WithScrollbar.png")
+
+                    TGUI_IGNORE_DEPRECATED_WARNINGS_END
+                }
             }
 
             SECTION("Horizontal scrollbar needed for item")
             {
                 listView->addColumn("C1", 70);
                 listView->addColumn("C2", 50);
-                listView->setExpandLastColumn(true);
+
+                SECTION("Using setColumnExpanded and setColumnAutoResize")
+                {
+                    listView->setColumnExpanded(1, true);
+                    listView->setColumnAutoResize(1, true);
+                }
+
+                SECTION("Using deprecated setExpandLastColumn")
+                {
+                    TGUI_IGNORE_DEPRECATED_WARNINGS_START
+                    listView->setExpandLastColumn(true);
+                    TGUI_IGNORE_DEPRECATED_WARNINGS_END
+                }
 
                 TEST_DRAW("ListView_LongestItemAutoWidth_NoScrollbar.png")
 

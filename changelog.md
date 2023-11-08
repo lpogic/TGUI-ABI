@@ -1,7 +1,13 @@
-TGUI 1.1  (TBD)
----------------
+TGUI 1.1  (4 November 2023)
+---------------------------
 
+- Added AutoLayout that lets widget fill entire side of parent
+- Any column in ListView can now be auto-sized and expanded
 - Added methods for arrow key navigation between widgets
+- Added getColumnDesignWidth function to ListView
+- Added TextOutlineColor and TextOutlineThickness to ProgressBar renderer
+- MiddleRect of Texture can now be changed after loading
+- Hover state is now reset when mouse leaves the window
 
 
 TGUI 1.0  (30 September 2023)
