@@ -34,7 +34,7 @@ namespace tgui {
         return static_cast<int>(self->getAlpha());
     }
 
-    C_ABI_METHOD Color* ABI_Color_fade(Color* self, float fade) {
+    C_ABI_METHOD Color* ABI_Color_applyOpacity(Color* self, float fade) {
         return new Color(Color::applyOpacity(*self, fade));
     }
 
@@ -178,11 +178,11 @@ namespace tgui {
 
     C_ABI_MAKE sf::RenderWindow* ABI_Window_new() {
 #ifdef TGUI_SYSTEM_IOS
-        return new sf::RenderWindow(sf::VideoMode::getDesktopMode(), "TGUI example (SFML-Graphics)");
+        return new sf::RenderWindow(sf::VideoMode::getDesktopMode(), "No title");
 #elif SFML_VERSION_MAJOR >= 3
-        return new sf::RenderWindow(sf::VideoMode{ {800, 600} }, "TGUI example (SFML-Graphics)");
+        return new sf::RenderWindow(sf::VideoMode{ {800, 600} }, "No title");
 #else
-        return new sf::RenderWindow({ 800, 600 }, "TGUI example (SFML-Graphics)");
+        return new sf::RenderWindow({ 800, 600 }, "No title");
 #endif
     }
 
@@ -204,6 +204,14 @@ namespace tgui {
         return self->getTextSize();
     }
 
+    C_ABI_RAW void ABI_BackendGui_setAbsoluteView(BackendGui* self, int x, int y, int w, int h) {
+        self->setAbsoluteView(FloatRect((float)x, (float)y, (float)w, (float)h));
+    }
+
+	C_ABI_RAW void ABI_BackendGui_setRelativeView(BackendGui* self, float x, float y, float w, float h) {
+        self->setRelativeView(FloatRect(x, y, w, h));
+    }
+
     C_ABI_RAW void ABI_BackendGui_getView(BackendGui* self, void(*f)(float, float, float, float)) {
         auto view = self->getView();
         auto position = view.getPosition();
@@ -211,8 +219,75 @@ namespace tgui {
         f(position.x, position.y, size.x, size.y);
     }
 
+    C_ABI_RAW void ABI_BackendGui_setAbsoluteViewport(BackendGui* self, int x, int y, int w, int h) {
+        self->setAbsoluteViewport(FloatRect((float)x, (float)y, (float)w, (float)h));
+    }
+
+	C_ABI_RAW void ABI_BackendGui_setRelativeViewport(BackendGui* self, float x, float y, float w, float h) {
+        self->setRelativeViewport(FloatRect(x, y, w, h));
+    }
+
+    C_ABI_RAW void ABI_BackendGui_getViewport(BackendGui* self, void(*f)(float, float, float, float)) {
+        auto view = self->getViewport();
+        auto position = view.getPosition();
+        auto size = view.getSize();
+        f(position.x, position.y, size.x, size.y);
+    }
+
+    C_ABI_RAW void ABI_BackendGui_setTabKeyUsageEnabled(BackendGui* self, int enabled) {
+        self->setTabKeyUsageEnabled(enabled);
+    }
+
+	C_ABI_RAW bool ABI_BackendGui_isTabKeyUsageEnabled(BackendGui* self) {
+        return self->isTabKeyUsageEnabled();
+    }
+
+	C_ABI_RAW void ABI_BackendGui_setFont(BackendGui* self, Font* font) {
+        self->setFont(*font);
+    }
+
+	C_ABI_RAW Font* ABI_BackendGui_getFont(BackendGui* self) {
+        return new Font(self->getFont());
+    }
+
+	C_ABI_RAW void ABI_BackendGui_unfocusAllWidgets(BackendGui* self) {
+        self->unfocusAllWidgets();
+    }
+
+	C_ABI_RAW void ABI_BackendGui_setOpacity(BackendGui* self, float opacity) {
+        self->setOpacity(opacity);
+    }
+
+	C_ABI_RAW float ABI_BackendGui_getOpacity(BackendGui* self) {
+        return self->getOpacity();
+    }
+
+	C_ABI_RAW void ABI_BackendGui_setOverrideMouseCursor(BackendGui* self, int mouseCursor) {
+        self->setOverrideMouseCursor(static_cast<Cursor::Type>(mouseCursor));
+    }
+
+	C_ABI_RAW void ABI_BackendGui_restoreOverrideMouseCursor(BackendGui* self) {
+        self->restoreOverrideMouseCursor();
+    }
+
+	C_ABI_RAW void ABI_BackendGui_mapPixelToCoords(BackendGui* self, int x, int y, void(*f)(float, float)) {
+        auto coords = self->mapPixelToCoords({x, y});
+        f((float)coords.x, (float)coords.y);
+    }
+
+	C_ABI_RAW void ABI_BackendGui_mapCoordsToPixel(BackendGui* self, float x, float y, void(*f)(float, float)) {
+        auto pixel = (*self).mapCoordsToPixel({x, y});
+        f((float)pixel.x, (float)pixel.y);
+    }
+
     C_ABI_RAW Signal* ABI_BackendGui_onViewChange(BackendGui* self) {
         return &self->onViewChange;
+    }
+
+    // Font
+    
+    C_ABI_MAKE Font* ABI_Font_new(char* id) {
+        return new Font(id);
     }
 
     // Gui
@@ -481,6 +556,52 @@ namespace tgui {
         (**self).finishAllAnimations();
     }
 
+    C_ABI_RAW void ABI_Widget_leftMousePressed(Widget::Ptr* self, float x, float y) {
+        (**self).leftMousePressed({x, y});
+    }
+
+    C_ABI_RAW void ABI_Widget_leftMouseReleased(Widget::Ptr* self, float x, float y) {
+        (**self).leftMouseReleased({x, y});
+    }
+
+    C_ABI_RAW void ABI_Widget_rightMousePressed(Widget::Ptr* self, float x, float y) {
+        (**self).rightMousePressed({x, y});
+    }
+
+    C_ABI_RAW void ABI_Widget_rightMouseReleased(Widget::Ptr* self, float x, float y) {
+        (**self).rightMouseReleased({x, y});
+    }
+
+    C_ABI_RAW void ABI_Widget_mouseMoved(Widget::Ptr* self, float x, float y) {
+        (**self).mouseMoved({x, y});
+    }
+
+	C_ABI_RAW void ABI_Widget_keyPressed(Widget::Ptr* self, int keyCode, int alt, int control, int shift, int system) {
+        (**self).keyPressed({static_cast<Event::KeyboardKey>(keyCode), alt != 0, control != 0, shift != 0, system != 0});
+    }
+
+	C_ABI_RAW void ABI_Widget_textEntered(Widget::Ptr* self, int character) {
+        (**self).textEntered(character);
+    }
+
+	C_ABI_RAW void ABI_Widget_scrolled(Widget::Ptr* self, float delta, float x, float y, int touch) {
+        (**self).scrolled(delta, {x, y}, touch);
+    }
+
+    C_ABI_RAW void ABI_Widget_askToolTip(Widget::Ptr* self, float x, float y) {
+        (**self).askToolTip({x, y});
+    }
+
+    C_ABI_RAW void ABI_Widget_setWidgetName(Widget::Ptr* self, char * name) {
+        (**self).setWidgetName(name);
+    }
+
+	C_ABI_RAW const char32_t* ABI_Widget_getWidgetName(Widget::Ptr* self) {
+        auto str = new String((**self).getWidgetName());
+        autoclean.push_back(str);
+        return str->data();
+    }
+    
     C_ABI_RAW SignalVector2f* ABI_Widget_onPositionChange(Widget::Ptr* self) {
         return &(**self).onPositionChange;
     }
@@ -707,47 +828,47 @@ namespace tgui {
         return ptr;
     }
 
-    C_ABI_SETTER void ABI_Label_setText(Label::Ptr* self, char* text) {
+    C_ABI_RAW void ABI_Label_setText(Label::Ptr* self, char* text) {
         (**self).setText(text);
     }
 
-    C_ABI_GETTER const char32_t* ABI_Label_getText(Label::Ptr* self) {
+    C_ABI_RAW const char32_t* ABI_Label_getText(Label::Ptr* self) {
         return (**self).getText().data();
     }
 
-    C_ABI_SETTER void ABI_Label_setHorizontalAlignment(Label::Ptr* self, int alignment) {
+    C_ABI_RAW void ABI_Label_setHorizontalAlignment(Label::Ptr* self, int alignment) {
         (**self).setHorizontalAlignment(static_cast<Label::HorizontalAlignment>(alignment));
     }
 
-    C_ABI_GETTER int ABI_Label_getHorizontalAlignment(Label::Ptr* self) {
+    C_ABI_RAW int ABI_Label_getHorizontalAlignment(Label::Ptr* self) {
         return static_cast<int>((**self).getHorizontalAlignment());
     }
 
-    C_ABI_SETTER void ABI_Label_setVerticalAlignment(Label::Ptr* self, int alignment) {
+    C_ABI_RAW void ABI_Label_setVerticalAlignment(Label::Ptr* self, int alignment) {
         (**self).setVerticalAlignment(static_cast<Label::VerticalAlignment>(alignment));
     }
 
-    C_ABI_GETTER int ABI_Label_getVerticalAlignment(Label::Ptr* self) {
+    C_ABI_RAW int ABI_Label_getVerticalAlignment(Label::Ptr* self) {
         return static_cast<int>((**self).getVerticalAlignment());
     }
 
-    C_ABI_SETTER void ABI_Label_setScrollbarPolicy(Label::Ptr* self, int policy) {
+    C_ABI_RAW void ABI_Label_setScrollbarPolicy(Label::Ptr* self, int policy) {
         (**self).setScrollbarPolicy(static_cast<Scrollbar::Policy>(policy));
     }
 
-    C_ABI_GETTER int ABI_Label_getScrollbarPolicy(Label::Ptr* self) {
+    C_ABI_RAW int ABI_Label_getScrollbarPolicy(Label::Ptr* self) {
         return static_cast<int>((**self).getScrollbarPolicy());
     }
 
-    C_ABI_SETTER void ABI_Label_setScrollbarValue(Label::Ptr* self, unsigned int value) {
+    C_ABI_RAW void ABI_Label_setScrollbarValue(Label::Ptr* self, unsigned int value) {
         (**self).setScrollbarValue(value);
     }
 
-    C_ABI_GETTER int ABI_Label_getScrollbarValue(Label::Ptr* self) {
+    C_ABI_RAW int ABI_Label_getScrollbarValue(Label::Ptr* self) {
         return (**self).getScrollbarValue();
     }
 
-    C_ABI_SETTER void ABI_Label_setAutoSize(Label::Ptr* self, int autoSize) {
+    C_ABI_RAW void ABI_Label_setAutoSize(Label::Ptr* self, int autoSize) {
         (**self).setAutoSize(autoSize);
     }
 
@@ -780,39 +901,39 @@ namespace tgui {
         return ptr;
     }
 
-    C_ABI_SETTER void ABI_RadioButton_setText(RadioButton::Ptr* self, char* text) {
+    C_ABI_RAW void ABI_RadioButton_setText(RadioButton::Ptr* self, char* text) {
         (**self).setText(text);
     }
 
-    C_ABI_GETTER const char32_t* ABI_RadioButton_getText(RadioButton::Ptr* self) {
+    C_ABI_RAW const char32_t* ABI_RadioButton_getText(RadioButton::Ptr* self) {
         return (**self).getText().data();
     }
 
-    C_ABI_SETTER void ABI_RadioButton_setChecked(RadioButton::Ptr* self, int checked) {
+    C_ABI_RAW void ABI_RadioButton_setChecked(RadioButton::Ptr* self, int checked) {
         (**self).setChecked(checked);
     }
 
-    C_ABI_TESTER bool ABI_RadioButton_isChecked(RadioButton::Ptr* self) {
+    C_ABI_RAW bool ABI_RadioButton_isChecked(RadioButton::Ptr* self) {
         return (**self).isChecked();
     }
 
-    C_ABI_SETTER void ABI_RadioButton_setTextClickable(RadioButton::Ptr* self, int textClickable) {
+    C_ABI_RAW void ABI_RadioButton_setTextClickable(RadioButton::Ptr* self, int textClickable) {
         (**self).setTextClickable(textClickable);
     }
 
-    C_ABI_TESTER bool ABI_RadioButton_isTextClickable(RadioButton::Ptr* self) {
+    C_ABI_RAW bool ABI_RadioButton_isTextClickable(RadioButton::Ptr* self) {
         return (**self).isTextClickable();
     }
 
-    C_ABI_SIGNAL SignalBool* ABI_RadioButton_onCheck(RadioButton::Ptr* self) {
+    C_ABI_RAW SignalBool* ABI_RadioButton_onCheck(RadioButton::Ptr* self) {
         return &(**self).onCheck;
     }
 
-    C_ABI_SIGNAL SignalBool* ABI_RadioButton_onUncheck(RadioButton::Ptr* self) {
+    C_ABI_RAW SignalBool* ABI_RadioButton_onUncheck(RadioButton::Ptr* self) {
         return &(**self).onUncheck;
     }
 
-    C_ABI_SIGNAL SignalBool* ABI_RadioButton_onChange(RadioButton::Ptr* self) {
+    C_ABI_RAW SignalBool* ABI_RadioButton_onChange(RadioButton::Ptr* self) {
         return &(**self).onChange;
     }
 
@@ -989,8 +1110,28 @@ namespace tgui {
         return (**self).focusPreviousWidget(recursive);
     }
 
-    C_ABI_SETTER void ABI_Container_setFocused(Container::Ptr* self, int focused) {
-        (**self).setFocused(focused);
+    C_ABI_RAW bool ABI_Container_processMouseMoveEvent(Container::Ptr* self, float x, float y) {
+        return (**self).processMouseMoveEvent({x, y});
+    }
+
+    C_ABI_RAW bool ABI_Container_processMousePressEvent(Container::Ptr* self, int mouseButton, float x, float y) {
+        return (**self).processMousePressEvent(static_cast<Event::MouseButton>(mouseButton), {x, y});
+    }
+
+    C_ABI_RAW bool ABI_Container_processMouseReleaseEvent(Container::Ptr* self, int mouseButton, float x, float y) {
+        return (**self).processMouseReleaseEvent(static_cast<Event::MouseButton>(mouseButton), {x, y});
+    }
+
+	C_ABI_RAW bool ABI_Container_processScrollEvent(Container::Ptr* self, float delta, float x, float y, int touch) {
+        return (**self).processScrollEvent(delta, {x, y}, (bool)touch);
+    }
+
+	C_ABI_RAW bool ABI_Container_processKeyPressEvent(Container::Ptr* self, int key, int alt, int control, int shift, int system) {
+        return (**self).processKeyPressEvent({static_cast<Event::KeyboardKey>(key), (bool)alt, (bool)control, (bool)shift, (bool)system});
+    }
+
+	C_ABI_RAW bool ABI_Container_processTextEnteredEvent(Container::Ptr* self, int character) {
+        return (**self).processTextEnteredEvent(static_cast<char32_t>(character));
     }
 
     // ChildWindow
@@ -1202,11 +1343,11 @@ namespace tgui {
         return ptr;
     }
 
-    C_ABI_METHOD void ABI_RadioButtonGroup_uncheckRadioButtons(RadioButtonGroup::Ptr* self) {
+    C_ABI_RAW void ABI_RadioButtonGroup_uncheckRadioButtons(RadioButtonGroup::Ptr* self) {
         (**self).uncheckRadioButtons();
     }
 
-    C_ABI_GETTER RadioButton::Ptr* ABI_RadioButtonGroup_getCheckedRadioButton(RadioButtonGroup::Ptr* self) {
+    C_ABI_RAW RadioButton::Ptr* ABI_RadioButtonGroup_getCheckedRadioButton(RadioButtonGroup::Ptr* self) {
         auto button = (**self).getCheckedRadioButton();
         if (button == nullptr) {
             return nullptr;
@@ -1373,6 +1514,15 @@ namespace tgui {
         return static_cast<int>((**self).getWidgetAlignment(*widget));
     }
 
+    C_ABI_RAW void ABI_Grid_getWidgetLocations(Grid::Ptr* self, void(*f)(Widget::Ptr*, const char32_t*, int, int)) {
+        for(auto &it : (**self).getWidgetLocations()) {
+            auto ptr = new Widget::Ptr(nullptr);
+            auto widgetPtr = it.first;
+            ptr->swap(widgetPtr);
+            f(ptr, it.first->getWidgetType().data(), static_cast<int>(std::get<0>(it.second)), static_cast<int>(std::get<1>(it.second)));
+        }
+    }
+
     // ListBox
 
     C_ABI_MAKE ListBox::Ptr* ABI_ListBox_new() {
@@ -1532,23 +1682,23 @@ namespace tgui {
         return (**self).getScrollbarValue();
     }
 
-	C_ABI_SIGNAL SignalItem* onItemSelect(ListBox::Ptr* self) {
+	C_ABI_SIGNAL SignalItem* ABI_ListBox_onItemSelect(ListBox::Ptr* self) {
         return &(**self).onItemSelect;
     }
 
-	C_ABI_SIGNAL SignalItem* onMousePress(ListBox::Ptr* self) {
+	C_ABI_SIGNAL SignalItem* ABI_ListBox_onMousePress(ListBox::Ptr* self) {
         return &(**self).onMousePress;
     }
 
-	C_ABI_SIGNAL SignalItem* onMouseRelease(ListBox::Ptr* self) {
+	C_ABI_SIGNAL SignalItem* ABI_ListBox_onMouseRelease(ListBox::Ptr* self) {
         return &(**self).onMouseRelease;
     }
 
-	C_ABI_SIGNAL SignalItem* onDoubleClick(ListBox::Ptr* self) {
+	C_ABI_SIGNAL SignalItem* ABI_ListBox_onDoubleClick(ListBox::Ptr* self) {
         return &(**self).onDoubleClick;
     }
 
-	C_ABI_SIGNAL Signal* onScroll(ListBox::Ptr* self) {
+	C_ABI_SIGNAL Signal* ABI_ListBox_onScroll(ListBox::Ptr* self) {
         return &(**self).onScroll;
     }
 
