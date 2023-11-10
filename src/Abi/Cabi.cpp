@@ -48,6 +48,14 @@ namespace tgui {
         return self->disconnect(f);
     }
 
+    C_ABI_RAW void ABI_Signal_setEnabled(Signal* self, int enabled) {
+        self->setEnabled(enabled);
+    }
+
+	C_ABI_RAW bool ABI_Signal_isEnabled(Signal* self) {
+        return self->isEnabled();
+    }
+
     // SignalString
 
     C_ABI_RAW int ABI_SignalString_connect(SignalString* self, void(*f)(const char32_t*)) {
@@ -166,11 +174,9 @@ namespace tgui {
 
     // SignalPanelListBoxItem
 
-    C_ABI_RAW int ABI_SignalPanelListBoxItem_connect(SignalPanelListBoxItem* self, void(*f)(Panel::Ptr*)) {
-        return self->connect([=](Panel::Ptr panel) {
-            auto ptr = new Panel::Ptr(nullptr);
-            ptr->swap(panel);
-            f(ptr);
+    C_ABI_RAW int ABI_SignalPanelListBoxItem_connect(SignalPanelListBoxItem* self, void(*f)(const char32_t*)) {
+        return self->connect([=](const String& str) {
+            f(str.data());
         });
     }
 
@@ -1741,6 +1747,22 @@ namespace tgui {
         return static_cast<int>((**self).getColumnAlignment(index));
     }
 
+    C_ABI_RAW void ABI_ListView_setColumnAutoResize(ListView::Ptr* self, int index, int autoResize) {
+        (**self).setColumnAutoResize(index, autoResize);
+    }
+
+	C_ABI_RAW bool ABI_ListView_getColumnAutoResize(ListView::Ptr* self, int index) {
+        return (**self).getColumnAutoResize(index);
+    }
+
+	C_ABI_RAW void ABI_ListView_setColumnExpanded(ListView::Ptr* self, int index, int expanded) {
+        (**self).setColumnExpanded(index, expanded);
+    }
+
+	C_ABI_RAW bool ABI_ListView_getColumnExpanded(ListView::Ptr* self, int index) {
+        return (**self).getColumnExpanded(index);
+    }
+
 	C_ABI_METHOD void ABI_ListView_removeAllColumns(ListView::Ptr* self) {
         (**self).removeAllColumns();
     }
@@ -1943,14 +1965,6 @@ namespace tgui {
 
 	C_ABI_TESTER bool ABI_ListView_showHorizontalGridLines(ListView::Ptr* self) {
         return (**self).getShowHorizontalGridLines();
-    }
-
-	C_ABI_SETTER void ABI_ListView_setExpandLastColumn(ListView::Ptr* self, int expand) {
-        (**self).setExpandLastColumn(expand);
-    }
-
-	C_ABI_TESTER bool ABI_ListView_expandLastColumn(ListView::Ptr* self) {
-        return (**self).getExpandLastColumn();
     }
 
 	C_ABI_SETTER void ABI_ListView_setVerticalScrollbarPolicy(ListView::Ptr* self, int policy) {
@@ -2530,7 +2544,7 @@ namespace tgui {
         return (**self).getItemsWidth().getValue();
     }
 
-	C_ABI_SETTER void ABI_PanelListBox_setItemsHeight(PanelListBox::Ptr* self, float height) {
+	C_ABI_SETTER void ABI_PanelListBox_setItemsHeight(PanelListBox::Ptr* self, char* height) {
         (**self).setItemsHeight(height);
     }
 
