@@ -1021,6 +1021,92 @@ namespace tgui {
         return &(**self).onValueChange;
     }
 
+    // ChatBox
+	C_ABI ChatBox::Ptr* ABI_ChatBox_new() {
+        auto self = ChatBox::create();
+        auto ptr = new ChatBox::Ptr(nullptr);
+        ptr->swap(self);
+        return ptr;
+    }
+
+	C_ABI void ABI_ChatBox_addLine(ChatBox::Ptr* self, char* text, Color* color, int style) {
+        (**self).addLine(text, *color, style);
+    }
+
+	C_ABI const char32_t* ABI_ChatBox_getLine(ChatBox::Ptr* self, int lineIndex) {
+        auto str = new String((**self).getLine(lineIndex));
+        autoclean.push_back(str);
+        return str->data();
+    }
+
+	C_ABI Color* ABI_ChatBox_getLineColor(ChatBox::Ptr* self, int lineIndex) {
+        return new Color((**self).getLineColor(lineIndex));
+    }
+
+	C_ABI int ABI_ChatBox_getLineTextStyle(ChatBox::Ptr* self, int lineIndex) {
+        return static_cast<int>((**self).getLineTextStyle(lineIndex));
+    }
+
+	C_ABI bool ABI_ChatBox_removeLine(ChatBox::Ptr* self, int lineIndex) {
+        return (**self).removeLine(lineIndex);
+    }
+
+	C_ABI void ABI_ChatBox_removeAllLines(ChatBox::Ptr* self) {
+        (**self).removeAllLines();
+    }
+
+	C_ABI int ABI_ChatBox_getLineAmount(ChatBox::Ptr* self) {
+        return static_cast<int>((**self).getLineAmount());
+    }
+
+	C_ABI void ABI_ChatBox_setLineLimit(ChatBox::Ptr* self, int maxLines) {
+        (**self).setLineLimit(maxLines);
+    }
+
+	C_ABI int ABI_ChatBox_getLineLimit(ChatBox::Ptr* self) {
+        return static_cast<int>((**self).getLineLimit());
+    }
+
+	C_ABI void ABI_ChatBox_setTextColor(ChatBox::Ptr* self, Color* color) {
+        (**self).setTextColor(*color);
+    }
+
+	C_ABI Color* ABI_ChatBox_getTextColor(ChatBox::Ptr* self) {
+        return new Color((**self).getTextColor());
+    }
+
+	C_ABI void ABI_ChatBox_setTextStyle(ChatBox::Ptr* self, int style) {
+        (**self).setTextStyle(style);
+    }
+
+	C_ABI int ABI_ChatBox_getTextStyle(ChatBox::Ptr* self) {
+        return static_cast<int>((**self).getTextStyle());
+    }
+
+	C_ABI void ABI_ChatBox_setLinesStartFromTop(ChatBox::Ptr* self, int startFromTop) {
+        (**self).setLinesStartFromTop(startFromTop);
+    }
+
+	C_ABI bool ABI_ChatBox_getLinesStartFromTop(ChatBox::Ptr* self) {
+        return (**self).getLinesStartFromTop();
+    }
+    
+	C_ABI void ABI_ChatBox_setNewLinesBelowOthers(ChatBox::Ptr* self, int newLinesBelowOthers) {
+        (**self).setNewLinesBelowOthers(newLinesBelowOthers);
+    }
+
+	C_ABI bool ABI_ChatBox_getNewLinesBelowOthers(ChatBox::Ptr* self) {
+        return (**self).getNewLinesBelowOthers();
+    }
+
+	C_ABI void ABI_ChatBox_setScrollbarValue(ChatBox::Ptr* self, int value) {
+        (**self).setScrollbarValue(value);
+    }
+
+	C_ABI int ABI_ChatBox_getScrollbarValue(ChatBox::Ptr* self) {
+        return (**self).getScrollbarValue();
+    }
+
     // Container
 
     C_ABI void ABI_Container_get_widgets(Container::Ptr* self, void(*f)(Widget::Ptr* widget, const char32_t* type)) {

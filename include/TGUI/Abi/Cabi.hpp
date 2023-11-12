@@ -258,28 +258,26 @@ namespace tgui
 	C_ABI float ABI_Knob_getClockwiseTurning(Knob::Ptr* self);
 	C_ABI SignalFloat* ABI_Knob_onValueChange(Knob::Ptr* self);
 	// ChatBox
-	// C_ABI ChatBox::Ptr* ABI_ChatBox_new();
-	// C_ABI void ABI_ChatBox_add_line(ChatBox::Ptr* self, char* text, Color* color, int style);
-	//void addLine(const String& text, Color color, TextStyles style);
- //   TGUI_NODISCARD String getLine(std::size_t lineIndex) const;
- //   TGUI_NODISCARD Color getLineColor(std::size_t lineIndex) const;
- //   TGUI_NODISCARD TextStyles getLineTextStyle(std::size_t lineIndex) const;
- //   bool removeLine(std::size_t lineIndex);
- //   void removeAllLines();
- //   TGUI_NODISCARD std::size_t getLineAmount();
- //   void setLineLimit(std::size_t maxLines);
- //   TGUI_NODISCARD std::size_t getLineLimit();
- //   void setTextColor(Color color);
- //   TGUI_NODISCARD const Color& getTextColor() const;
- //   void setTextStyle(TextStyles style);
- //   TGUI_NODISCARD TextStyles getTextStyle() const;
- //   void setLinesStartFromTop(bool startFromTop = true);
- //   TGUI_NODISCARD bool getLinesStartFromTop() const;
- //   void setNewLinesBelowOthers(bool newLinesBelowOthers = true);
- //   TGUI_NODISCARD bool getNewLinesBelowOthers() const;
- //   void setScrollbarValue(unsigned int value);
- //   TGUI_NODISCARD unsigned int getScrollbarValue() const;
- 
+	C_ABI ChatBox::Ptr* ABI_ChatBox_new();
+	C_ABI void ABI_ChatBox_addLine(ChatBox::Ptr* self, char* text, Color* color, int style);
+	C_ABI const char32_t* ABI_ChatBox_getLine(ChatBox::Ptr* self, int lineIndex);
+	C_ABI Color* ABI_ChatBox_getLineColor(ChatBox::Ptr* self, int lineIndex);
+	C_ABI int ABI_ChatBox_getLineTextStyle(ChatBox::Ptr* self, int lineIndex);
+	C_ABI bool ABI_ChatBox_removeLine(ChatBox::Ptr* self, int lineIndex);
+	C_ABI void ABI_ChatBox_removeAllLines(ChatBox::Ptr* self);
+	C_ABI int ABI_ChatBox_getLineAmount(ChatBox::Ptr* self);
+	C_ABI void ABI_ChatBox_setLineLimit(ChatBox::Ptr* self, int maxLines);
+	C_ABI int ABI_ChatBox_getLineLimit(ChatBox::Ptr* self);
+	C_ABI void ABI_ChatBox_setTextColor(ChatBox::Ptr* self, Color* color);
+	C_ABI Color* ABI_ChatBox_getTextColor(ChatBox::Ptr* self);
+	C_ABI void ABI_ChatBox_setTextStyle(ChatBox::Ptr* self, int style);
+	C_ABI int ABI_ChatBox_getTextStyle(ChatBox::Ptr* self);
+	C_ABI void ABI_ChatBox_setLinesStartFromTop(ChatBox::Ptr* self, int startFromTop);
+	C_ABI bool ABI_ChatBox_getLinesStartFromTop(ChatBox::Ptr* self);
+	C_ABI void ABI_ChatBox_setNewLinesBelowOthers(ChatBox::Ptr* self, int newLinesBelowOthers);
+	C_ABI bool ABI_ChatBox_getNewLinesBelowOthers(ChatBox::Ptr* self);
+	C_ABI void ABI_ChatBox_setScrollbarValue(ChatBox::Ptr* self, int value);
+	C_ABI int ABI_ChatBox_getScrollbarValue(ChatBox::Ptr* self); 
 	// Container
 	C_ABI void ABI_Container_get_widgets(Container::Ptr* self, void(*f)(Widget::Ptr* widget, const char32_t* type));
 	C_ABI void ABI_Container_add(Container::Ptr* self, Widget::Ptr* widget, char* name);
