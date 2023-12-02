@@ -38,6 +38,28 @@ namespace tgui {
         return new Color(Color::applyOpacity(*self, fade));
     }
 
+    // Outline
+
+	C_ABI Outline* ABI_Outline_new(char* left, char* right, char* top, char* bottom) {
+        return new Outline(left, top, right, bottom);
+    }
+
+	C_ABI float ABI_Outline_getLeft(Outline* self) {
+        return self->getLeft();
+    }
+
+	C_ABI float ABI_Outline_getRight(Outline* self) {
+        return self->getRight();
+    }
+
+	C_ABI float ABI_Outline_getTop(Outline* self) {
+        return self->getTop();
+    }
+
+	C_ABI float ABI_Outline_getBottom(Outline* self) {
+        return self->getBottom();
+    }
+
     // Signal
 
     C_ABI int ABI_Signal_connect(Signal* self, void(*f)()) {
@@ -200,6 +222,10 @@ namespace tgui {
         return self->isOpen();
     }
 
+    C_ABI void ABI_Window_setTitle(sf::WindowBase* self, char* title) {
+        self->setTitle(title);
+    }
+
     // BackendGui
     
 	C_ABI void ABI_BackendGui_setTextSize(BackendGui* self, int textSize) {
@@ -304,7 +330,7 @@ namespace tgui {
         return gui;
     }
 
-    C_ABI bool ABI_Gui_isActive(Gui* self) {
+    C_ABI int ABI_Gui_isActive(Gui* self) {
         return self->getWindow()->isOpen();
     }
 
@@ -359,10 +385,40 @@ namespace tgui {
         return ptr;
     }
 
+    C_ABI void ABI_Gui_setClearColor(Gui* self, Color* color) {
+        self->getBackendRenderTarget()->setClearColor(*color);
+    }
+
+    C_ABI void ABI_Gui_setClipboard(Gui* self, char* text) {
+        getBackend()->setClipboard(text);
+    }
+
+    C_ABI const char32_t* ABI_Gui_getClipboard(Gui* self) {
+        auto str = new String(getBackend()->getClipboard());
+        autoclean.push_back(str);
+        return str->data();
+    }
+
     // Theme
 
     C_ABI void ABI_STATIC_Theme_setDefault(char* theme) {
         Theme::setDefault(theme);
+    }
+
+    C_ABI std::shared_ptr<Theme>* ABI_STATIC_Theme_getDefault() {
+        auto self = Theme::getDefault();
+        auto ptr = new std::shared_ptr<Theme>(nullptr);
+        ptr->swap(self);
+        return ptr;
+    }
+
+    C_ABI void ABI_STATIC_Theme_finalizer(std::shared_ptr<Theme>* pointer) {
+        (*pointer).reset();
+        delete pointer;
+    }
+
+    C_ABI void ABI_Theme_load(std::shared_ptr<Theme>* self, char* primary) {
+        (**self).load(primary);
     }
 
     // Texture
@@ -614,6 +670,72 @@ namespace tgui {
         auto str = new String((**self).getWidgetName());
         autoclean.push_back(str);
         return str->data();
+    }
+
+    C_ABI void ABI_Widget_setColorRendererProperty(Widget::Ptr* self, char* property, Color* value) {
+        (**self).getRenderer()->setProperty(property, *value);
+    }
+
+	C_ABI Color* ABI_Widget_getColorRendererProperty(Widget::Ptr* self, char* property) {
+        return new Color((**self).getSharedRenderer()->getProperty(property).getColor());
+    }
+
+	C_ABI void ABI_Widget_setStringRendererProperty(Widget::Ptr* self, char* property, char* value) {
+        (**self).getRenderer()->setProperty(property, value);
+    }
+    
+	C_ABI const char32_t* ABI_Widget_getStringRendererProperty(Widget::Ptr* self, char* property) {
+        auto str = new String((**self).getSharedRenderer()->getProperty(property).getString());
+        autoclean.push_back(str);
+        return str->data();
+    }
+
+	C_ABI void ABI_Widget_setFontRendererProperty(Widget::Ptr* self, char* property, Font* value) {
+        (**self).getRenderer()->setProperty(property, *value);
+    }
+
+	C_ABI Font* ABI_Widget_getFontRendererProperty(Widget::Ptr* self, char* property) {
+        return new Font((**self).getSharedRenderer()->getProperty(property).getFont());
+    }
+
+	C_ABI void ABI_Widget_setBooleanRendererProperty(Widget::Ptr* self, char* property, int value) {
+        (**self).getRenderer()->setProperty(property, (bool)value);
+    }
+
+	C_ABI bool ABI_Widget_getBooleanRendererProperty(Widget::Ptr* self, char* property) {
+        return (**self).getSharedRenderer()->getProperty(property).getBool();
+    }
+
+	C_ABI void ABI_Widget_setFloatRendererProperty(Widget::Ptr* self, char* property, float value) {
+        (**self).getRenderer()->setProperty(property, value);
+    }
+
+	C_ABI float ABI_Widget_getFloatRendererProperty(Widget::Ptr* self, char* property) {
+        return (**self).getSharedRenderer()->getProperty(property).getNumber();
+    }
+
+	C_ABI void ABI_Widget_setOutlineRendererProperty(Widget::Ptr* self, char* property, Outline* value) {
+        (**self).getRenderer()->setProperty(property, *value);
+    }
+
+	C_ABI Outline* ABI_Widget_getOutlineRendererProperty(Widget::Ptr* self, char* property) {
+        return new Outline((**self).getSharedRenderer()->getProperty(property).getOutline());
+    }
+
+	C_ABI void ABI_Widget_setTextureRendererProperty(Widget::Ptr* self, char* property, Texture* value) {
+        (**self).getRenderer()->setProperty(property, *value);
+    }
+
+	C_ABI Texture* ABI_Widget_getTextureRendererProperty(Widget::Ptr* self, char* property) {
+        return new Texture((**self).getSharedRenderer()->getProperty(property).getTexture());
+    }
+
+	C_ABI void ABI_Widget_setTextStylesRendererProperty(Widget::Ptr* self, char* property, int value) {
+        (**self).getRenderer()->setProperty(property, static_cast<TextStyles>(value));
+    }
+
+	C_ABI int ABI_Widget_getTextStylesRendererProperty(Widget::Ptr* self, char* property) {
+        return static_cast<int>((**self).getSharedRenderer()->getProperty(property).getTextStyle());
     }
     
     C_ABI SignalVector2f* ABI_Widget_onPositionChange(Widget::Ptr* self) {
@@ -1702,7 +1824,7 @@ namespace tgui {
         return str->data();
     }
 
-	C_ABI const int ABI_ListBox_getSelectedItemIndex(ListBox::Ptr* self) {
+	C_ABI int ABI_ListBox_getSelectedItemIndex(ListBox::Ptr* self) {
         return (**self).getSelectedItemIndex();
     }
 
@@ -1928,12 +2050,10 @@ namespace tgui {
         (**self).setSelectedItem(index);
     }
 
-	C_ABI void ABI_ListView_setSelectedItems(ListView::Ptr* self, int(*f)(void)) {
+	C_ABI void ABI_ListView_setSelectedItems(ListView::Ptr* self, int size, int(*f)(void)) {
         std::set<std::size_t> indices;
-        int index = f();
-        while(index >= 0) {
-            indices.insert(index);
-            index = f();
+        for(int i = 0; i < size; ++i) {
+            indices.insert(f());
         }
         (**self).setSelectedItems(indices);
     }

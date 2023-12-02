@@ -1,7 +1,13 @@
 #ifndef CABI_HPP
 #define CABI_HPP
 
-#define C_ABI extern "C"  __declspec(dllexport)
+#ifdef TGUI_SYSTEM_WINDOWS
+    #define C_ABI extern "C"  __declspec(dllexport)
+#endif
+
+#ifdef TGUI_SYSTEM_LINUX
+    #define C_ABI extern "C" __attribute__((visibility("default")))
+#endif
 
 #include <TGUI/TGUI.hpp>
 #include <TGUI/Backend/SFML-Graphics.hpp>
@@ -18,6 +24,12 @@ namespace tgui
 	C_ABI int ABI_Color_get_blue(Color* self);
 	C_ABI int ABI_Color_get_alpha(Color* self);
 	C_ABI Color* ABI_Color_applyOpacity(Color* self, float fade);
+	// Outline
+	C_ABI Outline* ABI_Outline_new(char* left, char* right, char* top, char* bottom);
+	C_ABI float ABI_Outline_getLeft(Outline* self);
+	C_ABI float ABI_Outline_getRight(Outline* self);
+	C_ABI float ABI_Outline_getTop(Outline* self);
+	C_ABI float ABI_Outline_getBottom(Outline* self);
 	// Signal
 	C_ABI int ABI_Signal_connect(Signal* self, void(*f)());
 	C_ABI bool ABI_Signal_disconnect(Signal* self, int f);
@@ -62,6 +74,7 @@ namespace tgui
 	C_ABI sf::RenderWindow* ABI_Window_new();
 	C_ABI void ABI_Window_close(sf::WindowBase* self);
 	C_ABI bool ABI_Window_isOpen(sf::WindowBase* self);
+	C_ABI void ABI_Window_setTitle(sf::WindowBase* self, char* title);
 	// BackendGui
 	C_ABI void ABI_BackendGui_setTextSize(BackendGui* self, int textSize);
 	C_ABI int ABI_BackendGui_getTextSize(BackendGui* self);
@@ -87,7 +100,7 @@ namespace tgui
 	C_ABI Font* ABI_Font_new(char * id);
 	// Gui
 	C_ABI Gui* ABI_Gui_new(sf::RenderWindow* window);
-	C_ABI bool ABI_Gui_isActive(Gui* self);
+	C_ABI int ABI_Gui_isActive(Gui* self);
 	C_ABI void ABI_Gui_pollEvents(Gui* self);
 	C_ABI void ABI_Gui_draw(Gui* self);
 	C_ABI void ABI_Gui_add(Gui* self, Widget::Ptr* widget, const char* name);
@@ -95,8 +108,14 @@ namespace tgui
 	C_ABI void ABI_Gui_removeAll(Gui* self);
 	C_ABI void ABI_Gui_mainLoop(Gui* self);
 	C_ABI Widget::Ptr* ABI_Gui_getWidget(Gui* self, const char* name);
+	C_ABI void ABI_Gui_setClearColor(Gui* self, Color* color);
+	C_ABI void ABI_Gui_setClipboard(Gui* self, char* text);
+	C_ABI const char32_t* ABI_Gui_getClipboard(Gui* self);
 	// Theme
 	C_ABI void ABI_STATIC_Theme_setDefault(char* theme);
+	C_ABI std::shared_ptr<Theme>* ABI_STATIC_Theme_getDefault();
+	C_ABI void ABI_STATIC_Theme_finalizer(std::shared_ptr<Theme>* pointer);
+	C_ABI void ABI_Theme_load(std::shared_ptr<Theme>* self, char* primary);
 	// Texture
 	C_ABI Texture* ABI_Texture_new(char* id, int partRectX, int partRectY, int partRectW, int partRectH, int middlePartX, int middlePartY, int middlePartW, int middlePartH, int smooth);
 	C_ABI const char32_t* ABI_Texture_getId(Texture* self);
@@ -159,6 +178,22 @@ namespace tgui
 	C_ABI const char32_t* ABI_Widget_getWidgetName(Widget::Ptr* self);
 	C_ABI SignalVector2f* ABI_Widget_onPositionChange(Widget::Ptr* self);
 	C_ABI SignalVector2f* ABI_Widget_onSizeChange(Widget::Ptr* self);
+	C_ABI void ABI_Widget_setColorRendererProperty(Widget::Ptr* self, char* property, Color* value);
+	C_ABI Color* ABI_Widget_getColorRendererProperty(Widget::Ptr* self, char* property);
+	C_ABI void ABI_Widget_setStringRendererProperty(Widget::Ptr* self, char* property, char* value);
+	C_ABI const char32_t* ABI_Widget_getStringRendererProperty(Widget::Ptr* self, char* property);
+	C_ABI void ABI_Widget_setFontRendererProperty(Widget::Ptr* self, char* property, Font* value);
+	C_ABI Font* ABI_Widget_getFontRendererProperty(Widget::Ptr* self, char* property);
+	C_ABI void ABI_Widget_setBooleanRendererProperty(Widget::Ptr* self, char* property, int value);
+	C_ABI bool ABI_Widget_getBooleanRendererProperty(Widget::Ptr* self, char* property);
+	C_ABI void ABI_Widget_setFloatRendererProperty(Widget::Ptr* self, char* property, float value);
+	C_ABI float ABI_Widget_getFloatRendererProperty(Widget::Ptr* self, char* property);
+	C_ABI void ABI_Widget_setOutlineRendererProperty(Widget::Ptr* self, char* property, Outline* value);
+	C_ABI Outline* ABI_Widget_getOutlineRendererProperty(Widget::Ptr* self, char* property);
+	C_ABI void ABI_Widget_setTextureRendererProperty(Widget::Ptr* self, char* property, Texture* value);
+	C_ABI Texture* ABI_Widget_getTextureRendererProperty(Widget::Ptr* self, char* property);
+	C_ABI void ABI_Widget_setTextStylesRendererProperty(Widget::Ptr* self, char* property, int value);
+	C_ABI int ABI_Widget_getTextStylesRendererProperty(Widget::Ptr* self, char* property);
 	C_ABI Signal* ABI_Widget_onFocus(Widget::Ptr* self);
 	C_ABI Signal* ABI_Widget_onUnfocus(Widget::Ptr* self);
 	C_ABI Signal* ABI_Widget_onMouseEnter(Widget::Ptr* self);
@@ -405,7 +440,7 @@ namespace tgui
 	C_ABI const char32_t* ABI_ListBox_getIdByIndex(ListBox::Ptr* self, int index);
 	C_ABI const char32_t* ABI_ListBox_getSelectedItem(ListBox::Ptr* self);
 	C_ABI const char32_t* ABI_ListBox_getSelectedItemId(ListBox::Ptr* self);
-	C_ABI const int ABI_ListBox_getSelectedItemIndex(ListBox::Ptr* self);
+	C_ABI int ABI_ListBox_getSelectedItemIndex(ListBox::Ptr* self);
 	C_ABI bool ABI_ListBox_changeItem(ListBox::Ptr* self, char* originalValue, char* newValue);
 	C_ABI bool ABI_ListBox_changeItemById(ListBox::Ptr* self, char* id, char* newValue);
 	C_ABI bool ABI_ListBox_changeItemByIndex(ListBox::Ptr* self, int index, char* newValue);
@@ -456,7 +491,7 @@ namespace tgui
 	C_ABI bool ABI_ListView_removeItem(ListView::Ptr* self, int index);
 	C_ABI void ABI_ListView_removeAllItems(ListView::Ptr* self);
 	C_ABI void ABI_ListView_setSelectedItem(ListView::Ptr* self, int index);
-	C_ABI void ABI_ListView_setSelectedItems(ListView::Ptr* self, int(*f)(void));
+	C_ABI void ABI_ListView_setSelectedItems(ListView::Ptr* self, int size, int(*f)(void));
 	C_ABI void ABI_ListView_deselectItems(ListView::Ptr* self);
 	C_ABI int ABI_ListView_getSelectedItemIndex(ListView::Ptr* self);
 	C_ABI void ABI_ListView_getSelectedItemIndices(ListView::Ptr* self, void(*f)(int));
