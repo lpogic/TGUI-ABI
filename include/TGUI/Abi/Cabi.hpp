@@ -116,6 +116,7 @@ namespace tgui
 	C_ABI std::shared_ptr<Theme>* ABI_STATIC_Theme_getDefault();
 	C_ABI void ABI_STATIC_Theme_finalizer(std::shared_ptr<Theme>* pointer);
 	C_ABI void ABI_Theme_load(std::shared_ptr<Theme>* self, char* primary);
+	C_ABI Theme* ABI_STATIC_Theme_getUnshared(std::shared_ptr<Theme>* pointer);
 	// Texture
 	C_ABI Texture* ABI_Texture_new(char* id, int partRectX, int partRectY, int partRectW, int partRectH, int middlePartX, int middlePartY, int middlePartW, int middlePartH, int smooth);
 	C_ABI const char32_t* ABI_Texture_getId(Texture* self);
@@ -131,6 +132,7 @@ namespace tgui
 	C_ABI Widget* ABI_STATIC_Widget_getUnshared(std::shared_ptr<Widget>* pointer);
 	C_ABI const char32_t* ABI_STATIC_Widget_getType(Widget::Ptr* self);
 	C_ABI const char32_t* ABI_Widget_getName(Widget::Ptr* self);
+	C_ABI void ABI_Widget_setRenderer(Widget::Ptr* self, char* renderer);
 	C_ABI void ABI_Widget_setSize(Widget::Ptr* self, const char* width, const char* height);
 	C_ABI Vector2f* ABI_Widget_getSize(Widget::Ptr* self);
 	C_ABI Vector2f* ABI_Widget_getFullSize(Widget::Ptr* self);
@@ -418,7 +420,8 @@ namespace tgui
 	C_ABI bool ABI_Grid_isAutoSize(Grid::Ptr* self);
 	C_ABI bool ABI_Grid_setWidgetCell(Grid::Ptr* self, Widget::Ptr* widget, int row, int column);
 	C_ABI Widget::Ptr* ABI_Grid_getWidget(Grid::Ptr* self, int row, int column);
-	C_ABI void ABI_Grid_setWidgetPadding(Grid::Ptr* self, Widget::Ptr* widget, char* paddingLeft, char* paddingRight, char* paddingTop, char* paddingBottom);
+	C_ABI void ABI_Grid_setWidgetPadding(Grid::Ptr* self, Widget::Ptr* widget, Outline* padding);
+	// C_ABI void ABI_Grid_setWidgetPadding(Grid::Ptr* self, Widget::Ptr* widget, char* paddingLeft, char* paddingRight, char* paddingTop, char* paddingBottom);
 	C_ABI Outline* ABI_Grid_getWidgetPadding(Grid::Ptr* self, Widget::Ptr* widget);
 	C_ABI void ABI_Grid_setWidgetAlignment(Grid::Ptr* self, Widget::Ptr* widget, int alignment);
 	C_ABI int ABI_Grid_getWidgetAlignment(Grid::Ptr* self, Widget::Ptr* widget);

@@ -421,6 +421,10 @@ namespace tgui {
         (**self).load(primary);
     }
 
+    C_ABI Theme* ABI_STATIC_Theme_getUnshared(std::shared_ptr<Theme>* pointer) {
+        return &(**pointer);
+    }
+
     // Texture
 
     C_ABI Texture* ABI_Texture_new(char* id, int partRectX, int partRectY, int partRectW, int partRectH, int middlePartX, int middlePartY, int middlePartW, int middlePartH, int smooth) {
@@ -480,6 +484,10 @@ namespace tgui {
         auto name = new String((**self).getWidgetName());
         autoclean.push_back(name);
         return name->data();
+    }
+
+    C_ABI void ABI_Widget_setRenderer(Widget::Ptr* self, char* renderer) {
+        (**self).setRenderer(Theme::getDefault()->getRenderer(renderer));
     }
 
     C_ABI void ABI_Widget_setSize(Widget::Ptr* self, const char* width, const char* height) {
@@ -1719,8 +1727,8 @@ namespace tgui {
         return ptr;
     }
 
-	C_ABI void ABI_Grid_setWidgetPadding(Grid::Ptr* self, Widget::Ptr* widget, char* paddingLeft, char* paddingRight, char* paddingTop, char* paddingBottom) {
-        (**self).setWidgetPadding(*widget, Padding(paddingLeft, paddingRight, paddingTop, paddingBottom));
+	C_ABI void ABI_Grid_setWidgetPadding(Grid::Ptr* self, Widget::Ptr* widget, Outline* padding) {
+        (**self).setWidgetPadding(*widget, *padding);
     }
 
 	C_ABI Outline* ABI_Grid_getWidgetPadding(Grid::Ptr* self, Widget::Ptr* widget) {
