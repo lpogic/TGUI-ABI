@@ -29,9 +29,7 @@
 #include <TGUI/extlibs/IncludeSDL.hpp>
 #include <TGUI/Backend/Window/SDL/BackendGuiSDL.hpp>
 
-#if TGUI_BUILD_AS_CXX_MODULE
-    import tgui;
-#else
+#if !TGUI_BUILD_AS_CXX_MODULE
     #include <TGUI/Backend/Window/Backend.hpp>
 #endif
 
@@ -105,12 +103,16 @@ TGUI_MODULE_EXPORT namespace tgui
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         /// @brief Opens the virtual keyboard on Android and iOS
         /// @param inputRect Part of the screen where the text input is located
+        ///
+        /// @deprecated Replaced by BackendGui::startTextInput in TGUI 1.0
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         TGUI_DEPRECATED("Use BackendGui::startTextInput instead") void openVirtualKeyboard(const FloatRect& inputRect) override;
 
 
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         /// @brief Closes the virtual keyboard on Android and iOS
+        ///
+        /// @deprecated Replaced by BackendGui::stopTextInput in TGUI 1.0
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         TGUI_DEPRECATED("Use BackendGui::stopTextInput instead") void closeVirtualKeyboard() override;
 #endif

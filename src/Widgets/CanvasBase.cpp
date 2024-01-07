@@ -22,14 +22,7 @@
 //
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-
-#include <TGUI/extlibs/IncludeSDL.hpp>
-#include <TGUI/Backend/Renderer/SDL_Renderer/BackendRendererSDL.hpp>
-#include <TGUI/Backend/Renderer/SDL_Renderer/CanvasSDL.hpp>
-
-#if !TGUI_BUILD_AS_CXX_MODULE
-    #include <TGUI/Loading/WidgetFactory.hpp>
-#endif
+#include <TGUI/Widgets/CanvasBase.hpp>
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -37,41 +30,62 @@ namespace tgui
 {
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    BackendRendererSDL::BackendRendererSDL(SDL_Renderer* renderer) :
-        m_renderer{renderer}
+    CanvasBase::CanvasBase(const char* typeName, bool initRenderer) :
+        ClickableWidget{typeName, initRenderer}
     {
-        TGUI_ASSERT(m_renderer, "renderer passed to BackendRendererSDL can't be a nullptr");
-
-        if (!WidgetFactory::getConstructFunction(U"CanvasSDL"))
-            WidgetFactory::setConstructFunction(U"CanvasSDL", std::make_shared<CanvasSDL>);
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    std::shared_ptr<BackendTexture> BackendRendererSDL::createTexture()
+    void CanvasBase::ignoreMouseEvents(bool ignore)
     {
-        return std::make_shared<BackendTextureSDL>(m_renderer);
+        m_ignoringMouseEvents = ignore;
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    unsigned int BackendRendererSDL::getMaximumTextureSize()
+    bool CanvasBase::isIgnoringMouseEvents() const
     {
-        if ((m_maxTextureSize == 0) && m_renderer)
-        {
-            SDL_RendererInfo info;
-            if (SDL_GetRendererInfo(m_renderer, &info) == 0)
-                m_maxTextureSize = std::min(info.max_texture_width, info.max_texture_height);
-        }
-
-        return static_cast<unsigned int>(m_maxTextureSize);
+        return m_ignoringMouseEvents;
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    SDL_Renderer* BackendRendererSDL::getInternalRenderer() const
+    bool CanvasBase::canGainFocus() const
     {
-        return m_renderer;
+        return false;
+    }
+
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    bool CanvasBase::isMouseOnWidget(Vector2f pos) const
+    {
+        if (m_ignoringMouseEvents)
+            return false;
+
+        return ClickableWidget::isMouseOnWidget(pos);
+    }
+
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    std::unique_ptr<DataIO::Node> CanvasBase::save(SavingRenderersMap& renderers) const
+    {
+        auto node = ClickableWidget::save(renderers);
+
+        if (m_ignoringMouseEvents)
+            node->propertyValuePairs[U"IgnoreMouseEvents"] = std::make_unique<DataIO::ValueNode>(Serializer::serialize(m_ignoringMouseEvents));
+
+        return node;
+    }
+
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void CanvasBase::load(const std::unique_ptr<DataIO::Node>& node, const LoadingRenderersMap& renderers)
+    {
+        ClickableWidget::load(node, renderers);
+
+        if (node->propertyValuePairs[U"IgnoreMouseEvents"])
+            ignoreMouseEvents(Deserializer::deserialize(ObjectConverter::Type::Bool, node->propertyValuePairs[U"IgnoreMouseEvents"]->value).getBool());
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

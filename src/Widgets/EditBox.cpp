@@ -393,6 +393,13 @@ namespace tgui
 
     void EditBox::setFocused(bool focused)
     {
+        const bool wasFocused = m_focused;
+        ClickableWidget::setFocused(focused);
+
+        // Focusing the widget may fail if its parent is disabled
+        if (focused && !m_focused)
+            return;
+
         if (m_parentGui)
         {
             if (focused)
@@ -416,11 +423,9 @@ namespace tgui
             if (m_selChars)
                 setCaretPosition(m_selEnd);
 
-            if (m_focused)
-                onReturnOrUnfocus.emit(this, m_text);
+            if (wasFocused)
+                emitReturnOrUnfocus(m_text);
         }
-
-        ClickableWidget::setFocused(focused);
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -569,7 +574,7 @@ namespace tgui
         if (event.code == Event::KeyboardKey::Enter)
         {
             onReturnKeyPress.emit(this, m_text);
-            onReturnOrUnfocus.emit(this, m_text);
+            emitReturnOrUnfocus(m_text);
         }
         else if (event.code == Event::KeyboardKey::Backspace)
             backspaceKeyPressed();
@@ -1556,6 +1561,17 @@ namespace tgui
         m_selEnd = newValue;
         if (emit)
             onCaretPositionChange.emit(this, m_selEnd);
+    }
+
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void EditBox::emitReturnOrUnfocus(const String& text)
+    {
+        if (m_onReturnOrUnfocusEmitted)
+            return;
+        m_onReturnOrUnfocusEmitted = true;
+        onReturnOrUnfocus.emit(this, text);
+        m_onReturnOrUnfocusEmitted = false;
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

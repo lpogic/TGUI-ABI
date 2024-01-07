@@ -155,6 +155,52 @@ TEST_CASE("[ScrollablePanel]")
         REQUIRE(panel->getScrollbarWidth() == 15);
     }
 
+    SECTION("getWidgetAtPos")
+    {
+        panel->setPosition(200, 150);
+        panel->setSize(320, 240);
+        panel->setContentSize({4000, 3000});
+
+        auto child = tgui::ClickableWidget::create();
+        child->setPosition({50, 100});
+        child->setSize({40, 80});
+        panel->add(child);
+
+        REQUIRE(panel->getWidgetAtPos({70, 99}, false) == nullptr);
+        REQUIRE(panel->getWidgetAtPos({70, 100}, false) == child);
+
+        panel->setVerticalScrollbarValue(90);
+        panel->setHorizontalScrollbarValue(70);
+
+        REQUIRE(panel->getWidgetAtPos({20, 89}, false) == nullptr);
+        REQUIRE(panel->getWidgetAtPos({19, 89}, false) == child);
+        REQUIRE(panel->getWidgetAtPos({19, 90}, false) == nullptr);
+    }
+
+    SECTION("Content size")
+    {
+        panel->setSize(200, 100);
+
+        auto widget1 = tgui::Button::create();
+        widget1->setPosition({20, 30});
+        widget1->setSize({200, 50});
+        panel->add(widget1);
+
+        REQUIRE(panel->getContentSize() == tgui::Vector2f{220, 80});
+
+        auto widget2 = tgui::Button::create();
+        widget2->setPosition({200, 70});
+        widget2->setSize({300, 60});
+        widget2->setOrigin({0.5f, 1.f});
+        panel->add(widget2);
+
+        REQUIRE(panel->getContentSize().x == Approx{350});
+        REQUIRE(panel->getContentSize().y == 80);
+
+        panel->setContentSize({200, 100});
+        REQUIRE(panel->getContentSize() == tgui::Vector2f{200, 100});
+    }
+
     SECTION("Events / Signals")
     {
         unsigned int mousePressedCount = 0;
@@ -237,6 +283,8 @@ TEST_CASE("[ScrollablePanel]")
             REQUIRE(mouseReleasedCount == 2);
             REQUIRE(clickedCount == 1);
         }
+
+        // TODO: Scroll event
     }
 
     testWidgetRenderer(panel->getRenderer());

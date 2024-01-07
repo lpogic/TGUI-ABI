@@ -291,7 +291,11 @@ TEST_CASE("[Backend events]")
             {
                 sf::Event eventSFML;
                 eventSFML.type = sf::Event::MouseWheelScrolled;
+#if SFML_VERSION_MAJOR >= 3
+                eventSFML.mouseWheelScroll.wheel = sf::Mouse::Wheel::Vertical;
+#else
                 eventSFML.mouseWheelScroll.wheel = sf::Mouse::Wheel::VerticalWheel;
+#endif
                 eventSFML.mouseWheelScroll.delta = 2;
                 eventSFML.mouseWheelScroll.x = 200;
                 eventSFML.mouseWheelScroll.y = 150;
@@ -304,7 +308,11 @@ TEST_CASE("[Backend events]")
                 REQUIRE(eventTGUI.mouseWheel.y == 150);
 
                 // We only handle vertical scrolling
+#if SFML_VERSION_MAJOR >= 3
+                eventSFML.mouseWheelScroll.wheel = sf::Mouse::Wheel::Horizontal;
+#else
                 eventSFML.mouseWheelScroll.wheel = sf::Mouse::Wheel::HorizontalWheel;
+#endif
                 REQUIRE(!backendGuiSFML->convertEvent(eventSFML, eventTGUI));
             }
 
@@ -332,7 +340,11 @@ TEST_CASE("[Backend events]")
                 REQUIRE(eventTGUI.mouseButton.button == tgui::Event::MouseButton::Middle);
 
                 // Only left, middle and right mouse buttons are handled
+#if SFML_VERSION_MAJOR >= 3
+                eventSFML.mouseButton.button = sf::Mouse::Button::Extra1;
+#else
                 eventSFML.mouseButton.button = sf::Mouse::Button::XButton1;
+#endif
                 REQUIRE(!backendGuiSFML->convertEvent(eventSFML, eventTGUI));
             }
 
@@ -360,7 +372,11 @@ TEST_CASE("[Backend events]")
                 REQUIRE(eventTGUI.mouseButton.button == tgui::Event::MouseButton::Middle);
 
                 // Only left, middle and right mouse buttons are handled
+#if SFML_VERSION_MAJOR >= 3
+                eventSFML.mouseButton.button = sf::Mouse::Button::Extra1;
+#else
                 eventSFML.mouseButton.button = sf::Mouse::Button::XButton1;
+#endif
                 REQUIRE(!backendGuiSFML->convertEvent(eventSFML, eventTGUI));
             }
 
@@ -481,7 +497,11 @@ TEST_CASE("[Backend events]")
 
                 // Scroll the mouse wheel on top of the slider and verify that its value changes
                 eventSFML.type = sf::Event::MouseWheelScrolled;
+#if SFML_VERSION_MAJOR >= 3
+                eventSFML.mouseWheelScroll.wheel = sf::Mouse::Wheel::Vertical;
+#else
                 eventSFML.mouseWheelScroll.wheel = sf::Mouse::Wheel::VerticalWheel;
+#endif
                 eventSFML.mouseWheelScroll.delta = 4;
                 eventSFML.mouseWheelScroll.x = 260;
                 eventSFML.mouseWheelScroll.y = 80;
@@ -774,11 +794,20 @@ TEST_CASE("[Backend events]")
             {
                 SDL_Event eventSDL;
                 eventSDL.type = SDL_EVENT_TEXT_INPUT;
+#if SDL_MAJOR_VERSION >= 3
+                char textInput[4] = {
+                    static_cast<char>(static_cast<unsigned char>(0xE2)),
+                    static_cast<char>(static_cast<unsigned char>(0x9C)),
+                    static_cast<char>(static_cast<unsigned char>(0x85)),
+                    '\0'
+                };
+                eventSDL.text.text = textInput;
+#else
                 eventSDL.text.text[0] = static_cast<char>(static_cast<unsigned char>(0xE2));
                 eventSDL.text.text[1] = static_cast<char>(static_cast<unsigned char>(0x9C));
                 eventSDL.text.text[2] = static_cast<char>(static_cast<unsigned char>(0x85));
                 eventSDL.text.text[3] = '\0';
-
+#endif
                 tgui::Event eventTGUI;
                 REQUIRE(backendGuiSDL->convertEvent(eventSDL, eventTGUI));
                 REQUIRE(eventTGUI.type == tgui::Event::Type::TextEntered);
@@ -998,6 +1027,15 @@ TEST_CASE("[Backend events]")
                 // Type 3 characters in the edit box
                 SDL_Event eventSDL;
                 eventSDL.type = SDL_EVENT_TEXT_INPUT;
+#if SDL_MAJOR_VERSION >= 3
+                char textInput[2] = "A";
+                eventSDL.text.text = textInput;
+                backendGuiSDL->handleEvent(eventSDL);
+                textInput[0] = 'B';
+                backendGuiSDL->handleEvent(eventSDL);
+                textInput[0] = 'C';
+                backendGuiSDL->handleEvent(eventSDL);
+#else
                 eventSDL.text.text[0] = 'A';
                 eventSDL.text.text[1] = 0;
                 backendGuiSDL->handleEvent(eventSDL);
@@ -1005,7 +1043,7 @@ TEST_CASE("[Backend events]")
                 backendGuiSDL->handleEvent(eventSDL);
                 eventSDL.text.text[0] = 'C';
                 backendGuiSDL->handleEvent(eventSDL);
-
+#endif
                 // Erase the second character from the edit box
                 eventSDL.type = SDL_EVENT_KEY_DOWN;
                 eventSDL.key.windowID = 0;

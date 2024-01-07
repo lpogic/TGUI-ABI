@@ -212,7 +212,10 @@ namespace tgui
 
         if (m_contentSize == Vector2f{0, 0})
         {
-            const Vector2f bottomRight = widget->getPosition() + widget->getFullSize();
+            const Vector2f bottomRight{
+                widget->getPosition().x - (widget->getOrigin().x * widget->getSize().x) + widget->getFullSize().x,
+                widget->getPosition().y - (widget->getOrigin().y * widget->getSize().y) + widget->getFullSize().y
+            };
             if (bottomRight.x > m_mostBottomRightPosition.x)
                 m_mostBottomRightPosition.x = bottomRight.x;
             if (bottomRight.y > m_mostBottomRightPosition.y)
@@ -246,7 +249,10 @@ namespace tgui
 
         if (m_contentSize == Vector2f{0, 0})
         {
-            const Vector2f bottomRight = widget->getPosition() + widget->getFullSize();
+            const Vector2f bottomRight{
+                widget->getPosition().x - (widget->getOrigin().x * widget->getSize().x) + widget->getFullSize().x,
+                widget->getPosition().y - (widget->getOrigin().y * widget->getSize().y) + widget->getFullSize().y
+            };
             if ((bottomRight.x == m_mostBottomRightPosition.x) || (bottomRight.y == m_mostBottomRightPosition.y))
             {
                 recalculateMostBottomRightPosition();
@@ -477,11 +483,15 @@ namespace tgui
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    Widget::Ptr ScrollablePanel::getWidgetAtPosition(Vector2f pos) const
+    Widget::Ptr ScrollablePanel::getWidgetAtPos(Vector2f pos, bool recursive) const
     {
+        const Vector2f widgetsOffset = getChildWidgetsOffset();
+        if ((pos.x < widgetsOffset.x) || (pos.y < widgetsOffset.y))
+            return nullptr;
+
         pos.x += static_cast<float>(m_horizontalScrollbar->getValue());
         pos.y += static_cast<float>(m_verticalScrollbar->getValue());
-        return Panel::getWidgetAtPosition(pos);
+        return Panel::getWidgetAtPos(pos, recursive);
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -859,7 +869,10 @@ namespace tgui
 
         for (const auto& widget : m_widgets)
         {
-            const Vector2f bottomRight = widget->getPosition() + widget->getFullSize();
+            const Vector2f bottomRight{
+                widget->getPosition().x - (widget->getOrigin().x * widget->getSize().x) + widget->getFullSize().x,
+                widget->getPosition().y - (widget->getOrigin().y * widget->getSize().y) + widget->getFullSize().y
+            };
             if (bottomRight.x > m_mostBottomRightPosition.x)
                 m_mostBottomRightPosition.x = bottomRight.x;
             if (bottomRight.y > m_mostBottomRightPosition.y)

@@ -22,7 +22,7 @@
 
 # If the cmake version is higher than the minimum version then enable all new policies, up to the maximum version specified.
 # When cmake is newer than the highest version then its newest policies will still be set to the old behavior for compatibility.
-cmake_minimum_required(VERSION 3.16...3.27)
+cmake_minimum_required(VERSION 3.16...3.28)
 
 # Include macros such as tgui_set_option
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/Macros.cmake)
@@ -157,7 +157,8 @@ if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.25)
             message(FATAL_ERROR "TGUI_BUILD_AS_CXX_MODULE can only be turned on if TGUI_CXX_STANDARD is set to at least 20")
         endif()
 
-        if (NOT CMAKE_EXPERIMENTAL_CXX_MODULE_CMAKE_API)
+        # TODO: Remove support for CMake < 3.28 as the lines below don't work properly anyway when placed here
+        if(CMAKE_VERSION VERSION_LESS 3.28 AND NOT CMAKE_EXPERIMENTAL_CXX_MODULE_CMAKE_API)
             if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.27)
                 set(CMAKE_EXPERIMENTAL_CXX_MODULE_CMAKE_API "aa1f7df0-828a-4fcd-9afc-2dc80491aca7") # CMake 3.27
             else()
@@ -226,6 +227,19 @@ endif()
 
 # Set the path for the libraries
 set(LIBRARY_OUTPUT_PATH "${PROJECT_BINARY_DIR}/lib")
+
+# Don't create an install target if we detect a dependency that is being build without an install target
+if (NOT DEFINED TGUI_INSTALL)
+    if ((DEFINED SDL2_DISABLE_INSTALL AND SDL2_DISABLE_INSTALL)
+     OR (DEFINED SDL_DISABLE_INSTALL AND SDL_DISABLE_INSTALL)
+     OR (DEFINED SDL2TTF_INSTALL AND NOT SDL2TTF_INSTALL)
+     OR (DEFINED SDL3TTF_INSTALL AND NOT SDL3TTF_INSTALL)
+     OR (DEFINED GLFW_INSTALL AND NOT GLFW_INSTALL))
+        set(TGUI_INSTALL OFF)
+    else()
+        set(TGUI_INSTALL ON)
+    endif()
+endif()
 
 # Define the macros to link TGUI to its dependencies
 include(${PROJECT_SOURCE_DIR}/cmake/Dependencies.cmake)
@@ -354,46 +368,48 @@ if(TGUI_BUILD_DOC)
     add_subdirectory(doc)
 endif()
 
-# Install pkg-config files by default on Linux (and BSD)
-tgui_assign_bool(TGUI_INSTALL_PKGCONFIG_DEFAULT TGUI_OS_LINUX)
-option(TGUI_INSTALL_PKGCONFIG_FILES "TRUE to automatically install pkg-config files so other projects can find TGUI" ${TGUI_INSTALL_PKGCONFIG_DEFAULT})
+if (TGUI_INSTALL)
+    # Install pkg-config files by default on Linux (and BSD)
+    tgui_assign_bool(TGUI_INSTALL_PKGCONFIG_DEFAULT TGUI_OS_LINUX)
+    option(TGUI_INSTALL_PKGCONFIG_FILES "TRUE to automatically install pkg-config files so other projects can find TGUI" ${TGUI_INSTALL_PKGCONFIG_DEFAULT})
 
-if (TGUI_INSTALL_PKGCONFIG_FILES)
-    tgui_set_option(TGUI_PKGCONFIG_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}/${TGUI_PKGCONFIG_DIR}" PATH "Install directory for TGUI's pkg-config .pc files")
+    if (TGUI_INSTALL_PKGCONFIG_FILES)
+        tgui_set_option(TGUI_PKGCONFIG_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}/${TGUI_PKGCONFIG_DIR}" PATH "Install directory for TGUI's pkg-config .pc files")
 
-    configure_file("cmake/pkgconfig/tgui.pc.in" "pkgconfig/tgui.pc" @ONLY)
-    install(FILES "${CMAKE_CURRENT_BINARY_DIR}/pkgconfig/tgui.pc" DESTINATION "${TGUI_PKGCONFIG_INSTALL_PREFIX}")
-endif()
+        configure_file("cmake/pkgconfig/tgui.pc.in" "pkgconfig/tgui.pc" @ONLY)
+        install(FILES "${CMAKE_CURRENT_BINARY_DIR}/pkgconfig/tgui.pc" DESTINATION "${TGUI_PKGCONFIG_INSTALL_PREFIX}")
+    endif()
 
-# Install include files
-if(NOT TGUI_BUILD_FRAMEWORK)
-    install(DIRECTORY include/
-            DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
-            COMPONENT devel
-            PATTERN "*.in" EXCLUDE)
-endif()
+    # Install include files
+    if(NOT TGUI_BUILD_FRAMEWORK)
+        install(DIRECTORY include/
+                DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+                COMPONENT devel
+                PATTERN "*.in" EXCLUDE)
+    endif()
 
-# Install PDB file
-if(TGUI_GENERATE_PDB)
-    # When using a Visual Studio generator, the pdb files are located in Debug and RelWithDebInfo subfolders, but not when
-    # using single-configuration generators such as NMake Makefiles.
-    # When using Linker PDB files (i.e. TGUI_SHARED_LIBS=FALSE), CMake 3.13 introduced a generator expression that helps us.
-    # Linker PDB files are installed next to the dll file (where VS searches them) while compiler PDB files are placed next to the lib file.
-    if(TGUI_SHARED_LIBS)
-        install (FILES $<TARGET_PDB_FILE:tgui> DESTINATION ${CMAKE_INSTALL_BINDIR} OPTIONAL COMPONENT devel)
-    else()
-        # TODO: Find a reliable way to know whether the file has a "-d" postfix instead of trying to install both. OPTIONAL is also required when config is Release.
-        if (MSVC_IDE)
-            install(FILES "${PROJECT_BINARY_DIR}/lib/\${CMAKE_INSTALL_CONFIG_NAME}/tgui-s.pdb" DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT devel OPTIONAL)
-            install(FILES "${PROJECT_BINARY_DIR}/lib/\${CMAKE_INSTALL_CONFIG_NAME}/tgui-s-d.pdb" DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT devel OPTIONAL)
+    # Install PDB file
+    if(TGUI_GENERATE_PDB)
+        # When using a Visual Studio generator, the pdb files are located in Debug and RelWithDebInfo subfolders, but not when
+        # using single-configuration generators such as NMake Makefiles.
+        # When using Linker PDB files (i.e. TGUI_SHARED_LIBS=FALSE), CMake 3.13 introduced a generator expression that helps us.
+        # Linker PDB files are installed next to the dll file (where VS searches them) while compiler PDB files are placed next to the lib file.
+        if(TGUI_SHARED_LIBS)
+            install(FILES $<TARGET_PDB_FILE:tgui> DESTINATION ${CMAKE_INSTALL_BINDIR} OPTIONAL COMPONENT devel)
         else()
-            install(FILES "${PROJECT_BINARY_DIR}/lib/tgui-s.pdb" DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT devel OPTIONAL)
-            install(FILES "${PROJECT_BINARY_DIR}/lib/tgui-s-d.pdb" DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT devel OPTIONAL)
+            # TODO: Find a reliable way to know whether the file has a "-d" postfix instead of trying to install both. OPTIONAL is also required when config is Release.
+            if (MSVC_IDE)
+                install(FILES "${PROJECT_BINARY_DIR}/lib/\${CMAKE_INSTALL_CONFIG_NAME}/tgui-s.pdb" DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT devel OPTIONAL)
+                install(FILES "${PROJECT_BINARY_DIR}/lib/\${CMAKE_INSTALL_CONFIG_NAME}/tgui-s-d.pdb" DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT devel OPTIONAL)
+            else()
+                install(FILES "${PROJECT_BINARY_DIR}/lib/tgui-s.pdb" DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT devel OPTIONAL)
+                install(FILES "${PROJECT_BINARY_DIR}/lib/tgui-s-d.pdb" DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT devel OPTIONAL)
+            endif()
         endif()
     endif()
-endif()
 
-# Install miscellaneous files
-install(FILES license.txt DESTINATION ${CMAKE_INSTALL_DOCDIR})
-install(FILES README.md DESTINATION ${CMAKE_INSTALL_DOCDIR})
-install(DIRECTORY themes DESTINATION "${TGUI_MISC_INSTALL_PREFIX}")
+    # Install miscellaneous files
+    install(FILES license.txt DESTINATION ${CMAKE_INSTALL_DOCDIR})
+    install(FILES README.md DESTINATION ${CMAKE_INSTALL_DOCDIR})
+    install(DIRECTORY themes DESTINATION "${TGUI_MISC_INSTALL_PREFIX}")
+endif()
