@@ -95,9 +95,12 @@ namespace tgui
 	C_ABI void ABI_BackendGui_restoreOverrideMouseCursor(BackendGui* self);
 	C_ABI void ABI_BackendGui_mapPixelToCoords(BackendGui* self, int x, int y, void(*f)(float, float));
 	C_ABI void ABI_BackendGui_mapCoordsToPixel(BackendGui* self, float x, float y, void(*f)(float, float));
+	C_ABI void ABI_BackendGui_setKeyboardNavigationEnabled(BackendGui* self, int enabled);
+	C_ABI bool ABI_BackendGui_isKeyboardNavigationEnabled(BackendGui* self);
 	C_ABI Signal* ABI_BackendGui_onViewChange(BackendGui* self);
 	// Font
 	C_ABI Font* ABI_Font_new(char * id);
+	C_ABI Font* ABI_STATIC_Font_getGlobalFont();
 	// Gui
 	C_ABI Gui* ABI_Gui_new(sf::RenderWindow* window);
 	C_ABI int ABI_Gui_isActive(Gui* self);
@@ -157,7 +160,8 @@ namespace tgui
 	C_ABI Widget::Ptr* ABI_Widget_getToolTip(Widget::Ptr* self);
 	C_ABI void ABI_Widget_setMouseCursor(Widget::Ptr* self, int cursor);
 	C_ABI int ABI_Widget_getMouseCursor(Widget::Ptr* self);
-	// C_ABI bool ABI_Widget_isDraggableWidget(Widget::Ptr* self);
+	C_ABI void ABI_Widget_setNavigation(Widget::Ptr* self, Widget::Ptr* that, int direction);
+	C_ABI Widget::Ptr* ABI_Widget_getNavigation(Widget::Ptr* self, int direction);
 	C_ABI bool ABI_Widget_isMouseDown(Widget::Ptr* self);
 	C_ABI void ABI_Widget_showWithEffect(Widget::Ptr* self, int effect, int duration);
 	C_ABI void ABI_Widget_hideWithEffect(Widget::Ptr* self, int effect, int duration);
@@ -177,6 +181,8 @@ namespace tgui
 	C_ABI void ABI_Widget_scrolled(Widget::Ptr* self, float delta, float x, float y, int touch);
 	C_ABI void ABI_Widget_askToolTip(Widget::Ptr* self, float x, float y);
 	C_ABI void ABI_Widget_setWidgetName(Widget::Ptr* self, char * name);
+	C_ABI void ABI_Widget_setAutoLayout(Widget::Ptr* self, int autoLayout);
+	C_ABI int ABI_Widget_getAutoLayout(Widget::Ptr* self);
 	C_ABI const char32_t* ABI_Widget_getWidgetName(Widget::Ptr* self);
 	C_ABI SignalVector2f* ABI_Widget_onPositionChange(Widget::Ptr* self);
 	C_ABI SignalVector2f* ABI_Widget_onSizeChange(Widget::Ptr* self);
@@ -331,7 +337,7 @@ namespace tgui
 	C_ABI int ABI_Container_getWidgetIndex(Container::Ptr* self, Widget::Ptr* widget);
 	C_ABI Widget::Ptr* ABI_Container_getFocusedChild(Container::Ptr* self);
 	C_ABI Widget::Ptr* ABI_Container_getFocusedLeaf(Container::Ptr* self);
-	C_ABI Widget::Ptr* ABI_Container_getWidgetAtPosition(Container::Ptr* self, float x, float y);
+	C_ABI Widget::Ptr* ABI_Container_getWidgetAtPos(Container::Ptr* self, float x, float y, int recursive);
 	C_ABI bool ABI_Container_focusNextWidget(Container::Ptr* self, int recursive);
 	C_ABI bool ABI_Container_focusPreviousWidget(Container::Ptr* self, int recursive);
 	// ChildWindow
@@ -849,6 +855,7 @@ namespace tgui
 	// TreeView
 	C_ABI TreeView::Ptr* ABI_TreeView_new();
 	C_ABI bool ABI_TreeView_addItem(TreeView::Ptr* self, int hierarchySize, char*(*f)(void), int createParents);
+	C_ABI bool ABI_TreeView_changeItem(TreeView::Ptr* self, int hierarchySize, char*(*f)(void), char* leafText);
 	C_ABI void ABI_TreeView_expand(TreeView::Ptr* self, int hierarchySize, char*(*f)(void));
 	C_ABI void ABI_TreeView_expandAll(TreeView::Ptr* self);
 	C_ABI void ABI_TreeView_collapse(TreeView::Ptr* self, int hierarchySize, char*(*f)(void));
@@ -886,5 +893,70 @@ namespace tgui
 	C_ABI bool ABI_Scrollbar_getVerticalScroll(Scrollbar::Ptr* self);
 	C_ABI float ABI_Scrollbar_getDefaultWidth(Scrollbar::Ptr* self);
 	C_ABI SignalUInt* ABI_Scrollbar_onValueChange(Scrollbar::Ptr* self);
+	// Canvas
+	C_ABI CanvasSFML::Ptr* ABI_Canvas_new();
+	C_ABI void ABI_Canvas_clear(CanvasSFML::Ptr* self, Color* color);
+	C_ABI void ABI_Canvas_draw(CanvasSFML::Ptr* self, sf::Drawable* drawable);
+	C_ABI void ABI_Canvas_display(CanvasSFML::Ptr* self);
+	// Shape
+	C_ABI void ABI_Shape_setTexture(sf::Shape* self, Texture* texture);
+	C_ABI Texture* ABI_Shape_getTexture(sf::Shape* self);
+	C_ABI void ABI_Shape_setFillColor(sf::Shape* self, Color* color);
+	C_ABI Color* ABI_Shape_getFillColor(sf::Shape* self);
+	C_ABI void ABI_Shape_setOutlineColor(sf::Shape* self, Color* color);
+	C_ABI Color* ABI_Shape_getOutlineColor(sf::Shape* self);
+	C_ABI void ABI_Shape_setOutlineThickness(sf::Shape* self, float thickness);
+	C_ABI float ABI_Shape_getOutlineThickness(sf::Shape* self);
+	C_ABI void ABI_Shape_setPosition(sf::Shape* self, float x, float y);
+	C_ABI Vector2f* ABI_Shape_getPosition(sf::Shape* self);
+	C_ABI void ABI_Shape_setRotation(sf::Shape* self, float angle);
+	C_ABI float ABI_Shape_getRotation(sf::Shape* self);
+	C_ABI void ABI_Shape_setScale(sf::Shape* self, float factorX, float factorY);
+	C_ABI Vector2f* ABI_Shape_getScale(sf::Shape* self);
+	C_ABI void ABI_Shape_setOrigin(sf::Shape* self, float x, float y);
+	C_ABI Vector2f* ABI_Shape_getOrigin(sf::Shape* self);
+	C_ABI int ABI_CircleShape_getPointCount(sf::CircleShape* self);
+	// CircleShape
+	C_ABI sf::CircleShape* ABI_CircleShape_new();
+	C_ABI void ABI_CircleShape_setRadius(sf::CircleShape* self, float radius);
+	C_ABI float ABI_CircleShape_getRadius(sf::CircleShape* self);
+	C_ABI void ABI_CircleShape_setPointCount(sf::CircleShape* self, int pointCount);
+	// RectangleShape
+	C_ABI sf::RectangleShape* ABI_RectangleShape_new();
+	C_ABI void ABI_RectangleShape_setSize(sf::RectangleShape* self, float width, float height);
+	C_ABI Vector2f* ABI_RectangleShape_getSize(sf::RectangleShape* self);
+	// ConvexShape
+	C_ABI sf::ConvexShape* ABI_ConvexShape_new();
+	C_ABI void ABI_ConvexShape_setPoint(sf::ConvexShape* self, int index, float x, float y);
+	C_ABI void ABI_ConvexShape_setPointCount(sf::ConvexShape* self, int pointCount);
+	// Text
+	C_ABI sf::Text* ABI_Text_new();
+	C_ABI void ABI_Text_setString(sf::Text* self, char* string);
+	C_ABI const char32_t* ABI_Text_getString(sf::Text* self);
+	C_ABI void ABI_Text_setFont(sf::Text* self, Font* font);
+	// C_ABI Font* ABI_Text_getFont(sf::Text* self);
+	C_ABI void ABI_Text_setCharacterSize(sf::Text* self, int size);
+	C_ABI int ABI_Text_getCharacterSize(sf::Text* self);
+	C_ABI void ABI_Text_setLineSpacing(sf::Text* self, float spacing);
+	C_ABI float ABI_Text_getLineSpacing(sf::Text* self);
+	C_ABI void ABI_Text_setLetterSpacing(sf::Text* self, float spacing);
+	C_ABI float ABI_Text_getLetterSpacing(sf::Text* self);
+	C_ABI void ABI_Text_setStyle(sf::Text* self, int style);
+	C_ABI int ABI_Text_getStyle(sf::Text* self);
+	C_ABI void ABI_Text_setFillColor(sf::Text* self, Color* color);
+	C_ABI Color* ABI_Text_getFillColor(sf::Text* self);
+	C_ABI void ABI_Text_setOutlineColor(sf::Text* self, Color* color);
+	C_ABI Color* ABI_Text_getOutlineColor(sf::Text* self);
+	C_ABI void ABI_Text_setOutlineThickness(sf::Text* self, float thickness);
+	C_ABI float ABI_Text_getOutlineThickness(sf::Text* self);
+	C_ABI void ABI_Text_setPosition(sf::Text* self, float x, float y);
+	C_ABI Vector2f* ABI_Text_getPosition(sf::Text* self);
+	C_ABI void ABI_Text_setRotation(sf::Text* self, float angle);
+	C_ABI float ABI_Text_getRotation(sf::Text* self);
+	C_ABI void ABI_Text_setScale(sf::Text* self, float factorX, float factorY);
+	C_ABI Vector2f* ABI_Text_getScale(sf::Text* self);
+	C_ABI void ABI_Text_setOrigin(sf::Text* self, float x, float y);
+	C_ABI Vector2f* ABI_Text_getOrigin(sf::Text* self);
+	C_ABI Vector2f* ABI_Text_findCharacterPos(sf::Text* self, int index);
 }
 #endif //CABI_HPP

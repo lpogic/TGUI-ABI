@@ -6,6 +6,15 @@ namespace tgui {
 
     std::vector<void*> autoclean;
 
+    Widget::Ptr* localWidgetPtr(std::shared_ptr<Widget> shared) {
+        if (shared == nullptr) {
+            return nullptr;
+        }
+        auto ptr = new Widget::Ptr(nullptr);
+        ptr->swap(shared);
+        return ptr;
+    }
+
     // Util
 
     C_ABI void ABI_STATIC_Util_free(void* pointer) {
@@ -312,6 +321,14 @@ namespace tgui {
         f((float)pixel.x, (float)pixel.y);
     }
 
+    C_ABI void ABI_BackendGui_setKeyboardNavigationEnabled(BackendGui* self, int enabled) {
+        (*self).setKeyboardNavigationEnabled(enabled);
+    }
+
+	C_ABI bool ABI_BackendGui_isKeyboardNavigationEnabled(BackendGui* self) {
+        return (*self).isKeyboardNavigationEnabled();
+    }
+
     C_ABI Signal* ABI_BackendGui_onViewChange(BackendGui* self) {
         return &self->onViewChange;
     }
@@ -320,6 +337,10 @@ namespace tgui {
     
     C_ABI Font* ABI_Font_new(char* id) {
         return new Font(id);
+    }
+
+    C_ABI Font* ABI_STATIC_Font_getGlobalFont() {
+        return new Font(Font::getGlobalFont());
     }
 
     // Gui
@@ -594,9 +615,36 @@ namespace tgui {
         return static_cast<int>((**self).getMouseCursor());
     }
 
-    // C_ABI bool ABI_Widget_isDraggableWidget(Widget::Ptr* self) {
-    //     return (**self).isDraggableWidget();
-    // }
+    C_ABI void ABI_Widget_setNavigation(Widget::Ptr* self, Widget::Ptr* that, int direction) {
+        switch(direction) {
+            case 0:
+                (**self).setNavigationLeft(*that);
+                break;
+            case 1:
+                (**self).setNavigationRight(*that);
+                break;
+            case 2:
+                (**self).setNavigationUp(*that);
+                break;
+            case 3:
+                (**self).setNavigationDown(*that);
+                break;
+        }
+    }
+
+	C_ABI Widget::Ptr* ABI_Widget_getNavigation(Widget::Ptr* self, int direction) {
+        switch(direction) {
+            case 0:
+                return localWidgetPtr((**self).getNavigationLeft());
+            case 1:
+                return localWidgetPtr((**self).getNavigationRight());
+            case 2:
+                return localWidgetPtr((**self).getNavigationUp());
+            case 3:
+                return localWidgetPtr((**self).getNavigationDown());
+        }
+        return nullptr;
+    }
 
 	C_ABI bool ABI_Widget_isMouseDown(Widget::Ptr* self) {
         return (**self).isMouseDown();
@@ -672,6 +720,14 @@ namespace tgui {
 
     C_ABI void ABI_Widget_setWidgetName(Widget::Ptr* self, char * name) {
         (**self).setWidgetName(name);
+    }
+
+    C_ABI void ABI_Widget_setAutoLayout(Widget::Ptr* self, int autoLayout) {
+        (**self).setAutoLayout(static_cast<AutoLayout>(autoLayout));
+    }
+
+	C_ABI int ABI_Widget_getAutoLayout(Widget::Ptr* self) {
+        return static_cast<int>((**self).getAutoLayout());
     }
 
 	C_ABI const char32_t* ABI_Widget_getWidgetName(Widget::Ptr* self) {
@@ -1320,10 +1376,9 @@ namespace tgui {
         ptr->swap(shared);
         return ptr;
     }
-
-    C_ABI Widget::Ptr* ABI_Container_getWidgetAtPosition(Container::Ptr* self, float x, float y) {
-        Vector2f v(x, y);
-        auto shared = (**self).getWidgetAtPosition(v);
+    
+    C_ABI Widget::Ptr* ABI_Container_getWidgetAtPos(Container::Ptr* self, float x, float y, int recursive) {
+        auto shared = (**self).getWidgetAtPos({x, y}, recursive);
         if (shared == nullptr) {
             return nullptr;
         }
@@ -3637,6 +3692,14 @@ namespace tgui {
         return (**self).addItem(vec, createParents);
     }
 
+    C_ABI bool ABI_TreeView_changeItem(TreeView::Ptr* self, int hierarchySize, char*(*f)(void), char* leafText) {
+        std::vector<String> vec;
+        for(int i = 0; i < hierarchySize; ++i) {
+            vec.push_back(f());
+        }
+        return (**self).changeItem(vec, leafText);
+    }
+
 	C_ABI void ABI_TreeView_expand(TreeView::Ptr* self, int hierarchySize, char*(*f)(void)) {
         std::vector<String> vec;
         for(int i = 0; i < hierarchySize; ++i) {
@@ -3810,6 +3873,266 @@ namespace tgui {
 
 	C_ABI SignalUInt* ABI_Scrollbar_onValueChange(Scrollbar::Ptr* self) {
         return &(**self).onValueChange;
+    }
+
+    // Canvas
+
+	C_ABI CanvasSFML::Ptr* ABI_Canvas_new() {
+        auto self = CanvasSFML::create();
+        auto ptr = new CanvasSFML::Ptr(nullptr);
+        ptr->swap(self);
+        return ptr;
+    }
+
+	C_ABI void ABI_Canvas_clear(CanvasSFML::Ptr* self, Color* color) {
+        (**self).clear(*color);
+    }
+
+	C_ABI void ABI_Canvas_draw(CanvasSFML::Ptr* self, sf::Drawable* drawable) {
+        (**self).draw(*drawable);
+    }
+
+	C_ABI void ABI_Canvas_display(CanvasSFML::Ptr* self) {
+        (**self).display();
+    }
+
+    // Shape
+
+	C_ABI void ABI_Shape_setTexture(sf::Shape* self, Texture* texture) {
+        const BackendTexture& bt = *texture->getData()->backendTexture;
+        const BackendTextureSFML& bts = static_cast<const BackendTextureSFML&>(bt);
+        self->setTexture(&bts.getInternalTexture(), false);
+    }
+
+	C_ABI Texture* ABI_Shape_getTexture(sf::Shape* self) {
+        const sf::Texture* sfTexture = self->getTexture();
+        auto texture = new Texture();
+        texture->loadFromPixelData(sfTexture->getSize(), sfTexture->copyToImage().getPixelsPtr());
+        return texture;
+    }
+
+	C_ABI void ABI_Shape_setFillColor(sf::Shape* self, Color* color) {
+        self->setFillColor(*color);
+    }
+
+	C_ABI Color* ABI_Shape_getFillColor(sf::Shape* self) {
+        return new Color(self->getFillColor());
+    }
+
+	C_ABI void ABI_Shape_setOutlineColor(sf::Shape* self, Color* color) {
+        self->setOutlineColor(*color);
+    }
+
+	C_ABI Color* ABI_Shape_getOutlineColor(sf::Shape* self) {
+        return new Color(self->getOutlineColor());
+    }
+
+	C_ABI void ABI_Shape_setOutlineThickness(sf::Shape* self, float thickness) {
+        self->setOutlineThickness(thickness);
+    }
+
+	C_ABI float ABI_Shape_getOutlineThickness(sf::Shape* self) {
+        return self->getOutlineThickness();
+    }
+
+	C_ABI void ABI_Shape_setPosition(sf::Shape* self, float x, float y) {
+        self->setPosition(x, y);
+    }
+
+	C_ABI Vector2f* ABI_Shape_getPosition(sf::Shape* self) {
+        return new Vector2f(self->getPosition());
+    }
+
+	C_ABI void ABI_Shape_setRotation(sf::Shape* self, float angle) {
+        self->setRotation(angle);
+    }
+
+	C_ABI float ABI_Shape_getRotation(sf::Shape* self) {
+        return self->getRotation();
+    }
+
+	C_ABI void ABI_Shape_setScale(sf::Shape* self, float factorX, float factorY) {
+        self->setScale(factorX, factorY);
+    }
+
+	C_ABI Vector2f* ABI_Shape_getScale(sf::Shape* self) {
+        return new Vector2f(self->getScale());
+    }
+
+	C_ABI void ABI_Shape_setOrigin(sf::Shape* self, float x, float y) {
+        self->setOrigin(x, y);
+    }
+
+	C_ABI Vector2f* ABI_Shape_getOrigin(sf::Shape* self) {
+        return new Vector2f(self->getOrigin());
+    }
+
+	C_ABI int ABI_CircleShape_getPointCount(sf::CircleShape* self) {
+        return static_cast<int>(self->getPointCount());
+    }
+
+	// CircleShape
+
+	C_ABI sf::CircleShape* ABI_CircleShape_new() {
+        return new sf::CircleShape();
+    }
+
+	C_ABI void ABI_CircleShape_setRadius(sf::CircleShape* self, float radius) {
+        self->setRadius(radius);
+    }
+
+	C_ABI float ABI_CircleShape_getRadius(sf::CircleShape* self) {
+        return self->getRadius();
+    }
+
+	C_ABI void ABI_CircleShape_setPointCount(sf::CircleShape* self, int pointCount) {
+        self->setPointCount(pointCount);
+    }
+
+	// RectangleShape
+
+	C_ABI sf::RectangleShape* ABI_RectangleShape_new() {
+        return new sf::RectangleShape();
+    }
+
+	C_ABI void ABI_RectangleShape_setSize(sf::RectangleShape* self, float width, float height) {
+        self->setSize({width, height});
+    }
+
+	C_ABI Vector2f* ABI_RectangleShape_getSize(sf::RectangleShape* self) {
+        return new Vector2f(self->getSize());
+    }
+
+	// ConvexShape
+
+	C_ABI sf::ConvexShape* ABI_ConvexShape_new() {
+        return new sf::ConvexShape();
+    }
+
+	C_ABI void ABI_ConvexShape_setPoint(sf::ConvexShape* self, int index, float x, float y) {
+        self->setPoint(index, {x, y});
+    }
+
+	C_ABI void ABI_ConvexShape_setPointCount(sf::ConvexShape* self, int pointCount) {
+        self->setPointCount(pointCount);
+    }
+
+    // Text
+
+	C_ABI sf::Text* ABI_Text_new() {
+        return new sf::Text();
+    }
+
+	C_ABI void ABI_Text_setString(sf::Text* self, char* string) {
+        String str{string};
+        self->setString((sf::String)str);
+    }
+
+	C_ABI const char32_t* ABI_Text_getString(sf::Text* self) {
+        return reinterpret_cast<const char32_t*>(self->getString().toUtf32().c_str());
+    }
+
+	C_ABI void ABI_Text_setFont(sf::Text* self, Font* font) {
+        const BackendFont& backend = *font->getBackendFont();
+        const BackendFontSFML& sfml = static_cast<const BackendFontSFML&>(backend);
+        const sf::Font& internalFont = const_cast<BackendFontSFML&>(sfml).getInternalFont();
+        self->setFont(internalFont);
+    }
+
+	// C_ABI Font* ABI_Text_getFont(sf::Text* self) {
+
+    // }
+
+	C_ABI void ABI_Text_setCharacterSize(sf::Text* self, int size) {
+        self->setCharacterSize(size);
+    }
+
+	C_ABI int ABI_Text_getCharacterSize(sf::Text* self) {
+        return self->getCharacterSize();
+    }
+
+	C_ABI void ABI_Text_setLineSpacing(sf::Text* self, float spacing) {
+        self->setLineSpacing(spacing);
+    }
+
+	C_ABI float ABI_Text_getLineSpacing(sf::Text* self) {
+        return self->getLineSpacing();
+    }
+
+	C_ABI void ABI_Text_setLetterSpacing(sf::Text* self, float spacing) {
+        self->setLetterSpacing(spacing);
+    }
+
+	C_ABI float ABI_Text_getLetterSpacing(sf::Text* self) {
+        return self->getLetterSpacing();
+    }
+
+	C_ABI void ABI_Text_setStyle(sf::Text* self, int style) {
+        self->setStyle(style);
+    }
+
+	C_ABI int ABI_Text_getStyle(sf::Text* self) {
+        return self->getStyle();
+    }
+
+	C_ABI void ABI_Text_setFillColor(sf::Text* self, Color* color) {
+        self->setFillColor(*color);
+    }
+
+	C_ABI Color* ABI_Text_getFillColor(sf::Text* self) {
+        return new Color(self->getFillColor());
+    }
+
+	C_ABI void ABI_Text_setOutlineColor(sf::Text* self, Color* color) {
+        self->setOutlineColor(*color);
+    }
+
+	C_ABI Color* ABI_Text_getOutlineColor(sf::Text* self) {
+        return new Color(self->getOutlineColor());
+    }
+
+	C_ABI void ABI_Text_setOutlineThickness(sf::Text* self, float thickness) {
+        self->setOutlineThickness(thickness);
+    }
+
+	C_ABI float ABI_Text_getOutlineThickness(sf::Text* self) {
+        return self->getOutlineThickness();
+    }
+
+    C_ABI void ABI_Text_setPosition(sf::Text* self, float x, float y) {
+        self->setPosition(x, y);
+    }
+
+	C_ABI Vector2f* ABI_Text_getPosition(sf::Text* self) {
+        return new Vector2f(self->getPosition());
+    }
+
+	C_ABI void ABI_Text_setRotation(sf::Text* self, float angle) {
+        self->setRotation(angle);
+    }
+
+	C_ABI float ABI_Text_getRotation(sf::Text* self) {
+        return self->getRotation();
+    }
+
+	C_ABI void ABI_Text_setScale(sf::Text* self, float factorX, float factorY) {
+        self->setScale(factorX, factorY);
+    }
+
+	C_ABI Vector2f* ABI_Text_getScale(sf::Text* self) {
+        return new Vector2f(self->getScale());
+    }
+
+	C_ABI void ABI_Text_setOrigin(sf::Text* self, float x, float y) {
+        self->setOrigin(x, y);
+    }
+
+	C_ABI Vector2f* ABI_Text_getOrigin(sf::Text* self) {
+        return new Vector2f(self->getOrigin());
+    }
+
+	C_ABI Vector2f* ABI_Text_findCharacterPos(sf::Text* self, int index) {
+        return new Vector2f(self->findCharacterPos(index));
     }
 
 }
