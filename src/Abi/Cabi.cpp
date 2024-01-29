@@ -213,13 +213,27 @@ namespace tgui {
 
     // Window
 
-    C_ABI sf::RenderWindow* ABI_Window_new() {
+    C_ABI sf::RenderWindow* ABI_Window_new(int width, int height, int style) {
 #ifdef TGUI_SYSTEM_IOS
-        return new sf::RenderWindow(sf::VideoMode::getDesktopMode(), "No title");
+        return new sf::RenderWindow(sf::VideoMode::getDesktopMode(), "No title", style);
 #elif SFML_VERSION_MAJOR >= 3
-        return new sf::RenderWindow(sf::VideoMode{ {800, 600} }, "No title");
+        return new sf::RenderWindow(sf::VideoMode{ {(unsigned int)width, (unsigned int)height} }, "No title", style);
 #else
-        return new sf::RenderWindow({ 800, 600 }, "No title");
+        sf::RenderWindow* self = nullptr;
+        if(style & 8) {
+            auto videoMode = sf::VideoMode::getFullscreenModes().front();
+            self = new sf::RenderWindow(videoMode, "No title", style & 15);
+        } else {
+            self = new sf::RenderWindow({ (unsigned int)width, (unsigned int)height }, "No title", style & 15);
+        }
+        
+#ifdef TGUI_SYSTEM_WINDOWS
+        if(style & 16) {
+            SetWindowPos(self->getSystemHandle(), HWND_TOPMOST, 0, 0, 0, 0, SWP_NOACTIVATE | SWP_ASYNCWINDOWPOS | SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOSIZE);
+        }
+#endif
+        return self;
+
 #endif
     }
 
@@ -233,6 +247,31 @@ namespace tgui {
 
     C_ABI void ABI_Window_setTitle(sf::WindowBase* self, char* title) {
         self->setTitle(title);
+    }
+
+    C_ABI void ABI_Window_setSize(sf::WindowBase* self, int width, int height) {
+        self->setSize(Vector2u(width, height));
+    }
+
+	C_ABI Vector2u* ABI_Window_getSize(sf::WindowBase* self) {
+        return new Vector2u(self->getSize());
+    }
+
+	C_ABI void ABI_Window_setPosition(sf::WindowBase* self, int x, int y) {
+        self->setPosition(Vector2i(x, y));
+    }
+
+	C_ABI Vector2u* ABI_Window_getPosition(sf::WindowBase* self) {
+        auto v = self->getPosition();
+        return new Vector2u(v.x, v.y);
+    }
+
+    C_ABI void ABI_Window_requestFocus(sf::WindowBase* self) {
+        self->requestFocus();
+    }
+
+	C_ABI bool ABI_Window_hasFocus(sf::WindowBase* self) {
+        return self->hasFocus(); 
     }
 
     // BackendGui
@@ -418,6 +457,11 @@ namespace tgui {
         auto str = new String(getBackend()->getClipboard());
         autoclean.push_back(str);
         return str->data();
+    }
+
+    C_ABI Vector2u* ABI_Gui_getScreenSize(Gui* self) {
+        auto videoMode = sf::VideoMode::getDesktopMode();
+        return new Vector2u(videoMode.width, videoMode.height);
     }
 
     // Theme
@@ -3977,6 +4021,10 @@ namespace tgui {
         return new sf::CircleShape();
     }
 
+    C_ABI void ABI_STATIC_CircleShape_delete(sf::CircleShape* self) {
+        delete self;
+    }
+
 	C_ABI void ABI_CircleShape_setRadius(sf::CircleShape* self, float radius) {
         self->setRadius(radius);
     }
@@ -3995,6 +4043,10 @@ namespace tgui {
         return new sf::RectangleShape();
     }
 
+    C_ABI void ABI_STATIC_RectangleShape_delete(sf::RectangleShape* self) {
+        delete self;
+    }
+
 	C_ABI void ABI_RectangleShape_setSize(sf::RectangleShape* self, float width, float height) {
         self->setSize({width, height});
     }
@@ -4007,6 +4059,10 @@ namespace tgui {
 
 	C_ABI sf::ConvexShape* ABI_ConvexShape_new() {
         return new sf::ConvexShape();
+    }
+    
+    C_ABI void ABI_STATIC_ConvexShape_delete(sf::ConvexShape* self) {
+        delete self;
     }
 
 	C_ABI void ABI_ConvexShape_setPoint(sf::ConvexShape* self, int index, float x, float y) {
@@ -4021,6 +4077,10 @@ namespace tgui {
 
 	C_ABI sf::Text* ABI_Text_new() {
         return new sf::Text();
+    }
+
+    C_ABI void ABI_STATIC_Text_delete(sf::Text* self) {
+        delete self;
     }
 
 	C_ABI void ABI_Text_setString(sf::Text* self, char* string) {
@@ -4133,6 +4193,188 @@ namespace tgui {
 
 	C_ABI Vector2f* ABI_Text_findCharacterPos(sf::Text* self, int index) {
         return new Vector2f(self->findCharacterPos(index));
+    }
+
+    // CustomWidget
+
+	C_ABI CustomWidgetForBindings::Ptr* ABI_CustomWidget_new() {
+        auto self = CustomWidgetForBindings::create();
+        self->implPositionChanged = [](...){};
+        self->implSizeChanged  = [](...){};
+        self->implVisibleChanged  = [](...){};
+        self->implEnableChanged  = [](...){};
+        self->implFocusChanged  = [](...){};
+        self->implCanGainFocus  = [](...){return false;};
+        self->implGetFullSize  = [](...){return Vector2f(0, 0);};
+        self->implGetWidgetOffset  = [](...){return Vector2f(0, 0);};
+        self->implUpdateTimeFunction  = [](...){return false;};
+        self->implMouseOnWidget  = [](...){return false;};
+        self->implLeftMousePressed  = [](...){return false;};
+        self->implLeftMouseReleased  = [](...){};
+        self->implRightMousePressed  = [](...){};
+        self->implRightMouseReleased  = [](...){};
+        self->implMouseMoved  = [](...){};
+        self->implKeyPressed  = [](...){};
+        self->implTextEntered  = [](...){};
+        self->implScrolled  = [](...){return false;};
+        self->implMouseNoLongerOnWidget  = [](...){};
+        self->implLeftMouseButtonNoLongerDown  = [](...){};
+        self->implMouseEnteredWidget  = [](...){};
+        self->implMouseLeftWidget  = [](...){};
+        self->implRendererChanged = [](...){return false;};
+        self->implDrawFunction = [](...){};
+        auto ptr = new CustomWidgetForBindings::Ptr(nullptr);
+        ptr->swap(self);
+        return ptr;
+    }
+
+	C_ABI void ABI_CustomWidget_implPositionChanged(CustomWidgetForBindings::Ptr* self, void(*f)(float x, float y)) {
+        (**self).implPositionChanged = [=](Vector2f vector){
+            f(vector.x, vector.y);
+        };
+    }
+
+	C_ABI void ABI_CustomWidget_implSizeChanged(CustomWidgetForBindings::Ptr* self, void(*f)(float width, float height)) {
+        (**self).implSizeChanged = [=](Vector2f vector){
+            f(vector.x, vector.y);
+        };
+    }
+
+	C_ABI void ABI_CustomWidget_implVisibleChanged(CustomWidgetForBindings::Ptr* self, void(*f)(int visible)) {
+        (**self).implVisibleChanged = [=](bool visible){
+            f(visible);
+        };
+    }
+
+	C_ABI void ABI_CustomWidget_implEnableChanged(CustomWidgetForBindings::Ptr* self, void(*f)(int enable)) {
+        (**self).implEnableChanged = [=](bool enable){
+            f(enable);
+        };
+    }
+
+	C_ABI void ABI_CustomWidget_implFocusChanged(CustomWidgetForBindings::Ptr* self, void(*f)(int focus)) {
+        (**self).implFocusChanged = [=](bool focus){
+            f(focus);
+        };
+    }
+
+	C_ABI void ABI_CustomWidget_implCanGainFocus(CustomWidgetForBindings::Ptr* self, int(*f)(void)) {
+        (**self).implCanGainFocus = [=](){
+            return static_cast<bool>(f());
+        };
+    }
+
+	C_ABI void ABI_CustomWidget_implGetFullSize(CustomWidgetForBindings::Ptr* self, float(*f)(void)) {
+        (**self).implGetFullSize = [=](){
+            return Vector2f(f(), f());
+        };
+    }
+
+	C_ABI void ABI_CustomWidget_implGetWidgetOffset(CustomWidgetForBindings::Ptr* self, float(*f)(void)) {
+        (**self).implGetWidgetOffset = [=](){
+            return Vector2f(f(), f());
+        };
+    }
+
+	C_ABI void ABI_CustomWidget_implUpdateTimeFunction(CustomWidgetForBindings::Ptr* self, int(*f)(int time)) {
+        (**self).implUpdateTimeFunction = [=](Duration time){
+            return static_cast<bool>(f(sf::Time(time).asMilliseconds()));
+        };
+    }
+
+	C_ABI void ABI_CustomWidget_implMouseOnWidget(CustomWidgetForBindings::Ptr* self, int(*f)(float x, float y)) {
+        (**self).implMouseOnWidget = [=](Vector2f pos){
+            return static_cast<bool>(f(pos.x, pos.y));
+        };
+    }
+
+	C_ABI void ABI_CustomWidget_implLeftMousePressed(CustomWidgetForBindings::Ptr* self, int(*f)(float x, float y)) {
+        (**self).implLeftMousePressed = [=](Vector2f pos){
+            return static_cast<bool>(f(pos.x, pos.y));
+        };
+    }
+
+	C_ABI void ABI_CustomWidget_implLeftMouseReleased(CustomWidgetForBindings::Ptr* self, void(*f)(float x, float y)) {
+        (**self).implLeftMouseReleased = [=](Vector2f pos){
+            f(pos.x, pos.y);
+        };
+    }
+
+	C_ABI void ABI_CustomWidget_implRightMousePressed(CustomWidgetForBindings::Ptr* self, void(*f)(float x, float y)) {
+        (**self).implRightMousePressed = [=](Vector2f pos){
+            f(pos.x, pos.y);
+        };
+    }
+
+	C_ABI void ABI_CustomWidget_implRightMouseReleased(CustomWidgetForBindings::Ptr* self, void(*f)(float x, float y)) {
+        (**self).implRightMouseReleased = [=](Vector2f pos){
+            f(pos.x, pos.y);
+        };
+    }
+
+	C_ABI void ABI_CustomWidget_implMouseMoved(CustomWidgetForBindings::Ptr* self, void(*f)(float x, float y)) {
+        (**self).implMouseMoved = [=](Vector2f pos){
+            f(pos.x, pos.y);
+        };
+    }
+
+	C_ABI void ABI_CustomWidget_implKeyPressed(CustomWidgetForBindings::Ptr* self, void(*f)(int key, int alt, int control, int shift, int system)) {
+        (**self).implKeyPressed = [=](Event::KeyEvent event){
+            f(static_cast<int>(event.code), 
+                static_cast<int>(event.alt),
+                static_cast<int>(event.control),
+                static_cast<int>(event.shift) ,
+                static_cast<int>(event.system)
+            );
+        };
+    }
+
+	C_ABI void ABI_CustomWidget_implTextEntered(CustomWidgetForBindings::Ptr* self, void(*f)(int character)) {
+        (**self).implTextEntered = [=](char32_t text){
+            f(static_cast<int>(text));
+        };
+    }
+
+	C_ABI void ABI_CustomWidget_implScrolled(CustomWidgetForBindings::Ptr* self, int(*f)(float delta, float x, float y, int touch)) {
+        (**self).implScrolled = [=](float delta, Vector2f offset, bool touch){
+            return static_cast<bool>(f(delta, offset.x, offset.y, static_cast<int>(touch)));
+        };
+    }
+
+	C_ABI void ABI_CustomWidget_implMouseNoLongerOnWidget(CustomWidgetForBindings::Ptr* self, void(*f)(void)) {
+        (**self).implMouseNoLongerOnWidget = [=](){
+            f();
+        };
+    }
+
+	C_ABI void ABI_CustomWidget_implLeftMouseButtonNoLongerDown(CustomWidgetForBindings::Ptr* self, void(*f)(void)) {
+        (**self).implLeftMouseButtonNoLongerDown = [=](){
+            f();
+        };
+    }
+
+	C_ABI void ABI_CustomWidget_implMouseEnteredWidget(CustomWidgetForBindings::Ptr* self, void(*f)(void)) {
+        (**self).implMouseEnteredWidget = [=](){
+            f();
+        };
+    }
+
+	C_ABI void ABI_CustomWidget_implMouseLeftWidget(CustomWidgetForBindings::Ptr* self, void(*f)(void)) {
+        (**self).implMouseLeftWidget = [=](){
+            f();
+        };
+    }
+
+	C_ABI void ABI_CustomWidget_implRendererChanged(CustomWidgetForBindings::Ptr* self, int(*f)(const char32_t* property)) {
+        (**self).implRendererChanged = [=](const String& property){
+            return f(property.data());
+        };
+    }
+
+	C_ABI void ABI_CustomWidget_implDrawFunction(CustomWidgetForBindings::Ptr* self, void(*f)(BackendRenderTarget* target, RenderStates* states)) {
+        (**self).implDrawFunction = [=](BackendRenderTarget& target, RenderStates states){
+            f(&target, &states);
+        };
     }
 
 }

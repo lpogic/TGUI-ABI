@@ -3,6 +3,8 @@
 
 #ifdef TGUI_SYSTEM_WINDOWS
     #define C_ABI extern "C"  __declspec(dllexport)
+		#include <windows.h>
+		#include <winuser.h>
 #endif
 
 #ifdef TGUI_SYSTEM_LINUX
@@ -11,6 +13,7 @@
 
 #include <TGUI/TGUI.hpp>
 #include <TGUI/Backend/SFML-Graphics.hpp>
+#include <TGUI/CustomWidgetForBindings.hpp>
 
 
 namespace tgui
@@ -71,10 +74,16 @@ namespace tgui
 	// SignalPanelListBoxItem
 	C_ABI int ABI_SignalPanelListBoxItem_connect(SignalPanelListBoxItem* self, void(*f)(const char32_t*));
 	// Window
-	C_ABI sf::RenderWindow* ABI_Window_new();
+	C_ABI sf::RenderWindow* ABI_Window_new(int width, int height, int style);
 	C_ABI void ABI_Window_close(sf::WindowBase* self);
 	C_ABI bool ABI_Window_isOpen(sf::WindowBase* self);
 	C_ABI void ABI_Window_setTitle(sf::WindowBase* self, char* title);
+	C_ABI void ABI_Window_setSize(sf::WindowBase* self, int width, int height);
+	C_ABI Vector2u* ABI_Window_getSize(sf::WindowBase* self);
+	C_ABI void ABI_Window_setPosition(sf::WindowBase* self, int x, int y);
+	C_ABI Vector2u* ABI_Window_getPosition(sf::WindowBase* self);
+	C_ABI void ABI_Window_requestFocus(sf::WindowBase* self);
+	C_ABI bool ABI_Window_hasFocus(sf::WindowBase* self);
 	// BackendGui
 	C_ABI void ABI_BackendGui_setTextSize(BackendGui* self, int textSize);
 	C_ABI int ABI_BackendGui_getTextSize(BackendGui* self);
@@ -114,6 +123,7 @@ namespace tgui
 	C_ABI void ABI_Gui_setClearColor(Gui* self, Color* color);
 	C_ABI void ABI_Gui_setClipboard(Gui* self, char* text);
 	C_ABI const char32_t* ABI_Gui_getClipboard(Gui* self);
+	C_ABI Vector2u* ABI_Gui_getScreenSize(Gui* self);
 	// Theme
 	C_ABI void ABI_STATIC_Theme_setDefault(char* theme);
 	C_ABI std::shared_ptr<Theme>* ABI_STATIC_Theme_getDefault();
@@ -918,19 +928,23 @@ namespace tgui
 	C_ABI int ABI_CircleShape_getPointCount(sf::CircleShape* self);
 	// CircleShape
 	C_ABI sf::CircleShape* ABI_CircleShape_new();
+	C_ABI void ABI_STATIC_CircleShape_delete(sf::CircleShape* self);
 	C_ABI void ABI_CircleShape_setRadius(sf::CircleShape* self, float radius);
 	C_ABI float ABI_CircleShape_getRadius(sf::CircleShape* self);
 	C_ABI void ABI_CircleShape_setPointCount(sf::CircleShape* self, int pointCount);
 	// RectangleShape
 	C_ABI sf::RectangleShape* ABI_RectangleShape_new();
+	C_ABI void ABI_STATIC_RectangleShape_delete(sf::RectangleShape* self);
 	C_ABI void ABI_RectangleShape_setSize(sf::RectangleShape* self, float width, float height);
 	C_ABI Vector2f* ABI_RectangleShape_getSize(sf::RectangleShape* self);
 	// ConvexShape
 	C_ABI sf::ConvexShape* ABI_ConvexShape_new();
+	C_ABI void ABI_STATIC_ConvexShape_delete(sf::ConvexShape* self);
 	C_ABI void ABI_ConvexShape_setPoint(sf::ConvexShape* self, int index, float x, float y);
 	C_ABI void ABI_ConvexShape_setPointCount(sf::ConvexShape* self, int pointCount);
 	// Text
 	C_ABI sf::Text* ABI_Text_new();
+	C_ABI void ABI_STATIC_Text_delete(sf::Text* self);
 	C_ABI void ABI_Text_setString(sf::Text* self, char* string);
 	C_ABI const char32_t* ABI_Text_getString(sf::Text* self);
 	C_ABI void ABI_Text_setFont(sf::Text* self, Font* font);
@@ -958,5 +972,31 @@ namespace tgui
 	C_ABI void ABI_Text_setOrigin(sf::Text* self, float x, float y);
 	C_ABI Vector2f* ABI_Text_getOrigin(sf::Text* self);
 	C_ABI Vector2f* ABI_Text_findCharacterPos(sf::Text* self, int index);
+	// CustomWidget
+	C_ABI CustomWidgetForBindings::Ptr* ABI_CustomWidget_new();
+	C_ABI void ABI_CustomWidget_implPositionChanged(CustomWidgetForBindings::Ptr* self, void(*f)(float x, float y));
+	C_ABI void ABI_CustomWidget_implSizeChanged(CustomWidgetForBindings::Ptr* self, void(*f)(float width, float height));
+	C_ABI void ABI_CustomWidget_implVisibleChanged(CustomWidgetForBindings::Ptr* self, void(*f)(int visible));
+	C_ABI void ABI_CustomWidget_implEnableChanged(CustomWidgetForBindings::Ptr* self, void(*f)(int enable));
+	C_ABI void ABI_CustomWidget_implFocusChanged(CustomWidgetForBindings::Ptr* self, void(*f)(int focus));
+	C_ABI void ABI_CustomWidget_implCanGainFocus(CustomWidgetForBindings::Ptr* self, int(*f)(void));
+	C_ABI void ABI_CustomWidget_implGetFullSize(CustomWidgetForBindings::Ptr* self, float(*f)(void));
+	C_ABI void ABI_CustomWidget_implGetWidgetOffset(CustomWidgetForBindings::Ptr* self, float(*f)(void));
+	C_ABI void ABI_CustomWidget_implUpdateTimeFunction(CustomWidgetForBindings::Ptr* self, int(*f)(int time));
+	C_ABI void ABI_CustomWidget_implMouseOnWidget(CustomWidgetForBindings::Ptr* self, int(*f)(float x, float y));
+	C_ABI void ABI_CustomWidget_implLeftMousePressed(CustomWidgetForBindings::Ptr* self, int(*f)(float x, float y));
+	C_ABI void ABI_CustomWidget_implLeftMouseReleased(CustomWidgetForBindings::Ptr* self, void(*f)(float x, float y));
+	C_ABI void ABI_CustomWidget_implRightMousePressed(CustomWidgetForBindings::Ptr* self, void(*f)(float x, float y));
+	C_ABI void ABI_CustomWidget_implRightMouseReleased(CustomWidgetForBindings::Ptr* self, void(*f)(float x, float y));
+	C_ABI void ABI_CustomWidget_implMouseMoved(CustomWidgetForBindings::Ptr* self, void(*f)(float x, float y));
+	C_ABI void ABI_CustomWidget_implKeyPressed(CustomWidgetForBindings::Ptr* self, void(*f)(int key, int alt, int control, int shift, int system));
+	C_ABI void ABI_CustomWidget_implTextEntered(CustomWidgetForBindings::Ptr* self, void(*f)(int character));
+	C_ABI void ABI_CustomWidget_implScrolled(CustomWidgetForBindings::Ptr* self, int(*f)(float delta, float x, float y, int touch));
+	C_ABI void ABI_CustomWidget_implMouseNoLongerOnWidget(CustomWidgetForBindings::Ptr* self, void(*f)(void));
+	C_ABI void ABI_CustomWidget_implLeftMouseButtonNoLongerDown(CustomWidgetForBindings::Ptr* self, void(*f)(void));
+	C_ABI void ABI_CustomWidget_implMouseEnteredWidget(CustomWidgetForBindings::Ptr* self, void(*f)(void));
+	C_ABI void ABI_CustomWidget_implMouseLeftWidget(CustomWidgetForBindings::Ptr* self, void(*f)(void));
+	C_ABI void ABI_CustomWidget_implRendererChanged(CustomWidgetForBindings::Ptr* self, int(*f)(const char32_t* property));
+	C_ABI void ABI_CustomWidget_implDrawFunction(CustomWidgetForBindings::Ptr* self, void(*f)(BackendRenderTarget* target, RenderStates* states));
 }
 #endif //CABI_HPP
