@@ -4222,7 +4222,7 @@ namespace tgui {
         self->implMouseEnteredWidget  = [](...){};
         self->implMouseLeftWidget  = [](...){};
         self->implRendererChanged = [](...){return false;};
-        self->implDrawFunction = [](...){};
+        self->implDrawFunction = [](BackendRenderTarget & target, RenderStates states){};
         auto ptr = new CustomWidgetForBindings::Ptr(nullptr);
         ptr->swap(self);
         return ptr;
