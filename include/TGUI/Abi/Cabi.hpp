@@ -19,9 +19,12 @@
 namespace tgui
 {
 	// Util
-	C_ABI void ABI_STATIC_Util_free(void* pointer);
+	C_ABI void ABI_STATIC_Util_deleteVector2f(Vector2f* vector);
+	C_ABI void ABI_STATIC_Util_deleteVector2i(Vector2i* vector);
+	C_ABI void ABI_STATIC_Util_deleteUIntRect(UIntRect* rect);
 	// Color
 	C_ABI Color* ABI_Color_new(int r, int g, int b, int a);
+	C_ABI void ABI_STATIC_Color_delete(Color* color);
 	C_ABI int ABI_Color_get_red(Color* self);
 	C_ABI int ABI_Color_get_green(Color* self);
 	C_ABI int ABI_Color_get_blue(Color* self);
@@ -29,6 +32,7 @@ namespace tgui
 	C_ABI Color* ABI_Color_applyOpacity(Color* self, float fade);
 	// Outline
 	C_ABI Outline* ABI_Outline_new(char* left, char* right, char* top, char* bottom);
+	C_ABI void ABI_STATIC_Outline_delete(Outline* outline);
 	C_ABI float ABI_Outline_getLeft(Outline* self);
 	C_ABI float ABI_Outline_getRight(Outline* self);
 	C_ABI float ABI_Outline_getTop(Outline* self);
@@ -75,13 +79,14 @@ namespace tgui
 	C_ABI int ABI_SignalPanelListBoxItem_connect(SignalPanelListBoxItem* self, void(*f)(const char32_t*));
 	// Window
 	C_ABI sf::RenderWindow* ABI_Window_new(int width, int height, int style);
+	C_ABI void ABI_STATIC_Window_delete(sf::RenderWindow* self);
 	C_ABI void ABI_Window_close(sf::WindowBase* self);
 	C_ABI bool ABI_Window_isOpen(sf::WindowBase* self);
 	C_ABI void ABI_Window_setTitle(sf::WindowBase* self, char* title);
 	C_ABI void ABI_Window_setSize(sf::WindowBase* self, int width, int height);
-	C_ABI Vector2u* ABI_Window_getSize(sf::WindowBase* self);
+	C_ABI Vector2i* ABI_Window_getSize(sf::WindowBase* self);
 	C_ABI void ABI_Window_setPosition(sf::WindowBase* self, int x, int y);
-	C_ABI Vector2u* ABI_Window_getPosition(sf::WindowBase* self);
+	C_ABI Vector2i* ABI_Window_getPosition(sf::WindowBase* self);
 	C_ABI void ABI_Window_requestFocus(sf::WindowBase* self);
 	C_ABI bool ABI_Window_hasFocus(sf::WindowBase* self);
 	// BackendGui
@@ -109,9 +114,11 @@ namespace tgui
 	C_ABI Signal* ABI_BackendGui_onViewChange(BackendGui* self);
 	// Font
 	C_ABI Font* ABI_Font_new(char * id);
+	C_ABI void ABI_STATIC_Font_delete(Font* font);
 	C_ABI Font* ABI_STATIC_Font_getGlobalFont();
 	// Gui
 	C_ABI Gui* ABI_Gui_new(sf::RenderWindow* window);
+	C_ABI void ABI_STATIC_Gui_delete(Gui* self);
 	C_ABI int ABI_Gui_isActive(Gui* self);
 	C_ABI void ABI_Gui_pollEvents(Gui* self);
 	C_ABI void ABI_Gui_draw(Gui* self);
@@ -123,7 +130,7 @@ namespace tgui
 	C_ABI void ABI_Gui_setClearColor(Gui* self, Color* color);
 	C_ABI void ABI_Gui_setClipboard(Gui* self, char* text);
 	C_ABI const char32_t* ABI_Gui_getClipboard(Gui* self);
-	C_ABI Vector2u* ABI_Gui_getScreenSize(Gui* self);
+	C_ABI Vector2i* ABI_Gui_getScreenSize(Gui* self);
 	// Theme
 	C_ABI void ABI_STATIC_Theme_setDefault(char* theme);
 	C_ABI std::shared_ptr<Theme>* ABI_STATIC_Theme_getDefault();
@@ -132,8 +139,9 @@ namespace tgui
 	C_ABI Theme* ABI_STATIC_Theme_getUnshared(std::shared_ptr<Theme>* pointer);
 	// Texture
 	C_ABI Texture* ABI_Texture_new(char* id, int partRectX, int partRectY, int partRectW, int partRectH, int middlePartX, int middlePartY, int middlePartW, int middlePartH, int smooth);
+	C_ABI void ABI_STATIC_Texture_delete(Texture* texture);
 	C_ABI const char32_t* ABI_Texture_getId(Texture* self);
-	C_ABI Vector2u* ABI_Texture_getImageSize(Texture* self);
+	C_ABI Vector2i* ABI_Texture_getImageSize(Texture* self);
 	C_ABI UIntRect* ABI_Texture_getPartRect(Texture* self);
 	C_ABI void ABI_Texture_setColor(Texture* self, int red, int green, int blue);
 	C_ABI Color* ABI_Texture_getColor(Texture* self);
@@ -437,7 +445,6 @@ namespace tgui
 	C_ABI bool ABI_Grid_setWidgetCell(Grid::Ptr* self, Widget::Ptr* widget, int row, int column);
 	C_ABI Widget::Ptr* ABI_Grid_getWidget(Grid::Ptr* self, int row, int column);
 	C_ABI void ABI_Grid_setWidgetPadding(Grid::Ptr* self, Widget::Ptr* widget, Outline* padding);
-	// C_ABI void ABI_Grid_setWidgetPadding(Grid::Ptr* self, Widget::Ptr* widget, char* paddingLeft, char* paddingRight, char* paddingTop, char* paddingBottom);
 	C_ABI Outline* ABI_Grid_getWidgetPadding(Grid::Ptr* self, Widget::Ptr* widget);
 	C_ABI void ABI_Grid_setWidgetAlignment(Grid::Ptr* self, Widget::Ptr* widget, int alignment);
 	C_ABI int ABI_Grid_getWidgetAlignment(Grid::Ptr* self, Widget::Ptr* widget);

@@ -4,7 +4,7 @@
 
 namespace tgui {
 
-    std::vector<void*> autoclean;
+    std::vector<String*> autoclean;
 
     Widget::Ptr* localWidgetPtr(std::shared_ptr<Widget> shared) {
         if (shared == nullptr) {
@@ -17,14 +17,26 @@ namespace tgui {
 
     // Util
 
-    C_ABI void ABI_STATIC_Util_free(void* pointer) {
-        delete pointer;
+    C_ABI void ABI_STATIC_Util_deleteVector2f(Vector2f* vector) {
+        delete vector;
+    }
+
+    C_ABI void ABI_STATIC_Util_deleteVector2i(Vector2i* vector) {
+        delete vector;
+    }
+
+	C_ABI void ABI_STATIC_Util_deleteUIntRect(UIntRect* rect) {
+        delete rect;
     }
 
     // Color
 
     C_ABI Color* ABI_Color_new(int r, int g, int b, int a) {
         return new Color(static_cast<uint8_t>(r), static_cast<uint8_t>(g), static_cast<uint8_t>(b), static_cast<uint8_t>(a));
+    }
+
+    C_ABI void ABI_STATIC_Color_delete(Color* color) {
+        delete color;
     }
 
     C_ABI int ABI_Color_get_red(Color* self) {
@@ -53,6 +65,10 @@ namespace tgui {
         return new Outline(left, top, right, bottom);
     }
 
+    C_ABI void ABI_STATIC_Outline_delete(Outline* outline) {
+        delete outline;
+    }
+
 	C_ABI float ABI_Outline_getLeft(Outline* self) {
         return self->getLeft();
     }
@@ -72,11 +88,11 @@ namespace tgui {
     // Signal
 
     C_ABI int ABI_Signal_connect(Signal* self, void(*f)()) {
-        return self->connect(f);
+        return (int)self->connect(f);
     }
 
     C_ABI bool ABI_Signal_disconnect(Signal* self, int f) {
-        return self->disconnect(f);
+        return self->disconnect((unsigned int)f);
     }
 
     C_ABI void ABI_Signal_setEnabled(Signal* self, int enabled) {
@@ -90,7 +106,7 @@ namespace tgui {
     // SignalString
 
     C_ABI int ABI_SignalString_connect(SignalString* self, void(*f)(const char32_t*)) {
-        return self->connect([=](const String& str) {
+        return (int)self->connect([=](const String& str) {
             f(str.data());
         });
     }
@@ -98,37 +114,37 @@ namespace tgui {
     // SignalBool
 
     C_ABI int ABI_SignalBool_connect(SignalBool* self, void(*f)(int)) {
-        return self->connect(f);
+        return (int)self->connect(f);
     }
 
     // SignalInt
 
     C_ABI int ABI_SignalInt_connect(SignalInt* self, void(*f)(int)) {
-        return self->connect(f);
+        return (int)self->connect(f);
     }
 
     // SignalUInt
 
 	C_ABI int ABI_SignalUInt_connect(SignalUInt* self, void(*f)(unsigned int)) {
-        return self->connect(f);
+        return (int)self->connect(f);
     }
 
     // SignalFloat
 
 	C_ABI int ABI_SignalFloat_connect(SignalFloat* self, void(*f)(float)) {
-        return self->connect(f);
+        return (int)self->connect(f);
     }
 
     // SignalRange
 
     C_ABI int ABI_SignalRange_connect(SignalRange* self, void(*f)(float, float)) {
-        return self->connect(f);
+        return (int)self->connect(f);
     }
 
     // SignalColor
 
     C_ABI int ABI_SignalColor_connect(SignalColor* self, void(*f)(void*)) {
-        return self->connect([=](Color col) {
+        return (int)self->connect([=](Color col) {
             auto color = new Color(col);
             f(color);
         });
@@ -137,7 +153,7 @@ namespace tgui {
     // SignalVector2f
 
     C_ABI int ABI_SignalVector2f_connect(SignalVector2f* self, void(*f)(void*)) {
-        return self->connect([=](Vector2f vec) {
+        return (int)self->connect([=](Vector2f vec) {
             auto vector = new Vector2f(vec);
             f(vector);
         });
@@ -146,13 +162,13 @@ namespace tgui {
     // SignalPointer
 
     C_ABI int ABI_SignalPointer_connect(SignalTyped<void*>* self, void(*f)(void*)) {
-        return self->connect(f);
+        return (int)self->connect(f);
     }
 
     // SignalShowEffect
 
     C_ABI int ABI_SignalShowEffect_connect(SignalShowEffect* self, void(*f)(int, int)) {
-        return self->connect([=](ShowEffectType showEffectType, bool show) {
+        return (int)self->connect([=](ShowEffectType showEffectType, bool show) {
             f(static_cast<int>(showEffectType), static_cast<int>(show));
         });
     }
@@ -160,7 +176,7 @@ namespace tgui {
     // SignalAnimationType
 
     C_ABI int ABI_SignalAnimationType_connect(SignalAnimationType* self, void(*f)(int)) {
-        return self->connect([=](AnimationType animationType) {
+        return (int)self->connect([=](AnimationType animationType) {
             f(static_cast<int>(animationType));
         });
     }
@@ -168,7 +184,7 @@ namespace tgui {
     // SignalItem
 
     C_ABI int ABI_SignalItem_connect(SignalItem* self, void(*f)(const char32_t*, const char32_t*)) {
-        return self->connect([=](const String& str1, const String& str2) {
+        return (int)self->connect([=](const String& str1, const String& str2) {
             f(str1.data(), str2.data());
         });
     }
@@ -176,7 +192,7 @@ namespace tgui {
     // SignalItemHierarchy
 
     C_ABI int ABI_SignalItemHierarchy_connect(SignalItemHierarchy* self, void(*f)(void*)) {
-        return self->connect([=](const std::vector< String > &fullItem) {
+        return (int)self->connect([=](const std::vector< String > &fullItem) {
             f((void*)&fullItem);
         });
     }
@@ -190,7 +206,7 @@ namespace tgui {
     // SignalTypedIntBoolPtr
 
 	C_ABI int ABI_SignalTypedIntBoolPtr_connect(SignalTypedIntBoolPtr* self, void(*f)(int, bool*)) {
-        return self->connect([=](int index, bool* shouldChange) {
+        return (int)self->connect([=](int index, bool* shouldChange) {
             f(index, shouldChange);
         });
     }
@@ -198,7 +214,7 @@ namespace tgui {
     // SignalTypedSizeT
     
 	C_ABI int ABI_SignalTypedSizeT_connect(SignalTypedSizeT* self, void(*f)(int)) {
-        return self->connect([=](std::size_t size) {
+        return (int)self->connect([=](std::size_t size) {
             f(static_cast<int>(size));
         });
     }
@@ -206,7 +222,7 @@ namespace tgui {
     // SignalPanelListBoxItem
 
     C_ABI int ABI_SignalPanelListBoxItem_connect(SignalPanelListBoxItem* self, void(*f)(const char32_t*)) {
-        return self->connect([=](const String& str) {
+        return (int)self->connect([=](const String& str) {
             f(str.data());
         });
     }
@@ -237,6 +253,10 @@ namespace tgui {
 #endif
     }
 
+    C_ABI void ABI_STATIC_Window_delete(sf::RenderWindow* self) {
+        delete self;
+    }
+
     C_ABI void ABI_Window_close(sf::WindowBase* self) {
         self->close();
     }
@@ -250,20 +270,21 @@ namespace tgui {
     }
 
     C_ABI void ABI_Window_setSize(sf::WindowBase* self, int width, int height) {
-        self->setSize(Vector2u(width, height));
+        self->setSize(Vector2u((unsigned int)width, (unsigned int)height));
     }
 
-	C_ABI Vector2u* ABI_Window_getSize(sf::WindowBase* self) {
-        return new Vector2u(self->getSize());
+	C_ABI Vector2i* ABI_Window_getSize(sf::WindowBase* self) {
+        auto v = self->getSize();
+        return new Vector2i((int)v.x, (int)v.y);
     }
 
 	C_ABI void ABI_Window_setPosition(sf::WindowBase* self, int x, int y) {
         self->setPosition(Vector2i(x, y));
     }
 
-	C_ABI Vector2u* ABI_Window_getPosition(sf::WindowBase* self) {
+	C_ABI Vector2i* ABI_Window_getPosition(sf::WindowBase* self) {
         auto v = self->getPosition();
-        return new Vector2u(v.x, v.y);
+        return new Vector2i(v);
     }
 
     C_ABI void ABI_Window_requestFocus(sf::WindowBase* self) {
@@ -277,11 +298,11 @@ namespace tgui {
     // BackendGui
     
 	C_ABI void ABI_BackendGui_setTextSize(BackendGui* self, int textSize) {
-        self->setTextSize(textSize);
+        self->setTextSize((unsigned int)textSize);
     }
 
 	C_ABI int ABI_BackendGui_getTextSize(BackendGui* self) {
-        return self->getTextSize();
+        return (int)self->getTextSize();
     }
 
     C_ABI void ABI_BackendGui_setAbsoluteView(BackendGui* self, int x, int y, int w, int h) {
@@ -378,6 +399,10 @@ namespace tgui {
         return new Font(id);
     }
 
+    C_ABI void ABI_STATIC_Font_delete(Font* font) {
+        delete font;
+    }
+
     C_ABI Font* ABI_STATIC_Font_getGlobalFont() {
         return new Font(Font::getGlobalFont());
     }
@@ -388,6 +413,10 @@ namespace tgui {
         auto gui = new Gui(*window);
         gui->getBackendRenderTarget()->setClearColor(Color(240, 240, 240));
         return gui;
+    }
+
+    C_ABI void ABI_STATIC_Gui_delete(Gui* self) {
+        delete self;
     }
 
     C_ABI int ABI_Gui_isActive(Gui* self) {
@@ -449,19 +478,19 @@ namespace tgui {
         self->getBackendRenderTarget()->setClearColor(*color);
     }
 
-    C_ABI void ABI_Gui_setClipboard(Gui* self, char* text) {
+    C_ABI void ABI_Gui_setClipboard([[maybe_unused]]Gui* self, char* text) {
         getBackend()->setClipboard(text);
     }
 
-    C_ABI const char32_t* ABI_Gui_getClipboard(Gui* self) {
+    C_ABI const char32_t* ABI_Gui_getClipboard([[maybe_unused]]Gui* self) {
         auto str = new String(getBackend()->getClipboard());
         autoclean.push_back(str);
         return str->data();
     }
 
-    C_ABI Vector2u* ABI_Gui_getScreenSize(Gui* self) {
+    C_ABI Vector2i* ABI_Gui_getScreenSize([[maybe_unused]]Gui* self) {
         auto videoMode = sf::VideoMode::getDesktopMode();
-        return new Vector2u(videoMode.width, videoMode.height);
+        return new Vector2i((int)videoMode.width, (int)videoMode.height);
     }
 
     // Theme
@@ -493,17 +522,21 @@ namespace tgui {
     // Texture
 
     C_ABI Texture* ABI_Texture_new(char* id, int partRectX, int partRectY, int partRectW, int partRectH, int middlePartX, int middlePartY, int middlePartW, int middlePartH, int smooth) {
-        UIntRect partRect(partRectX, partRectY, partRectW, partRectH);
-        UIntRect middlePart(middlePartX, middlePartY, middlePartW, middlePartH);
+        UIntRect partRect((unsigned int)partRectX, (unsigned int)partRectY, (unsigned int)partRectW, (unsigned int)partRectH);
+        UIntRect middlePart((unsigned int)middlePartX, (unsigned int)middlePartY, (unsigned int)middlePartW, (unsigned int)middlePartH);
         return new Texture(id, partRect, middlePart, smooth);
+    }
+
+    C_ABI void ABI_STATIC_Texture_delete(Texture* texture) {
+        delete texture;
     }
 
 	C_ABI const char32_t* ABI_Texture_getId(Texture* self) {
         return (*self).getId().data();
     }
 
-	C_ABI Vector2u* ABI_Texture_getImageSize(Texture* self) {
-        return new Vector2u((*self).getImageSize());
+	C_ABI Vector2i* ABI_Texture_getImageSize(Texture* self) {
+        return new Vector2i((*self).getImageSize());
     }
 
 	C_ABI UIntRect* ABI_Texture_getPartRect(Texture* self) {
@@ -580,15 +613,15 @@ namespace tgui {
     }
 
     C_ABI void ABI_Widget_setTextSize(Widget::Ptr* self, int textSize) {
-        (**self).setTextSize(textSize);
+        (**self).setTextSize((unsigned int)textSize);
     }
 
 	C_ABI int ABI_Widget_getTextSize(Widget::Ptr* self) {
-        return (**self).getTextSize();
+        return (int)(**self).getTextSize();
     }
 
     C_ABI void ABI_Widget_setWidth(Widget::Ptr* self, char* width) {
-        (**self).setWidth(width);
+        (**self).setWidth(width); 
     }
 
     C_ABI void ABI_Widget_setHeight(Widget::Ptr* self, char* height) {
@@ -751,7 +784,7 @@ namespace tgui {
     }
 
 	C_ABI void ABI_Widget_textEntered(Widget::Ptr* self, int character) {
-        (**self).textEntered(character);
+        (**self).textEntered((char32_t)character);
     }
 
 	C_ABI void ABI_Widget_scrolled(Widget::Ptr* self, float delta, float x, float y, int touch) {
@@ -839,7 +872,7 @@ namespace tgui {
     }
 
 	C_ABI void ABI_Widget_setTextStylesRendererProperty(Widget::Ptr* self, char* property, int value) {
-        (**self).getRenderer()->setProperty(property, static_cast<TextStyles>(value));
+        (**self).getRenderer()->setProperty(property, (TextStyles)(unsigned int)value);
     }
 
 	C_ABI int ABI_Widget_getTextStylesRendererProperty(Widget::Ptr* self, char* property) {
@@ -982,7 +1015,7 @@ namespace tgui {
     }
 
     C_ABI void ABI_EditBox_selectText(EditBox::Ptr* self, int start, int length) {
-        (**self).selectText(start, length);
+        (**self).selectText((std::size_t)start, (std::size_t)length);
     }
 
     C_ABI const char32_t* ABI_EditBox_getSelectedText(EditBox::Ptr* self) {
@@ -992,7 +1025,7 @@ namespace tgui {
     }
 
     C_ABI void ABI_EditBox_setPasswordCharacter(EditBox::Ptr* self, char* character) {
-        (**self).setPasswordCharacter(*character);
+        (**self).setPasswordCharacter((char32_t)*character);
     }
 
     C_ABI char ABI_EditBox_getPasswordCharacter(EditBox::Ptr* self) {
@@ -1032,7 +1065,7 @@ namespace tgui {
     }
 
     C_ABI void ABI_EditBox_setCaretPosition(EditBox::Ptr* self, int caretPosition) {
-        (**self).setCaretPosition(caretPosition);
+        (**self).setCaretPosition((std::size_t)caretPosition);
     }
 
     C_ABI int ABI_EditBox_getCaretPosition(EditBox::Ptr* self) {
@@ -1109,7 +1142,7 @@ namespace tgui {
     }
 
     C_ABI int ABI_Label_getScrollbarValue(Label::Ptr* self) {
-        return (**self).getScrollbarValue();
+        return (int)(**self).getScrollbarValue();
     }
 
     C_ABI void ABI_Label_setAutoSize(Label::Ptr* self, int autoSize) {
@@ -1260,25 +1293,25 @@ namespace tgui {
     }
 
 	C_ABI void ABI_ChatBox_addLine(ChatBox::Ptr* self, char* text, Color* color, int style) {
-        (**self).addLine(text, *color, style);
+        (**self).addLine(text, *color, (unsigned int)style);
     }
 
 	C_ABI const char32_t* ABI_ChatBox_getLine(ChatBox::Ptr* self, int lineIndex) {
-        auto str = new String((**self).getLine(lineIndex));
+        auto str = new String((**self).getLine((std::size_t)lineIndex));
         autoclean.push_back(str);
         return str->data();
     }
 
 	C_ABI Color* ABI_ChatBox_getLineColor(ChatBox::Ptr* self, int lineIndex) {
-        return new Color((**self).getLineColor(lineIndex));
+        return new Color((**self).getLineColor((std::size_t)lineIndex));
     }
 
 	C_ABI int ABI_ChatBox_getLineTextStyle(ChatBox::Ptr* self, int lineIndex) {
-        return static_cast<int>((**self).getLineTextStyle(lineIndex));
+        return static_cast<int>((**self).getLineTextStyle((std::size_t)lineIndex));
     }
 
 	C_ABI bool ABI_ChatBox_removeLine(ChatBox::Ptr* self, int lineIndex) {
-        return (**self).removeLine(lineIndex);
+        return (**self).removeLine((std::size_t)lineIndex);
     }
 
 	C_ABI void ABI_ChatBox_removeAllLines(ChatBox::Ptr* self) {
@@ -1290,7 +1323,7 @@ namespace tgui {
     }
 
 	C_ABI void ABI_ChatBox_setLineLimit(ChatBox::Ptr* self, int maxLines) {
-        (**self).setLineLimit(maxLines);
+        (**self).setLineLimit((std::size_t)maxLines);
     }
 
 	C_ABI int ABI_ChatBox_getLineLimit(ChatBox::Ptr* self) {
@@ -1306,7 +1339,7 @@ namespace tgui {
     }
 
 	C_ABI void ABI_ChatBox_setTextStyle(ChatBox::Ptr* self, int style) {
-        (**self).setTextStyle(style);
+        (**self).setTextStyle((unsigned int)style);
     }
 
 	C_ABI int ABI_ChatBox_getTextStyle(ChatBox::Ptr* self) {
@@ -1330,11 +1363,11 @@ namespace tgui {
     }
 
 	C_ABI void ABI_ChatBox_setScrollbarValue(ChatBox::Ptr* self, int value) {
-        (**self).setScrollbarValue(value);
+        (**self).setScrollbarValue((unsigned int)value);
     }
 
 	C_ABI int ABI_ChatBox_getScrollbarValue(ChatBox::Ptr* self) {
-        return (**self).getScrollbarValue();
+        return (int)(**self).getScrollbarValue();
     }
 
     // Container
@@ -1394,7 +1427,7 @@ namespace tgui {
     }
 
     C_ABI bool ABI_Container_setWidgetIndex(Container::Ptr* self, Widget::Ptr* widget, int index) {
-        return (**self).setWidgetIndex(*widget, index);
+        return (**self).setWidgetIndex(*widget, (std::size_t)index);
     }
 
     C_ABI int ABI_Container_getWidgetIndex(Container::Ptr* self, Widget::Ptr* widget) {
@@ -1596,18 +1629,18 @@ namespace tgui {
     // BoxLayout
 
     C_ABI Widget::Ptr* ABI_BoxLayout_getByIndex(BoxLayout::Ptr* self, int index) {
-        auto widget = (**self).get(index);
+        auto widget = (**self).get((std::size_t)index);
         auto ptr = new Widget::Ptr(nullptr);
         ptr->swap(widget);
         return ptr;
     }
 
     C_ABI void ABI_BoxLayout_insert(BoxLayout::Ptr* self, int index, Widget::Ptr* widget, char* name) {
-        (**self).insert(index, *widget, name);
+        (**self).insert((std::size_t)index, *widget, name);
     }
 
     C_ABI bool ABI_BoxLayout_removeByIndex(BoxLayout::Ptr* self, int index) {
-        return (**self).remove(index);
+        return (**self).remove((std::size_t)index);
     }
 
     // BoxLayoutRatios
@@ -1617,7 +1650,7 @@ namespace tgui {
     }
 
     C_ABI void ABI_BoxLayoutRatios_insertSpace(BoxLayoutRatios::Ptr* self, int index, float ratio) {
-        (**self).insertSpace(index, ratio);
+        (**self).insertSpace((std::size_t)index, ratio);
     }
 
     C_ABI void ABI_BoxLayoutRatios_setRatio(BoxLayoutRatios::Ptr* self, Widget::Ptr* widget, float ratio) {
@@ -1625,7 +1658,7 @@ namespace tgui {
     }
 
     C_ABI void ABI_BoxLayoutRatios_setRatioByIndex(BoxLayoutRatios::Ptr* self, int index, float ratio) {
-        (**self).setRatio(index, ratio);
+        (**self).setRatio((std::size_t)index, ratio);
     }
 
     C_ABI float ABI_BoxLayoutRatios_getRatio(BoxLayoutRatios::Ptr* self, Widget::Ptr* widget) {
@@ -1633,7 +1666,7 @@ namespace tgui {
     }
 
     C_ABI float ABI_BoxLayoutRatios_getRatioByIndex(BoxLayoutRatios::Ptr* self, int index) {
-        return (**self).getRatio(index);
+        return (**self).getRatio((std::size_t)index);
     }
 
     // HorizontalLayout
@@ -1765,7 +1798,7 @@ namespace tgui {
     }
 
     C_ABI void ABI_ScrollablePanel_setVerticalScrollAmount(ScrollablePanel::Ptr* self, int amount) {
-        (**self).setVerticalScrollAmount(amount);
+        (**self).setVerticalScrollAmount((unsigned int)amount);
     }
 
     C_ABI int ABI_ScrollablePanel_getVerticalScrollAmount(ScrollablePanel::Ptr* self) {
@@ -1773,7 +1806,7 @@ namespace tgui {
     }
 
     C_ABI void ABI_ScrollablePanel_setHorizontalScrollAmount(ScrollablePanel::Ptr* self, int amount) {
-        (**self).setHorizontalScrollAmount(amount);
+        (**self).setHorizontalScrollAmount((unsigned int)amount);
     }
 
     C_ABI int ABI_ScrollablePanel_getHorizontalScrollAmount(ScrollablePanel::Ptr* self) {
@@ -1781,7 +1814,7 @@ namespace tgui {
     }
 
     C_ABI void ABI_ScrollablePanel_setVerticalScrollbarValue(ScrollablePanel::Ptr* self, int value) {
-        (**self).setVerticalScrollbarValue(value);
+        (**self).setVerticalScrollbarValue((unsigned int)value);
     }
 
     C_ABI int ABI_ScrollablePanel_getVerticalScrollbarValue(ScrollablePanel::Ptr* self) {
@@ -1789,7 +1822,7 @@ namespace tgui {
     }
 
     C_ABI void ABI_ScrollablePanel_setHorizontalScrollbarValue(ScrollablePanel::Ptr* self, int value) {
-        (**self).setHorizontalScrollbarValue(value);
+        (**self).setHorizontalScrollbarValue((unsigned int)value);
     }
 
     C_ABI int ABI_ScrollablePanel_getHorizontalScrollbarValue(ScrollablePanel::Ptr* self) {
@@ -1814,13 +1847,13 @@ namespace tgui {
     }
 
 	C_ABI bool ABI_Grid_setWidgetCell(Grid::Ptr* self, Widget::Ptr* widget, int row, int column) {
-        auto alignment = (**self).getWidgetAlignment(row, column);
-        auto padding = (**self).getWidgetPadding(row, column);
-        return (**self).setWidgetCell(*widget, row, column, alignment, padding);
+        auto alignment = (**self).getWidgetAlignment((std::size_t)row, (std::size_t)column);
+        auto padding = (**self).getWidgetPadding((std::size_t)row, (std::size_t)column);
+        return (**self).setWidgetCell(*widget, (std::size_t)row, (std::size_t)column, alignment, padding);
     }
 
 	C_ABI Widget::Ptr* ABI_Grid_getWidget(Grid::Ptr* self, int row, int column) {
-        auto widget = (**self).getWidget(row, column);
+        auto widget = (**self).getWidget((std::size_t)row, (std::size_t)column);
         auto ptr = new Widget::Ptr(nullptr);
         ptr->swap(widget);
         return ptr;
@@ -1874,7 +1907,7 @@ namespace tgui {
     }
 
 	C_ABI bool ABI_ListBox_setSelectedItemByIndex(ListBox::Ptr* self, int index) {
-        return (**self).setSelectedItemByIndex(index);
+        return (**self).setSelectedItemByIndex((std::size_t)index);
     }
 
 	C_ABI void ABI_ListBox_deselectItem(ListBox::Ptr* self) {
@@ -1890,7 +1923,7 @@ namespace tgui {
     }
 
 	C_ABI bool ABI_ListBox_removeItemByIndex(ListBox::Ptr* self, int index) {
-        return (**self).removeItemByIndex(index);
+        return (**self).removeItemByIndex((std::size_t)index);
     }
 
 	C_ABI void ABI_ListBox_removeAllItems(ListBox::Ptr* self) {
@@ -1904,7 +1937,7 @@ namespace tgui {
     }
 
 	C_ABI const char32_t* ABI_ListBox_getItemByIndex(ListBox::Ptr* self, int index) {
-        auto str = new String((**self).getItemByIndex(index));
+        auto str = new String((**self).getItemByIndex((std::size_t)index));
         autoclean.push_back(str);
         return str->data();
     }
@@ -1914,7 +1947,7 @@ namespace tgui {
     }
 
 	C_ABI const char32_t* ABI_ListBox_getIdByIndex(ListBox::Ptr* self, int index) {
-        auto str = new String((**self).getIdByIndex(index));
+        auto str = new String((**self).getIdByIndex((std::size_t)index));
         autoclean.push_back(str);
         return str->data();
     }
@@ -1944,7 +1977,7 @@ namespace tgui {
     }
 
 	C_ABI bool ABI_ListBox_changeItemByIndex(ListBox::Ptr* self, int index, char* newValue) {
-        return (**self).changeItemByIndex(index, newValue);
+        return (**self).changeItemByIndex((std::size_t)index, newValue);
     }
 
 	C_ABI int ABI_ListBox_getItemCount(ListBox::Ptr* self) {
@@ -1964,15 +1997,15 @@ namespace tgui {
     }
 
 	C_ABI void ABI_ListBox_setItemHeight(ListBox::Ptr* self, int itemHeight) {
-        (**self).setItemHeight(itemHeight);
+        (**self).setItemHeight((unsigned int)itemHeight);
     }
 
 	C_ABI int ABI_ListBox_getItemHeight(ListBox::Ptr* self) {
-        return (**self).getItemHeight();
+        return (int)(**self).getItemHeight();
     }
 
 	C_ABI void ABI_ListBox_setMaximumItems(ListBox::Ptr* self, int maximumItems) {
-        (**self).setMaximumItems(maximumItems);
+        (**self).setMaximumItems((std::size_t)maximumItems);
     }
 
 	C_ABI int ABI_ListBox_getMaximumItems(ListBox::Ptr* self) {
@@ -2004,11 +2037,11 @@ namespace tgui {
     }
 
 	C_ABI void ABI_ListBox_setScrollbarValue(ListBox::Ptr* self, int value) {
-        (**self).setScrollbarValue(value);
+        (**self).setScrollbarValue((unsigned int)value);
     }
 
 	C_ABI int ABI_ListBox_getScrollbarValue(ListBox::Ptr* self) {
-        return (**self).getScrollbarValue();
+        return (int)(**self).getScrollbarValue();
     }
 
 	C_ABI SignalItem* ABI_ListBox_onItemSelect(ListBox::Ptr* self) {
@@ -2045,45 +2078,45 @@ namespace tgui {
     }
 
 	C_ABI void ABI_ListView_setColumnText(ListView::Ptr* self, int index, char* text) {
-        (**self).setColumnText(index, text);
+        (**self).setColumnText((std::size_t)index, text);
     }
 
 	C_ABI const char32_t* ABI_ListView_getColumnText(ListView::Ptr* self, int index) {
-        auto str = new String((**self).getColumnText(index));
+        auto str = new String((**self).getColumnText((std::size_t)index));
         autoclean.push_back(str);
         return str->data();
     }
 
 	C_ABI void ABI_ListView_setColumnWidth(ListView::Ptr* self, int index, float width) {
-        (**self).setColumnWidth(index, width);
+        (**self).setColumnWidth((std::size_t)index, width);
     }
 
 	C_ABI float ABI_ListView_getColumnWidth(ListView::Ptr* self, int index) {
-        return (**self).getColumnWidth(index);
+        return (**self).getColumnWidth((std::size_t)index);
     }
 
 	C_ABI void ABI_ListView_setColumnAlignment(ListView::Ptr* self, int index, int columnAlignment) {
-        (**self).setColumnAlignment(index, static_cast<ListView::ColumnAlignment>(columnAlignment));
+        (**self).setColumnAlignment((std::size_t)index, static_cast<ListView::ColumnAlignment>(columnAlignment));
     }
 
 	C_ABI int ABI_ListView_getColumnAlignment(ListView::Ptr* self, int index) {
-        return static_cast<int>((**self).getColumnAlignment(index));
+        return static_cast<int>((**self).getColumnAlignment((std::size_t)index));
     }
 
     C_ABI void ABI_ListView_setColumnAutoResize(ListView::Ptr* self, int index, int autoResize) {
-        (**self).setColumnAutoResize(index, autoResize);
+        (**self).setColumnAutoResize((std::size_t)index, autoResize);
     }
 
 	C_ABI bool ABI_ListView_getColumnAutoResize(ListView::Ptr* self, int index) {
-        return (**self).getColumnAutoResize(index);
+        return (**self).getColumnAutoResize((std::size_t)index);
     }
 
 	C_ABI void ABI_ListView_setColumnExpanded(ListView::Ptr* self, int index, int expanded) {
-        (**self).setColumnExpanded(index, expanded);
+        (**self).setColumnExpanded((std::size_t)index, expanded);
     }
 
 	C_ABI bool ABI_ListView_getColumnExpanded(ListView::Ptr* self, int index) {
-        return (**self).getColumnExpanded(index);
+        return (**self).getColumnExpanded((std::size_t)index);
     }
 
 	C_ABI void ABI_ListView_removeAllColumns(ListView::Ptr* self) {
@@ -2117,7 +2150,7 @@ namespace tgui {
 	C_ABI int ABI_ListView_addItem(ListView::Ptr* self, char*(*f)(void)) {
         auto columnsCount = (**self).getColumnCount();
         std::vector<String> vec;
-        for(int i = 0;i < columnsCount; ++i) {
+        for(unsigned int i = 0;i < columnsCount; ++i) {
             vec.push_back(f());
         }
         return static_cast<int>((**self).addItem(vec));
@@ -2126,27 +2159,27 @@ namespace tgui {
 	C_ABI void ABI_ListView_insertItem(ListView::Ptr* self, int index, char*(*f)(void)) {
         auto columnsCount = (**self).getColumnCount();
         std::vector<String> vec;
-        for(int i = 0;i < columnsCount; ++i) {
+        for(unsigned int i = 0;i < columnsCount; ++i) {
             vec.push_back(f());
         }
-        (**self).insertItem(index, vec);
+        (**self).insertItem((std::size_t)index, vec);
     }
 
 	C_ABI bool ABI_ListView_changeItem(ListView::Ptr* self, int index, char*(*f)(void)) {
         auto columnsCount = (**self).getColumnCount();
         std::vector<String> vec;
-        for(int i = 0;i < columnsCount; ++i) {
+        for(unsigned int i = 0;i < columnsCount; ++i) {
             vec.push_back(f());
         }
-        return (**self).changeItem(index, vec);
+        return (**self).changeItem((std::size_t)index, vec);
     }
 
 	C_ABI bool ABI_ListView_changeSubitem(ListView::Ptr* self, int index, int column, char* item) {
-        return (**self).changeSubItem(index, column, item);
+        return (**self).changeSubItem((std::size_t)index, (std::size_t)column, item);
     }
 
 	C_ABI bool ABI_ListView_removeItem(ListView::Ptr* self, int index) {
-        return (**self).removeItem(index);
+        return (**self).removeItem((std::size_t)index);
     }
 
 	C_ABI void ABI_ListView_removeAllItems(ListView::Ptr* self) {
@@ -2154,13 +2187,13 @@ namespace tgui {
     }
 
 	C_ABI void ABI_ListView_setSelectedItem(ListView::Ptr* self, int index) {
-        (**self).setSelectedItem(index);
+        (**self).setSelectedItem((std::size_t)index);
     }
 
 	C_ABI void ABI_ListView_setSelectedItems(ListView::Ptr* self, int size, int(*f)(void)) {
         std::set<std::size_t> indices;
         for(int i = 0; i < size; ++i) {
-            indices.insert(f());
+            indices.insert((std::size_t)f());
         }
         (**self).setSelectedItems(indices);
     }
@@ -2189,11 +2222,11 @@ namespace tgui {
     }
 
 	C_ABI void ABI_ListView_setItemIcon(ListView::Ptr* self, int index, Texture* texture) {
-        (**self).setItemIcon(index, *texture);
+        (**self).setItemIcon((std::size_t)index, *texture);
     }
 
 	C_ABI Texture* ABI_ListView_getItemIcon(ListView::Ptr* self, int index) {
-        return new Texture((**self).getItemIcon(index));
+        return new Texture((**self).getItemIcon((std::size_t)index));
     }
 
 	C_ABI int ABI_ListView_getItemCount(ListView::Ptr* self) {
@@ -2201,14 +2234,14 @@ namespace tgui {
     }
 
 	C_ABI void ABI_ListView_getItemRow(ListView::Ptr* self, int index, void(*f)(const char32_t*)) {
-        auto row = (**self).getItemRow(index);
+        auto row = (**self).getItemRow((std::size_t)index);
         for(auto text : row) {
             f(text.data());
         }
     }
 
 	C_ABI const char32_t* ABI_ListView_getItemCell(ListView::Ptr* self, int rowIndex, int columnIndex) {
-        auto cell = new String((**self).getItemCell(rowIndex, columnIndex));
+        auto cell = new String((**self).getItemCell((std::size_t)rowIndex, (std::size_t)columnIndex));
         autoclean.push_back(cell);
         return cell->data();
     }
@@ -2225,43 +2258,43 @@ namespace tgui {
     }
 
 	C_ABI void ABI_ListView_setItemHeight(ListView::Ptr* self, int itemHeight) {
-        (**self).setItemHeight(itemHeight);
+        (**self).setItemHeight((unsigned int)itemHeight);
     }
 
 	C_ABI int ABI_ListView_getItemHeight(ListView::Ptr* self) {
-        return (**self).getItemHeight();
+        return (int)(**self).getItemHeight();
     }
 
 	C_ABI void ABI_ListView_setHeaderTextSize(ListView::Ptr* self, int textSize) {
-        (**self).setHeaderTextSize(textSize);
+        (**self).setHeaderTextSize((unsigned int)textSize);
     }
 
 	C_ABI int ABI_ListView_getHeaderTextSize(ListView::Ptr* self) {
-        return (**self).getHeaderTextSize();
+        return (int)(**self).getHeaderTextSize();
     }
 
 	C_ABI void ABI_ListView_setSeparatorWidth(ListView::Ptr* self, int width) {
-        (**self).setSeparatorWidth(width);
+        (**self).setSeparatorWidth((unsigned int)width);
     }
 
 	C_ABI int ABI_ListView_getSeparatorWidth(ListView::Ptr* self) {
-        return (**self).getSeparatorWidth();
+        return (int)(**self).getSeparatorWidth();
     }
 
 	C_ABI void ABI_ListView_setHeaderSeparatorHeight(ListView::Ptr* self, int height) {
-        (**self).setHeaderSeparatorHeight(height);
+        (**self).setHeaderSeparatorHeight((unsigned int)height);
     }
 
 	C_ABI int ABI_ListView_getHeaderSeparatorHeight(ListView::Ptr* self) {
-        return (**self).getHeaderSeparatorHeight();
+        return (int)(**self).getHeaderSeparatorHeight();
     }
 
 	C_ABI void ABI_ListView_setGridLinesWidth(ListView::Ptr* self, int width) {
-        (**self).setGridLinesWidth(width);
+        (**self).setGridLinesWidth((unsigned int)width);
     }
 
 	C_ABI int ABI_ListView_getGridLinesWidth(ListView::Ptr* self) {
-        return (**self).getGridLinesWidth();
+        return (int)(**self).getGridLinesWidth();
     }
 
 	C_ABI void ABI_ListView_setAutoScroll(ListView::Ptr* self, int autoScroll) {
@@ -2305,19 +2338,19 @@ namespace tgui {
     }
 
 	C_ABI void ABI_ListView_setVerticalScrollbarValue(ListView::Ptr* self, int value) {
-        (**self).setVerticalScrollbarValue(value);
+        (**self).setVerticalScrollbarValue((unsigned int)value);
     }
 
 	C_ABI int ABI_ListView_getVerticalScrollbarValue(ListView::Ptr* self) {
-        return (**self).getVerticalScrollbarValue();
+        return (int)(**self).getVerticalScrollbarValue();
     }
 
 	C_ABI void ABI_ListView_setHorizontalScrollbarValue(ListView::Ptr* self, int value) {
-        (**self).setHorizontalScrollbarValue(value);
+        (**self).setHorizontalScrollbarValue((unsigned int)value);
     }
 
 	C_ABI int ABI_ListView_getHorizontalScrollbarValue(ListView::Ptr* self) {
-        return (**self).getHorizontalScrollbarValue();
+        return (int)(**self).getHorizontalScrollbarValue();
     }
 
 	C_ABI void ABI_ListView_setFixedIconSize(ListView::Ptr* self, float width, float height) {
@@ -2362,7 +2395,7 @@ namespace tgui {
     }
 
 	C_ABI void ABI_ComboBox_setItemsToDisplay(ComboBox::Ptr* self, int itemsToDisplay) {
-        (**self).setItemsToDisplay(itemsToDisplay);
+        (**self).setItemsToDisplay((std::size_t)itemsToDisplay);
     }
 
 	C_ABI int ABI_ComboBox_getItemsToDisplay(ComboBox::Ptr* self) {
@@ -2378,7 +2411,7 @@ namespace tgui {
     }
 
 	C_ABI bool ABI_ComboBox_setSelectedItemByIndex(ComboBox::Ptr* self, int index) {
-        return (**self).setSelectedItemByIndex(index);
+        return (**self).setSelectedItemByIndex((std::size_t)index);
     }
 
 	C_ABI void ABI_ComboBox_deselectItem(ComboBox::Ptr* self) {
@@ -2390,7 +2423,7 @@ namespace tgui {
     }
 
 	C_ABI bool ABI_ComboBox_removeItemByIndex(ComboBox::Ptr* self, int index) {
-        return (**self).removeItemByIndex(index);
+        return (**self).removeItemByIndex((std::size_t)index);
     }
 
 	C_ABI void ABI_ComboBox_removeAllItems(ComboBox::Ptr* self) {
@@ -2414,7 +2447,7 @@ namespace tgui {
     }
 
 	C_ABI bool ABI_ComboBox_changeItemByIndex(ComboBox::Ptr* self, int index, char* newValue) {
-        return (**self).changeItemByIndex(index, newValue);
+        return (**self).changeItemByIndex((std::size_t)index, newValue);
     }
 
 	C_ABI int ABI_ComboBox_getItemCount(ComboBox::Ptr* self) {
@@ -2428,7 +2461,7 @@ namespace tgui {
     }
 
 	C_ABI void ABI_ComboBox_setMaximumItems(ComboBox::Ptr* self, int maximumItems) {
-        (**self).setMaximumItems(maximumItems);
+        (**self).setMaximumItems((std::size_t)maximumItems);
     }
 
 	C_ABI int ABI_ComboBox_getMaximumItems(ComboBox::Ptr* self) {
@@ -2537,7 +2570,7 @@ namespace tgui {
             std::pair pair(base, vec1);
             vec.push_back(pair);
         }
-        return (**self).setFileTypeFilters(vec, defaultFilterIndex);
+        return (**self).setFileTypeFilters(vec, (std::size_t)defaultFilterIndex);
     }
 
 	C_ABI void ABI_FileDialog_getFileTypeFilters(FileDialog::Ptr* self, void(*f)(int, const char32_t*, const char32_t*)) {
@@ -2735,7 +2768,7 @@ namespace tgui {
         for(int i = 0;i < hierarchySize; ++i) {
             vec.push_back(hierarchy());
         }
-        return (**self).connectMenuItem(vec, handler);
+        return (int)(**self).connectMenuItem(vec, handler);
     }
 
 	C_ABI bool ABI_MenuBar_addMenuItem(MenuBar::Ptr* self, int hierarchySize, char*(*hierarchy)()) {
@@ -2882,7 +2915,7 @@ namespace tgui {
     }
 
 	C_ABI bool ABI_PanelListBox_setSelectedItemByIndex(PanelListBox::Ptr* self, int index) {
-        return (**self).setSelectedItemByIndex(index);
+        return (**self).setSelectedItemByIndex((std::size_t)index);
     }
 
 	C_ABI void ABI_PanelListBox_deselectItem(PanelListBox::Ptr* self) {
@@ -2898,7 +2931,7 @@ namespace tgui {
     }
 
 	C_ABI bool ABI_PanelListBox_removeItemByIndex(PanelListBox::Ptr* self, int index) {
-        return (**self).removeItemByIndex(index);
+        return (**self).removeItemByIndex((std::size_t)index);
     }
 
 	C_ABI void ABI_PanelLIstBox_removeAllItems(PanelListBox::Ptr* self) {
@@ -2913,7 +2946,7 @@ namespace tgui {
     }
 
 	C_ABI Panel::Ptr* ABI_PanelListBox_getItemByIndex(PanelListBox::Ptr* self, int index) {
-        auto panel = (**self).getItemByIndex(index);
+        auto panel = (**self).getItemByIndex((std::size_t)index);
         auto ptr = new Panel::Ptr(nullptr);
         ptr->swap(panel);
         return ptr;
@@ -2928,7 +2961,7 @@ namespace tgui {
     }
 
 	C_ABI const char32_t* ABI_PanelListBox_getIdByIndex(PanelListBox::Ptr* self, int index) {
-        auto str = new String((**self).getIdByIndex(index));
+        auto str = new String((**self).getIdByIndex((std::size_t)index));
         autoclean.push_back(str);
         return str->data();
     }
@@ -2969,7 +3002,7 @@ namespace tgui {
     }
 
 	C_ABI void ABI_PanelListBox_setMaximumItems(PanelListBox::Ptr* self, int maximumItems) {
-        (**self).setMaximumItems(maximumItems);
+        (**self).setMaximumItems((std::size_t)maximumItems);
     }
 
 	C_ABI int ABI_PanelListBox_getMaximumItems(PanelListBox::Ptr* self) {
@@ -2998,31 +3031,31 @@ namespace tgui {
     }
 
 	C_ABI void ABI_ProgressBar_setMinimum(ProgressBar::Ptr* self, int minimum) {
-        (**self).setMinimum(minimum);
+        (**self).setMinimum((unsigned int)minimum);
     }
 
 	C_ABI int ABI_ProgressBar_getMinimum(ProgressBar::Ptr* self) {
-        return (**self).getMinimum();
+        return (int)(**self).getMinimum();
     }
 
 	C_ABI void ABI_ProgressBar_setMaximum(ProgressBar::Ptr* self, int maximum) {
-        (**self).setMaximum(maximum);
+        (**self).setMaximum((unsigned int)maximum);
     }
 
 	C_ABI int ABI_ProgressBar_getMaximum(ProgressBar::Ptr* self) {
-        return (**self).getMaximum();
+        return (int)(**self).getMaximum();
     }
 
 	C_ABI void ABI_ProgressBar_setValue(ProgressBar::Ptr* self, int value) {
-        (**self).setValue(value);
+        (**self).setValue((unsigned int)value);
     }
 
 	C_ABI int ABI_ProgressBar_getValue(ProgressBar::Ptr* self) {
-        return (**self).getValue();
+        return (int)(**self).getValue();
     }
 
 	C_ABI int ABI_ProgressBar_incrementValue(ProgressBar::Ptr* self) {
-        return (**self).incrementValue();
+        return (int)(**self).incrementValue();
     }
 
 	C_ABI void ABI_ProgressBar_setText(ProgressBar::Ptr* self, char* text) {
@@ -3290,11 +3323,11 @@ namespace tgui {
     }
 
     C_ABI void ABI_SpinControl_setDecimalPlaces(SpinControl::Ptr* self, int decimalPlaces) {
-        (**self).setDecimalPlaces(decimalPlaces);
+        (**self).setDecimalPlaces((unsigned int)decimalPlaces);
     }
 
 	C_ABI int ABI_SpinControl_getDecimalPlaces(SpinControl::Ptr* self) {
-        return (**self).getDecimalPlaces();
+        return (int)(**self).getDecimalPlaces();
     }
 
 	C_ABI void ABI_SpinControl_setUseWideArrows(SpinControl::Ptr* self, int useWideArrows) {
@@ -3331,18 +3364,18 @@ namespace tgui {
     }
 
 	C_ABI void ABI_Tabs_insert(Tabs::Ptr* self, int index, char* text, int select) {
-        (**self).insert(index, text, select);
+        (**self).insert((std::size_t)index, text, select);
     }
 
 	C_ABI const char32_t* ABI_Tabs_getText(Tabs::Ptr* self, int index) {
-        auto str = new String((**self).getText(index));
+        auto str = new String((**self).getText((std::size_t)index));
         autoclean.push_back(str);
         return str->data();
     }
 
 
 	C_ABI bool ABI_Tabs_changeText(Tabs::Ptr* self, int index, char* text) {
-        return (**self).changeText(index, text);
+        return (**self).changeText((std::size_t)index, text);
     }
 
 	C_ABI bool ABI_Tabs_select(Tabs::Ptr* self, char* text) {
@@ -3350,7 +3383,7 @@ namespace tgui {
     }
 
 	C_ABI bool ABI_Tabs_selectByIndex(Tabs::Ptr* self, int index) {
-        return (**self).select(index);
+        return (**self).select((std::size_t)index);
     }
 
 	C_ABI void ABI_Tabs_deselect(Tabs::Ptr* self) {
@@ -3362,7 +3395,7 @@ namespace tgui {
     }
 
 	C_ABI bool ABI_Tabs_removeByIndex(Tabs::Ptr* self, int index) {
-        return (**self).remove(index);
+        return (**self).remove((std::size_t)index);
     }
 
 	C_ABI void ABI_Tabs_removeAll(Tabs::Ptr* self) {
@@ -3380,19 +3413,19 @@ namespace tgui {
     }
 
 	C_ABI void ABI_Tabs_setTabVisible(Tabs::Ptr* self, int index, int visible) {
-        (**self).setTabVisible(index, visible);
+        (**self).setTabVisible((std::size_t)index, visible);
     }
 
 	C_ABI bool ABI_Tabs_getTabVisible(Tabs::Ptr* self, int index) {
-        return (**self).getTabVisible(index);
+        return (**self).getTabVisible((std::size_t)index);
     }
 
 	C_ABI void ABI_Tabs_setTabEnabled(Tabs::Ptr* self, int index, int enabled) {
-        (**self).setTabEnabled(index, enabled);
+        (**self).setTabEnabled((std::size_t)index, enabled);
     }
 
 	C_ABI bool ABI_Tabs_getTabEnabled(Tabs::Ptr* self, int index) {
-        return (**self).getTabEnabled(index);
+        return (**self).getTabEnabled((std::size_t)index);
     }
 
 	C_ABI void ABI_Tabs_setTabHeight(Tabs::Ptr* self, float height) {
@@ -3444,7 +3477,7 @@ namespace tgui {
     }
 
 	C_ABI Panel::Ptr* ABI_TabContainer_insertTab(TabContainer::Ptr* self, int index, char* name, int select) {
-        auto panel = (**self).insertTab(index, name, select);
+        auto panel = (**self).insertTab((std::size_t)index, name, select);
         auto ptr = new Panel::Ptr(nullptr);
         ptr->swap(panel);
         return ptr;
@@ -3455,11 +3488,11 @@ namespace tgui {
     }
 
 	C_ABI bool ABI_TabContainer_removeTabByIndex(TabContainer::Ptr* self, int index) {
-        return (**self).removeTab(index);
+        return (**self).removeTab((std::size_t)index);
     }
 
 	C_ABI void ABI_TabContainer_select(TabContainer::Ptr* self, int index) {
-        (**self).select(index);
+        (**self).select((std::size_t)index);
     }
 
 	C_ABI int ABI_TabContainer_getPanelCount(TabContainer::Ptr* self) {
@@ -3496,13 +3529,13 @@ namespace tgui {
     }
 
 	C_ABI const char32_t* ABI_TabContainer_getTabText(TabContainer::Ptr* self, int index) {
-        auto str = new String((**self).getTabText(index));
+        auto str = new String((**self).getTabText((std::size_t)index));
         autoclean.push_back(str);
         return str->data();
     }
 
 	C_ABI bool ABI_TabContainer_changeTabText(TabContainer::Ptr* self, int index, char* text) {
-        return (**self).changeTabText(index, text);
+        return (**self).changeTabText((std::size_t)index, text);
     }
 
 	C_ABI void ABI_TabContainer_setTabAlignment(TabContainer::Ptr* self, int align) {
@@ -3561,7 +3594,7 @@ namespace tgui {
     }
     
 	C_ABI void ABI_TextArea_setSelectedText(TextArea::Ptr* self, int selectionStartIndex, int selectionEndIndex) {
-        (**self).setSelectedText(selectionStartIndex, selectionEndIndex);
+        (**self).setSelectedText((std::size_t)selectionStartIndex, (std::size_t)selectionEndIndex);
     }
 
 	C_ABI const char32_t* ABI_TextArea_getSelectedText(TextArea::Ptr* self) {
@@ -3579,7 +3612,7 @@ namespace tgui {
     }
 
 	C_ABI void ABI_TextArea_setMaximumCharacters(TextArea::Ptr* self, int maxChars) {
-        (**self).setMaximumCharacters(maxChars);
+        (**self).setMaximumCharacters((std::size_t)maxChars);
     }
 
 	C_ABI int ABI_TextArea_getMaximumCharacters(TextArea::Ptr* self) {
@@ -3597,7 +3630,7 @@ namespace tgui {
     }
     
 	C_ABI void ABI_TextArea_setCaretPosition(TextArea::Ptr* self, int charactersBeforeCaret) {
-        (**self).setCaretPosition(charactersBeforeCaret);
+        (**self).setCaretPosition((std::size_t)charactersBeforeCaret);
     }
 
 	C_ABI int ABI_TextArea_getCaretPosition(TextArea::Ptr* self) {
@@ -3645,19 +3678,19 @@ namespace tgui {
     }
 
 	C_ABI void ABI_TextArea_setVerticalScrollbarValue(TextArea::Ptr* self, int value) {
-        (**self).setVerticalScrollbarValue(value);
+        (**self).setVerticalScrollbarValue((unsigned int)value);
     }
 
 	C_ABI int ABI_TextArea_getVerticalScrollbarValue(TextArea::Ptr* self) {
-        return (**self).getVerticalScrollbarValue();
+        return (int)(**self).getVerticalScrollbarValue();
     }
 
     C_ABI void ABI_TextArea_setHorizontalScrollbarValue(TextArea::Ptr* self, int value) {
-        (**self).setHorizontalScrollbarValue(value);
+        (**self).setHorizontalScrollbarValue((unsigned int)value);
     }
 
 	C_ABI int ABI_TextArea_getHorizontalScrollbarValue(TextArea::Ptr* self) {
-        return (**self).getHorizontalScrollbarValue();
+        return (int)(**self).getHorizontalScrollbarValue();
     }
 
 	C_ABI SignalString* ABI_TextArea_onTextChange(TextArea::Ptr* self) {
@@ -3811,27 +3844,27 @@ namespace tgui {
     }
 
 	C_ABI void ABI_TreeView_setItemHeight(TreeView::Ptr* self, int itemHeight) {
-        (**self).setItemHeight(itemHeight);
+        (**self).setItemHeight((unsigned int)itemHeight);
     }
 
 	C_ABI int ABI_TreeView_getItemHeight(TreeView::Ptr* self) {
-        return (**self).getItemHeight();
+        return (int)(**self).getItemHeight();
     }
 
 	C_ABI void ABI_TreeView_setVerticalScrollbarValue(TreeView::Ptr* self, int value) {
-        (**self).setVerticalScrollbarValue(value);
+        (**self).setVerticalScrollbarValue((unsigned int)value);
     }
 
 	C_ABI int ABI_TreeView_getVerticalScrollbarValue(TreeView::Ptr* self) {
-        return (**self).getVerticalScrollbarValue();
+        return (int)(**self).getVerticalScrollbarValue();
     }
 
 	C_ABI void ABI_TreeView_setHorizontalScrollbarValue(TreeView::Ptr* self, int value) {
-        (**self).setHorizontalScrollbarValue(value);
+        (**self).setHorizontalScrollbarValue((unsigned int)value);
     }
 
 	C_ABI int ABI_TreeView_getHorizontalScrollbarValue(TreeView::Ptr* self) {
-        return (**self).getHorizontalScrollbarValue();
+        return (int)(**self).getHorizontalScrollbarValue();
     }
 
 	C_ABI SignalItemHierarchy* ABI_TreeView_onItemSelect(TreeView::Ptr* self) {
@@ -3864,35 +3897,35 @@ namespace tgui {
     }
 
 	C_ABI void ABI_Scrollbar_setMaximum(Scrollbar::Ptr* self, int maximum) {
-        (**self).setMaximum(maximum);
+        (**self).setMaximum((unsigned int)maximum);
     }
 
 	C_ABI int ABI_Scrollbar_getMaximum(Scrollbar::Ptr* self) {
-        return (**self).getMaximum();
+        return (int)(**self).getMaximum();
     }
 
 	C_ABI void ABI_Scrollbar_setValue(Scrollbar::Ptr* self, int value) {
-        (**self).setValue(value);
+        (**self).setValue((unsigned int)value);
     }
 
 	C_ABI int ABI_Scrollbar_getValue(Scrollbar::Ptr* self) {
-        return (**self).getValue();
+        return (int)(**self).getValue();
     }
 
 	C_ABI void ABI_Scrollbar_setViewportSize(Scrollbar::Ptr* self, int viewport) {
-        (**self).setViewportSize(viewport);
+        (**self).setViewportSize((unsigned int)viewport);
     }
 
 	C_ABI int ABI_Scrollbar_getViewportSize(Scrollbar::Ptr* self) {
-        return (**self).getViewportSize();
+        return (int)(**self).getViewportSize();
     }
 
 	C_ABI void ABI_Scrollbar_setScrollAmount(Scrollbar::Ptr* self, int scrollAmount) {
-        (**self).setScrollAmount(scrollAmount);
+        (**self).setScrollAmount((unsigned int)scrollAmount);
     }
 
 	C_ABI int ABI_Scrollbar_getScrollAmount(Scrollbar::Ptr* self) {
-        return (**self).getScrollAmount();
+        return (int)(**self).getScrollAmount();
     }
 
 	C_ABI void ABI_Scrollbar_setAutoHide(Scrollbar::Ptr* self, int autoHide) {
@@ -4034,7 +4067,7 @@ namespace tgui {
     }
 
 	C_ABI void ABI_CircleShape_setPointCount(sf::CircleShape* self, int pointCount) {
-        self->setPointCount(pointCount);
+        self->setPointCount((std::size_t)pointCount);
     }
 
 	// RectangleShape
@@ -4066,11 +4099,11 @@ namespace tgui {
     }
 
 	C_ABI void ABI_ConvexShape_setPoint(sf::ConvexShape* self, int index, float x, float y) {
-        self->setPoint(index, {x, y});
+        self->setPoint((std::size_t)index, {x, y});
     }
 
 	C_ABI void ABI_ConvexShape_setPointCount(sf::ConvexShape* self, int pointCount) {
-        self->setPointCount(pointCount);
+        self->setPointCount((std::size_t)pointCount);
     }
 
     // Text
@@ -4104,11 +4137,11 @@ namespace tgui {
     // }
 
 	C_ABI void ABI_Text_setCharacterSize(sf::Text* self, int size) {
-        self->setCharacterSize(size);
+        self->setCharacterSize((unsigned int)size);
     }
 
 	C_ABI int ABI_Text_getCharacterSize(sf::Text* self) {
-        return self->getCharacterSize();
+        return (int)self->getCharacterSize();
     }
 
 	C_ABI void ABI_Text_setLineSpacing(sf::Text* self, float spacing) {
@@ -4128,11 +4161,11 @@ namespace tgui {
     }
 
 	C_ABI void ABI_Text_setStyle(sf::Text* self, int style) {
-        self->setStyle(style);
+        self->setStyle((unsigned int)style);
     }
 
 	C_ABI int ABI_Text_getStyle(sf::Text* self) {
-        return self->getStyle();
+        return (int)self->getStyle();
     }
 
 	C_ABI void ABI_Text_setFillColor(sf::Text* self, Color* color) {
@@ -4192,7 +4225,7 @@ namespace tgui {
     }
 
 	C_ABI Vector2f* ABI_Text_findCharacterPos(sf::Text* self, int index) {
-        return new Vector2f(self->findCharacterPos(index));
+        return new Vector2f(self->findCharacterPos((std::size_t)index));
     }
 
     // CustomWidget
@@ -4222,7 +4255,7 @@ namespace tgui {
         self->implMouseEnteredWidget  = [](...){};
         self->implMouseLeftWidget  = [](...){};
         self->implRendererChanged = [](...){return false;};
-        self->implDrawFunction = [](BackendRenderTarget & target, RenderStates states){};
+        self->implDrawFunction = []([[maybe_unused]]BackendRenderTarget & target, [[maybe_unused]]RenderStates states){};
         auto ptr = new CustomWidgetForBindings::Ptr(nullptr);
         ptr->swap(self);
         return ptr;
@@ -4236,7 +4269,7 @@ namespace tgui {
 
 	C_ABI void ABI_CustomWidget_implSizeChanged(CustomWidgetForBindings::Ptr* self, void(*f)(float width, float height)) {
         (**self).implSizeChanged = [=](Vector2f vector){
-            f(vector.x, vector.y);
+            f(vector.x, vector.y); 
         };
     }
 
