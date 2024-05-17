@@ -186,12 +186,12 @@ namespace tgui
             }
             case Event::Type::LostFocus:
             {
-                m_windowFocused = false;
+                updateWindowFocused(false);
                 break;
             }
             case Event::Type::GainedFocus:
             {
-                m_windowFocused = true;
+                updateWindowFocused(true);
                 break;
             }
             case Event::Type::Resized:
@@ -644,6 +644,14 @@ namespace tgui
             m_lastView = viewRect;
             onViewChange.emit(m_container.get(), viewRect);
         }
+    }
+
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void BackendGui::updateWindowFocused(bool focused)
+    {
+        m_windowFocused = focused;
+        onWindowFocusChange.emit(m_container.get(), focused);
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
