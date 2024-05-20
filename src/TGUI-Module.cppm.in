@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 // TGUI - Texus' Graphical User Interface
-// Copyright (C) 2012-2023 Bruno Van de Velde (vdv_b@tgui.eu)
+// Copyright (C) 2012-2024 Bruno Van de Velde (vdv_b@tgui.eu)
 //
 // This software is provided 'as-is', without any express or implied warranty.
 // In no event will the authors be held liable for any damages arising from the use of this software.
@@ -90,7 +90,13 @@ module;
 #include <cassert>
 
 #ifdef TGUI_SYSTEM_WINDOWS
-	#include <TGUI/extlibs/IncludeWindows.hpp>
+    // raylib.h and windows.h give conflicts
+    #if TGUI_HAS_WINDOW_BACKEND_RAYLIB || TGUI_HAS_FONT_BACKEND_RAYLIB || TGUI_HAS_RENDERER_BACKEND_RAYLIB
+        #define NOGDI
+        #define NOUSER
+    #endif
+
+    #include <TGUI/extlibs/IncludeWindows.hpp>
 #endif
 
 #if TGUI_USE_SYSTEM_AURORA
@@ -150,18 +156,15 @@ module;
     #if defined(__GNUC__)
         #pragma GCC diagnostic pop
     #endif
-
-    using FT_Library = struct FT_LibraryRec_*;
-    using FT_Face = struct FT_FaceRec_*;
-    using FT_Stroker = struct FT_StrokerRec_*;
 #endif
 
 #if TGUI_HAS_WINDOW_BACKEND_GLFW
     #define GLFW_INCLUDE_NONE // Don't let GLFW include an OpenGL extention loader
     #include <GLFW/glfw3.h>
+#endif
 
-    using GLFWwindow = struct GLFWwindow;
-    using GLFWcursor = struct GLFWcursor;
+#if TGUI_HAS_WINDOW_BACKEND_RAYLIB || TGUI_HAS_FONT_BACKEND_RAYLIB || TGUI_HAS_RENDERER_BACKEND_RAYLIB
+    #include <raylib.h>
 #endif
 
 #if defined(TGUI_SYSTEM_LINUX) && defined(TGUI_USE_X11) && ((TGUI_HAS_WINDOW_BACKEND_SFML && SFML_VERSION_MAJOR == 2 && SFML_VERSION_MINOR < 6) || TGUI_HAS_WINDOW_BACKEND_SDL)
@@ -189,5 +192,5 @@ module;
 #if defined(__clang__)
     #pragma clang diagnostic ignored "-Winclude-angled-in-module-purview"
 #elif defined(_MSC_VER)
-	#pragma warning(disable: 5244)
+    #pragma warning(disable: 5244)
 #endif

@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 // TGUI - Texus' Graphical User Interface
-// Copyright (C) 2012-2023 Bruno Van de Velde (vdv_b@tgui.eu)
+// Copyright (C) 2012-2024 Bruno Van de Velde (vdv_b@tgui.eu)
 //
 // This software is provided 'as-is', without any express or implied warranty.
 // In no event will the authors be held liable for any damages arising from the use of this software.
@@ -804,7 +804,7 @@ namespace tgui
             const auto& widget = *it;
 
             // Look for a visible widget below the mouse
-            if (!widget->isVisible())
+            if (!widget->isVisible() || widget->getIgnoreMouseEvents())
                 continue;
             if (!widget->isMouseOnWidget(transformMousePos(widget, pos)))
                 continue;
@@ -1487,7 +1487,7 @@ namespace tgui
         for (auto it = m_widgets.crbegin(); it != m_widgets.crend(); ++it)
         {
             const auto& widget = *it;
-            if (!widget->isVisible())
+            if (!widget->isVisible() || widget->getIgnoreMouseEvents())
                 continue;
 
             if (!widget->isMouseOnWidget(transformMousePos(widget, mousePos)))

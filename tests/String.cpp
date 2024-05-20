@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 // TGUI - Texus' Graphical User Interface
-// Copyright (C) 2012-2023 Bruno Van de Velde (vdv_b@tgui.eu)
+// Copyright (C) 2012-2024 Bruno Van de Velde (vdv_b@tgui.eu)
 //
 // This software is provided 'as-is', without any express or implied warranty.
 // In no event will the authors be held liable for any damages arising from the use of this software.
@@ -21,6 +21,11 @@
 // 3. This notice may not be removed or altered from any source distribution.
 //
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+#include <TGUI/Config.hpp>
+#if TGUI_HAS_WINDOW_BACKEND_SFML
+    #include <SFML/System/String.hpp>
+#endif
 
 #include "Tests.hpp"
 
@@ -1469,6 +1474,7 @@ TEST_CASE("[String]")
         REQUIRE(tgui::String::fromNumber(15) == "15");
         REQUIRE(tgui::String::fromNumber(-3) == "-3");
         REQUIRE(tgui::String::fromNumber(0.5) == "0.5");
+        REQUIRE(tgui::String::fromNumber(uint8_t(5)) == "5");
     }
 
     SECTION("fromNumberRounded")
@@ -1476,6 +1482,8 @@ TEST_CASE("[String]")
         REQUIRE(tgui::String::fromNumberRounded(15.001f, 0) == "15");
         REQUIRE(tgui::String::fromNumberRounded(-3.0015f, 3) == "-3.001");
         REQUIRE(tgui::String::fromNumberRounded(0.5f, 2) == "0.50");
+        REQUIRE(tgui::String::fromNumberRounded(15, 2) == "15");
+        REQUIRE(tgui::String::fromNumberRounded(uint8_t(5), 2) == "5");
     }
 
     SECTION("trim")

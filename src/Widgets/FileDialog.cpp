@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 // TGUI - Texus' Graphical User Interface
-// Copyright (C) 2012-2023 Bruno Van de Velde (vdv_b@tgui.eu)
+// Copyright (C) 2012-2024 Bruno Van de Velde (vdv_b@tgui.eu)
 //
 // This software is provided 'as-is', without any express or implied warranty.
 // In no event will the authors be held liable for any damages arising from the use of this software.
@@ -118,8 +118,8 @@ namespace tgui
         m_listView->setSize({"100% - 20", "#TGUI_INTERNAL$EditBoxFilename#.top - top - 10"});
 
         m_listView->addColumn("Name", 0);
-        m_listView->addColumn("Size", 75, ListView::ColumnAlignment::Right);
-        m_listView->addColumn("Modified", 145, ListView::ColumnAlignment::Right);
+        m_listView->addColumn("Size", 75, HorizontalAlignment::Right);
+        m_listView->addColumn("Modified", 145, HorizontalAlignment::Right);
         m_listView->setColumnExpanded(0, true);
 
         if (m_iconLoader->supportsSystemIcons())

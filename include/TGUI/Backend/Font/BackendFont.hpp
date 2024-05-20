@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 // TGUI - Texus' Graphical User Interface
-// Copyright (C) 2012-2023 Bruno Van de Velde (vdv_b@tgui.eu)
+// Copyright (C) 2012-2024 Bruno Van de Velde (vdv_b@tgui.eu)
 //
 // This software is provided 'as-is', without any express or implied warranty.
 // In no event will the authors be held liable for any damages arising from the use of this software.
@@ -302,7 +302,7 @@ TGUI_MODULE_EXPORT namespace tgui
         ///
         /// Calling this function with the same parameters results in the same id, while other parameters result in another id.
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        TGUI_NODISCARD std::uint64_t constructGlyphKey(char32_t codePoint, unsigned int characterSize, bool bold, float outlineThickness);
+        TGUI_NODISCARD std::uint64_t constructGlyphKey(char32_t codePoint, unsigned int characterSize, bool bold, float outlineThickness) const;
 
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     protected:

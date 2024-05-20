@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 // TGUI - Texus' Graphical User Interface
-// Copyright (C) 2012-2023 Bruno Van de Velde (vdv_b@tgui.eu)
+// Copyright (C) 2012-2024 Bruno Van de Velde (vdv_b@tgui.eu)
 //
 // This software is provided 'as-is', without any express or implied warranty.
 // In no event will the authors be held liable for any damages arising from the use of this software.
@@ -102,22 +102,6 @@ struct SpinControlProperties : WidgetProperties
         pair.second["SpinText.DefaultTextStyle"] = {"TextStyle", tgui::Serializer::serialize(textRenderer->getDefaultTextStyle())};
         return pair;
     }
-
-private:
-
-    const std::set<tgui::String> m_buttonProperties = {
-        "ButtonsBorders", "BorderBetweenArrows", "ButtonsBackgroundColor", "ButtonsBackgroundColorHover", "ArrowColor",
-        "ArrowColorHover", "ButtonsBorderColor", "TextureArrowUp", "TextureArrowUpHover", "TextureArrowDown",
-        "TextureArrowDownHover"
-    };
-
-    const std::set<tgui::String> m_textProperties = {
-        "Padding", "CaretWidth", "TextColor", "TextColorDisabled", "TextColorFocused", "SelectedTextColor",
-        "SelectedTextBackgroundColor", "DefaultTextColor", "BackgroundColor", "BackgroundColorHover",
-        "BackgroundColorDisabled", "BackgroundColorFocused", "CaretColor", "CaretColorHover", "CaretColorFocused",
-        "BorderColor", "BorderColorHover", "BorderColorDisabled", "BorderColorFocused", "Texture", "TextureHover",
-        "TextureDisabled", "TextureFocused", "TextStyle", "DefaultTextStyle", "Borders"
-    };
 };
 
 #endif // TGUI_GUI_BUILDER_SPIN_CONTROL_PROPERTIES_HPP

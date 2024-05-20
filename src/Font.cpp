@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 // TGUI - Texus' Graphical User Interface
-// Copyright (C) 2012-2023 Bruno Van de Velde (vdv_b@tgui.eu)
+// Copyright (C) 2012-2024 Bruno Van de Velde (vdv_b@tgui.eu)
 //
 // This software is provided 'as-is', without any express or implied warranty.
 // In no event will the authors be held liable for any damages arising from the use of this software.
@@ -63,7 +63,7 @@ namespace tgui
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     Font::Font(const String& id) :
-        Font(Deserializer::deserialize(ObjectConverter::Type::Font, id).getFont()) // Did not compile with clang 3.6 when using braces
+        Font{Deserializer::deserialize(ObjectConverter::Type::Font, id).getFont()}
     {
     }
 

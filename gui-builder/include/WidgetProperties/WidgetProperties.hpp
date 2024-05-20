@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 // TGUI - Texus' Graphical User Interface
-// Copyright (C) 2012-2023 Bruno Van de Velde (vdv_b@tgui.eu)
+// Copyright (C) 2012-2024 Bruno Van de Velde (vdv_b@tgui.eu)
 //
 // This software is provided 'as-is', without any express or implied warranty.
 // In no event will the authors be held liable for any damages arising from the use of this software.
@@ -66,6 +66,8 @@ struct WidgetProperties
             widget->setUserData(value);
         else if (property == "MouseCursor")
             widget->setMouseCursor(deserializeMouseCursor(value));
+        else if (property == "IgnoreMouseEvents")
+            widget->setIgnoreMouseEvents(parseBoolean(value, false));
         else // Renderer property
             widget->getRenderer()->setProperty(property, value);
     }
@@ -84,6 +86,7 @@ struct WidgetProperties
         pairs["NavigationLeft"] = {"String", widget->getNavigationLeft() ? widget->getNavigationLeft()->getWidgetName() : U""};
         pairs["NavigationRight"] = {"String", widget->getNavigationRight() ? widget->getNavigationRight()->getWidgetName() : U""};
         pairs["MouseCursor"] = {"Enum{Arrow,Text,Hand,SizeLeft,SizeRight,SizeTop,SizeBottom,SizeBottomRight,SizeTopLeft,SizeBottomLeft,SizeTopRight,Cross,Help,NotAllowed}", serializeMouseCursor(widget->getMouseCursor())};
+        pairs["IgnoreMouseEvents"] = {"Bool", tgui::Serializer::serialize(widget->getIgnoreMouseEvents())};
         try
         {
             pairs["UserData"] = {"String", widget->getUserData<tgui::String>()};
@@ -225,6 +228,48 @@ struct WidgetProperties
             case tgui::Cursor::Type::NotAllowed:      return "NotAllowed";
             default:                                  return "Arrow";
         }
+    }
+
+    TGUI_NODISCARD static tgui::HorizontalAlignment deserializeHorizontalAlignment(tgui::String value)
+    {
+        value = value.trim().toLower();
+        if (value == "right")
+            return tgui::HorizontalAlignment::Right;
+        else if (value == "center")
+            return tgui::HorizontalAlignment::Center;
+        else
+            return tgui::HorizontalAlignment::Left;
+    }
+
+    TGUI_NODISCARD static tgui::VerticalAlignment deserializeVerticalAlignment(tgui::String value)
+    {
+        value = value.trim().toLower();
+        if (value == "bottom")
+            return tgui::VerticalAlignment::Bottom;
+        else if (value == "center")
+            return tgui::VerticalAlignment::Center;
+        else
+            return tgui::VerticalAlignment::Top;
+    }
+
+    TGUI_NODISCARD static tgui::String serializeHorizontalAlignment(tgui::HorizontalAlignment alignment)
+    {
+        if (alignment == tgui::HorizontalAlignment::Center)
+            return "Center";
+        else if (alignment == tgui::HorizontalAlignment::Right)
+            return "Right";
+        else
+            return "Left";
+    }
+
+    TGUI_NODISCARD static tgui::String serializeVerticalAlignment(tgui::VerticalAlignment alignment)
+    {
+        if (alignment == tgui::VerticalAlignment::Center)
+            return "Center";
+        else if (alignment == tgui::VerticalAlignment::Bottom)
+            return "Bottom";
+        else
+            return "Top";
     }
 };
 

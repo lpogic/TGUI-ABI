@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 // TGUI - Texus' Graphical User Interface
-// Copyright (C) 2012-2023 Bruno Van de Velde (vdv_b@tgui.eu)
+// Copyright (C) 2012-2024 Bruno Van de Velde (vdv_b@tgui.eu)
 //
 // This software is provided 'as-is', without any express or implied warranty.
 // In no event will the authors be held liable for any damages arising from the use of this software.
@@ -355,11 +355,11 @@ namespace tgui
             return nullptr;
 
 #if TGUI_USE_SDL3
-        SDL_RWops* handle = SDL_RWFromConstMem(m_fileContents.get(), m_fileSize);
+        SDL_IOStream* handle = SDL_IOFromConstMem(m_fileContents.get(), m_fileSize);
         if (!handle)
             return nullptr;
 
-        auto font = TTF_OpenFontRW(handle, SDL_TRUE, static_cast<int>(scaledTextSize));
+        auto font = TTF_OpenFontIO(handle, SDL_TRUE, static_cast<int>(scaledTextSize));
 #else
         SDL_RWops* handle = SDL_RWFromConstMem(m_fileContents.get(), static_cast<int>(m_fileSize));
         if (!handle)

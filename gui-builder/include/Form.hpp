@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 // TGUI - Texus' Graphical User Interface
-// Copyright (C) 2012-2023 Bruno Van de Velde (vdv_b@tgui.eu)
+// Copyright (C) 2012-2024 Bruno Van de Velde (vdv_b@tgui.eu)
 //
 // This software is provided 'as-is', without any express or implied warranty.
 // In no event will the authors be held liable for any damages arising from the use of this software.
@@ -80,6 +80,7 @@ private:
     void onDrag(tgui::Vector2i mousePos);
     void selectWidget(const std::shared_ptr<WidgetInfo>& widget);
     TGUI_NODISCARD std::vector<std::pair<tgui::Vector2f, tgui::Vector2f>> getAlignmentLines() const;
+    tgui::String widgetPtrToStrId(const tgui::Widget::Ptr& widget) const;
 
 private:
 

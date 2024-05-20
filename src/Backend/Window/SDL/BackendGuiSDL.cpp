@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 // TGUI - Texus' Graphical User Interface
-// Copyright (C) 2012-2023 Bruno Van de Velde (vdv_b@tgui.eu)
+// Copyright (C) 2012-2024 Bruno Van de Velde (vdv_b@tgui.eu)
 //
 // This software is provided 'as-is', without any express or implied warranty.
 // In no event will the authors be held liable for any damages arising from the use of this software.
@@ -96,7 +96,11 @@ namespace tgui
         case SDLK_SEMICOLON:    return Event::KeyboardKey::Semicolon;
         case SDLK_COMMA:        return Event::KeyboardKey::Comma;
         case SDLK_PERIOD:       return Event::KeyboardKey::Period;
+#if SDL_MAJOR_VERSION >= 3
+        case SDLK_APOSTROPHE:   return Event::KeyboardKey::Quote;
+#else
         case SDLK_QUOTE:        return Event::KeyboardKey::Quote;
+#endif
         case SDLK_SLASH:        return Event::KeyboardKey::Slash;
         case SDLK_BACKSLASH:    return Event::KeyboardKey::Backslash;
         case SDLK_EQUALS:       return Event::KeyboardKey::Equal;
@@ -282,7 +286,10 @@ namespace tgui
                     eventTGUI.mouseWheel.delta = static_cast<float>(eventSDL.wheel.y);
 #endif
 
-#if (SDL_MAJOR_VERSION > 2) || ((SDL_MAJOR_VERSION == 2) && (SDL_MINOR_VERSION >= 26))
+#if (SDL_MAJOR_VERSION >= 3)
+                eventTGUI.mouseWheel.x = static_cast<int>(eventSDL.wheel.mouse_x * m_dpiScale);
+                eventTGUI.mouseWheel.y = static_cast<int>(eventSDL.wheel.mouse_y * m_dpiScale);
+#elif (SDL_MAJOR_VERSION > 2) || ((SDL_MAJOR_VERSION == 2) && (SDL_MINOR_VERSION >= 26))
                 eventTGUI.mouseWheel.x = static_cast<int>(eventSDL.wheel.mouseX * m_dpiScale);
                 eventTGUI.mouseWheel.y = static_cast<int>(eventSDL.wheel.mouseY * m_dpiScale);
 #else
@@ -345,8 +352,13 @@ namespace tgui
 
                 // Remember which finger this is, for when we receive SDL_EVENT_FINGER_MOTION and SDL_EVENT_FINGER_UP events
                 m_touchFirstFingerDown = true;
+#if (SDL_MAJOR_VERSION >= 3)
+                m_touchFirstFingerId = eventSDL.tfinger.fingerID;
+                m_touchFirstFingerTouchId = eventSDL.tfinger.touchID;
+#else
                 m_touchFirstFingerId = eventSDL.tfinger.fingerId;
                 m_touchFirstFingerTouchId = eventSDL.tfinger.touchId;
+#endif
 
                 // Simulate a MouseButtonPressed event
                 eventTGUI.type = Event::Type::MouseButtonPressed;
@@ -358,9 +370,13 @@ namespace tgui
             case SDL_EVENT_FINGER_UP:
             {
                 // Only handle the event if this is the first finger
+#if (SDL_MAJOR_VERSION >= 3)
+                if (!m_touchFirstFingerDown || (m_touchFirstFingerId != eventSDL.tfinger.fingerID) || (m_touchFirstFingerTouchId != eventSDL.tfinger.touchID))
+                    return false;
+#else
                 if (!m_touchFirstFingerDown || (m_touchFirstFingerId != eventSDL.tfinger.fingerId) || (m_touchFirstFingerTouchId != eventSDL.tfinger.touchId))
                     return false;
-
+#endif
                 m_touchFirstFingerDown = false;
 
                 // Simulate a MouseButtonReleased event
@@ -373,8 +389,13 @@ namespace tgui
             case SDL_EVENT_FINGER_MOTION:
             {
                 // Only handle the event if this is the first finger
+#if (SDL_MAJOR_VERSION >= 3)
+                if (!m_touchFirstFingerDown || (m_touchFirstFingerId != eventSDL.tfinger.fingerID) || (m_touchFirstFingerTouchId != eventSDL.tfinger.touchID))
+                    return false;
+#else
                 if (!m_touchFirstFingerDown || (m_touchFirstFingerId != eventSDL.tfinger.fingerId) || (m_touchFirstFingerTouchId != eventSDL.tfinger.touchId))
                     return false;
+#endif
 
                 // Simulate a MouseMoved event
                 eventTGUI.type = Event::Type::MouseMoved;
@@ -396,7 +417,11 @@ namespace tgui
         {
             const bool wasScrolling = m_twoFingerScroll.isScrolling();
 
+#if (SDL_MAJOR_VERSION >= 3)
+            const auto fingerId = static_cast<std::intptr_t>(sdlEvent.tfinger.fingerID);
+#else
             const auto fingerId = static_cast<std::intptr_t>(sdlEvent.tfinger.fingerId);
+#endif
             const float x = sdlEvent.tfinger.x * m_framebufferSize.x;
             const float y = sdlEvent.tfinger.y * m_framebufferSize.y;
 

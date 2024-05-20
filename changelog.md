@@ -1,10 +1,30 @@
-TGUI 1.2  (TBD)
+TGUI 1.3  (TBD)
 ---------------
 
-- Added changeItem function to TreeView
+- New backend: raylib
+- New widget: EditBoxSlider ([PR #238](https://github.com/texus/TGUI/pull/238))
+- All widgets can now be configured to ignore mouse events
+- Added HorizontalLayout and VerticalLayout to replace widget-specific enums
+- Added method to associate user data to combo box items
+- Renamed isKeptInParent to getKeepInParent in ChildWindow
+- Renamed limitTextWidth to setTextWidthLimited in EditBox
+- String::fromNumber now supports int8_t (but no longer accepts pointers)
+
+
+TGUI 1.2  (23 March 2024)
+-------------------------
+
+- Added Theme::replace function
+- Added TreeView::changeItem function
+- Added TreeView::getNode function
 - Added ignoreMouseEvents function to canvas widgets
+- Added Panel::setEventBubbling to enable more intuitive event propagation
 - Replaced getWidgetAtPosition with getWidgetAtPos
 - getWidgetBelowMouseCursor was given a parameter for recursive search
+- Textures with different part rects were incorrectly considered equal
+- showWithEffect didn't show widget if a hide animation was still playing
+- Setting opacity of a SubWidgetContainer didn't work
+- SubWidgetContainer didn't support show/hide animations
 
 
 TGUI 1.1  (4 November 2023)

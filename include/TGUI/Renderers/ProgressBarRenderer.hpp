@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 // TGUI - Texus' Graphical User Interface
-// Copyright (C) 2012-2023 Bruno Van de Velde (vdv_b@tgui.eu)
+// Copyright (C) 2012-2024 Bruno Van de Velde (vdv_b@tgui.eu)
 //
 // This software is provided 'as-is', without any express or implied warranty.
 // In no event will the authors be held liable for any damages arising from the use of this software.
@@ -224,7 +224,7 @@ TGUI_MODULE_EXPORT namespace tgui
 
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         /// @brief Returns the outline color of the text (used when TextOutlineThickness > 0)
-        /// @param Text outline color
+        /// @return Text outline color
         /// @since TGUI 1.1
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         TGUI_NODISCARD Color getTextOutlineColor() const;
@@ -240,7 +240,7 @@ TGUI_MODULE_EXPORT namespace tgui
 
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         /// @brief Returns the thickness of the text outline
-        /// @param Text outline thickness
+        /// @return Text outline thickness
         /// @since TGUI 1.1
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         TGUI_NODISCARD float getTextOutlineThickness() const;

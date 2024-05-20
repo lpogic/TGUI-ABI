@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 // TGUI - Texus' Graphical User Interface
-// Copyright (C) 2012-2023 Bruno Van de Velde (vdv_b@tgui.eu)
+// Copyright (C) 2012-2024 Bruno Van de Velde (vdv_b@tgui.eu)
 //
 // This software is provided 'as-is', without any express or implied warranty.
 // In no event will the authors be held liable for any damages arising from the use of this software.
@@ -57,14 +57,14 @@ TGUI_MODULE_EXPORT namespace tgui
         ///
         /// By default, mouse events are NOT ignored.
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        void ignoreMouseEvents(bool ignore = true);
+        TGUI_DEPRECATED("Use setIgnoreMouseEvents instead") void ignoreMouseEvents(bool ignore = true);
 
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         /// @brief Returns whether the widget is ignoring mouse events and letting them pass to the widgets behind it
         ///
         /// @return Are mouse events ignored by this widget?
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        TGUI_NODISCARD bool isIgnoringMouseEvents() const;
+        TGUI_DEPRECATED("Use getIgnoreMouseEvents instead") TGUI_NODISCARD bool isIgnoringMouseEvents() const;
 
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         /// @brief Returns whether the widget can gain focus
@@ -96,7 +96,7 @@ TGUI_MODULE_EXPORT namespace tgui
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     private:
 
-        bool m_ignoringMouseEvents = false;
+        bool m_ignoringMouseEvents = false; // TGUI_NEXT: Remove this property
     };
 }
 

@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 // TGUI - Texus' Graphical User Interface
-// Copyright (C) 2012-2023 Bruno Van de Velde (vdv_b@tgui.eu)
+// Copyright (C) 2012-2024 Bruno Van de Velde (vdv_b@tgui.eu)
 //
 // This software is provided 'as-is', without any express or implied warranty.
 // In no event will the authors be held liable for any damages arising from the use of this software.
@@ -56,10 +56,10 @@ TGUI_MODULE_EXPORT namespace tgui
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         /// @brief Enumeration of the tab alignments for tabs
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        enum TabAlign
+        enum class TabAlign
         {
-            Top    = 0,      //!< Tabs are above panes
-            Bottom = 1 << 0  //!< Tabs are below panes
+            Top    = 0,      //!< Tabs are above panels
+            Bottom = 1 << 0  //!< Tabs are below panels
         };
 
 
@@ -213,10 +213,11 @@ TGUI_MODULE_EXPORT namespace tgui
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         /// @brief Returns index of the specified panel
         ///
-        /// @param ptr Panel to find
+        /// @param panel  Panel to find
+        ///
         /// @return Index of the specified panel or -1 if not found
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        TGUI_NODISCARD int getIndex(const Panel::Ptr& ptr);
+        TGUI_NODISCARD int getIndex(const Panel::Ptr& panel);
 
 
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -224,7 +225,7 @@ TGUI_MODULE_EXPORT namespace tgui
         ///
         /// @return Selected panel or nullptr
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        TGUI_NODISCARD Panel::Ptr getSelected();
+        TGUI_NODISCARD Panel::Ptr getSelected() const;
 
 
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -241,7 +242,7 @@ TGUI_MODULE_EXPORT namespace tgui
         /// @param index Index of panel to get
         /// @return Panel with given index
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        TGUI_NODISCARD Panel::Ptr getPanel(int index);
+        TGUI_NODISCARD Panel::Ptr getPanel(int index) const;
 
 
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -249,7 +250,7 @@ TGUI_MODULE_EXPORT namespace tgui
         ///
         /// @return Internal tabs widget
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        TGUI_NODISCARD Tabs::Ptr getTabs();
+        TGUI_NODISCARD Tabs::Ptr getTabs() const;
 
 
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -280,7 +281,7 @@ TGUI_MODULE_EXPORT namespace tgui
         ///
         /// @param align  New tab alignment
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        void setTabAlignment(TabContainer::TabAlign align);
+        void setTabAlignment(TabAlign align);
 
 
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -288,7 +289,7 @@ TGUI_MODULE_EXPORT namespace tgui
         ///
         /// @return The current tab alignment
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        TGUI_NODISCARD TabContainer::TabAlign getTabAlignment() const;
+        TGUI_NODISCARD TabAlign getTabAlignment() const;
 
 
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -298,7 +299,7 @@ TGUI_MODULE_EXPORT namespace tgui
         /// A value less than or equal to 0.0f sets the width of the tabs to the automatic width (tabs fill the TabContainer).
         /// A value greater than zero sets the width of the tabs to the specified value.
         ///
-        /// @param align  New tab fixed size
+        /// @param fixedSize  New tab fixed size
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         void setTabFixedSize(float fixedSize);
 
@@ -382,7 +383,7 @@ TGUI_MODULE_EXPORT namespace tgui
 
         Tabs::Ptr m_tabs = Tabs::create(); // Stores the tabs.
 
-        TabContainer::TabAlign m_tabAlign = TabContainer::TabAlign::Top; // Stores the tab alignment.
+        TabAlign m_tabAlign = TabAlign::Top; // Stores the tab alignment.
 
         float m_tabFixedSize = 0.0f; // Stores the tab fixed size for fixed size alignment, default is 0.0f.
     };

@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 // TGUI - Texus' Graphical User Interface
-// Copyright (C) 2012-2023 Bruno Van de Velde (vdv_b@tgui.eu)
+// Copyright (C) 2012-2024 Bruno Van de Velde (vdv_b@tgui.eu)
 //
 // This software is provided 'as-is', without any express or implied warranty.
 // In no event will the authors be held liable for any damages arising from the use of this software.
@@ -163,16 +163,16 @@ TEST_CASE("[ChildWindow]")
 
     SECTION("TitleAlignment")
     {
-        REQUIRE(childWindow->getTitleAlignment() == tgui::ChildWindow::TitleAlignment::Center);
+        REQUIRE(childWindow->getTitleAlignment() == tgui::HorizontalAlignment::Center);
 
-        childWindow->setTitleAlignment(tgui::ChildWindow::TitleAlignment::Left);
-        REQUIRE(childWindow->getTitleAlignment() == tgui::ChildWindow::TitleAlignment::Left);
+        childWindow->setTitleAlignment(tgui::HorizontalAlignment::Left);
+        REQUIRE(childWindow->getTitleAlignment() == tgui::HorizontalAlignment::Left);
 
-        childWindow->setTitleAlignment(tgui::ChildWindow::TitleAlignment::Right);
-        REQUIRE(childWindow->getTitleAlignment() == tgui::ChildWindow::TitleAlignment::Right);
+        childWindow->setTitleAlignment(tgui::HorizontalAlignment::Right);
+        REQUIRE(childWindow->getTitleAlignment() == tgui::HorizontalAlignment::Right);
 
-        childWindow->setTitleAlignment(tgui::ChildWindow::TitleAlignment::Center);
-        REQUIRE(childWindow->getTitleAlignment() == tgui::ChildWindow::TitleAlignment::Center);
+        childWindow->setTitleAlignment(tgui::HorizontalAlignment::Center);
+        REQUIRE(childWindow->getTitleAlignment() == tgui::HorizontalAlignment::Center);
     }
 
     SECTION("TitleButtons")
@@ -211,13 +211,13 @@ TEST_CASE("[ChildWindow]")
 
     SECTION("KeepInParent")
     {
-        REQUIRE(childWindow->isKeptInParent() == false);
+        REQUIRE(childWindow->getKeepInParent() == false);
 
         childWindow->setKeepInParent(true);
-        REQUIRE(childWindow->isKeptInParent() == true);
+        REQUIRE(childWindow->getKeepInParent() == true);
 
         childWindow->setKeepInParent(false);
-        REQUIRE(childWindow->isKeptInParent() == false);
+        REQUIRE(childWindow->getKeepInParent() == false);
     }
 
     SECTION("Events / Signals")
@@ -440,7 +440,7 @@ TEST_CASE("[ChildWindow]")
             childWindow->setMinimumSize({40, 30});
             childWindow->setMaximumSize({200, 150});
             childWindow->setTitle("Title");
-            childWindow->setTitleAlignment(tgui::ChildWindow::TitleAlignment::Left);
+            childWindow->setTitleAlignment(tgui::HorizontalAlignment::Left);
             childWindow->setTitleButtons(tgui::ChildWindow::TitleButton::Close | tgui::ChildWindow::TitleButton::Minimize);
             childWindow->setResizable();
             childWindow->setPositionLocked();
@@ -471,7 +471,7 @@ TEST_CASE("[ChildWindow]")
         childWindow->setTitle("Window");
         childWindow->setTitleTextSize(18);
         childWindow->setTitleButtons(tgui::ChildWindow::TitleButton::Maximize | tgui::ChildWindow::TitleButton::Minimize);
-        childWindow->setTitleAlignment(tgui::ChildWindow::TitleAlignment::Center);
+        childWindow->setTitleAlignment(tgui::HorizontalAlignment::Center);
 
         tgui::ChildWindowRenderer renderer = tgui::RendererData::create();
         renderer.setTitleBarColor(tgui::Color::Blue);
@@ -505,7 +505,7 @@ TEST_CASE("[ChildWindow]")
         {
             TEST_DRAW("ChildWindow.png")
 
-            childWindow->setTitleAlignment(tgui::ChildWindow::TitleAlignment::Left);
+            childWindow->setTitleAlignment(tgui::HorizontalAlignment::Left);
 
             renderer.setShowTextOnTitleButtons(true);
             TEST_DRAW("ChildWindow_TitleButtonText.png")
@@ -516,7 +516,7 @@ TEST_CASE("[ChildWindow]")
 
         SECTION("Textured")
         {
-            childWindow->setTitleAlignment(tgui::ChildWindow::TitleAlignment::Right);
+            childWindow->setTitleAlignment(tgui::HorizontalAlignment::Right);
 
             renderer.setTextureTitleBar("resources/Texture1.png");
             TEST_DRAW("ChildWindow_Textured.png")

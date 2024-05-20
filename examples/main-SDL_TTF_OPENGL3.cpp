@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 // TGUI - Texus' Graphical User Interface
-// Copyright (C) 2012-2023 Bruno Van de Velde (vdv_b@tgui.eu)
+// Copyright (C) 2012-2024 Bruno Van de Velde (vdv_b@tgui.eu)
 //
 // This software is provided 'as-is', without any express or implied warranty.
 // In no event will the authors be held liable for any damages arising from the use of this software.
@@ -28,8 +28,6 @@
 #if SDL_MAJOR_VERSION >= 3
     #include <SDL3/SDL_main.h>
     #include <SDL3/SDL_opengl.h>
-    #define SDL_WINDOW_SHOWN 0  // To keep code below compatible between SDL2 and SDL3
-    #define SDL_CreateWindow SDL_CreateWindowWithPosition // To keep code below compatible between SDL2 and SDL3
 #else
     #include <SDL_opengl.h>
 #endif
@@ -43,7 +41,7 @@ void run_application(SDL_Window* window)
     if (!runExample(gui))
         return;
 
-    gui.mainLoop();
+    gui.mainLoop(); // To use your own main loop, see https://tgui.eu/tutorials/latest-stable/backend-sdl-ttf-opengl3/#main-loop
 }
 
 // Note that no error checking is performed on SDL initialization in this example code
@@ -57,10 +55,14 @@ int main(int, char **)
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
 
     // TGUI requires a window created with the SDL_WINDOW_OPENGL flag and an OpenGL context
+#if SDL_MAJOR_VERSION >= 3
+    SDL_Window* window = SDL_CreateWindow("TGUI example (SDL-TTF-OpenGL3)", 800, 600, SDL_WINDOW_OPENGL);
+#else
     SDL_Window* window = SDL_CreateWindow("TGUI example (SDL-TTF-OpenGL3)",
                                           SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
                                           800, 600,
                                           SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN);
+#endif
     SDL_GLContext glContext = SDL_GL_CreateContext(window);
 
     // SDL_ttf needs to be initialized before using TGUI

@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 // TGUI - Texus' Graphical User Interface
-// Copyright (C) 2012-2023 Bruno Van de Velde (vdv_b@tgui.eu)
+// Copyright (C) 2012-2024 Bruno Van de Velde (vdv_b@tgui.eu)
 //
 // This software is provided 'as-is', without any express or implied warranty.
 // In no event will the authors be held liable for any damages arising from the use of this software.
@@ -273,7 +273,7 @@ namespace tgui
             maxWidth = width;
 
         // Horizontally align the lines now that we know their sizes
-        if (m_horizontalAlignment != HorizontalAlignment::Left)
+        if (m_horizontalAlignment != tgui::HorizontalAlignment::Left) // TGUI_NEXT: Remove "tgui::" prefix
         {
             const float availableWidth = maxWidth;
 
@@ -303,7 +303,7 @@ namespace tgui
                 const float lineWidth = lineWidths[i] - whitespaceOffset;
 
                 float horizontalOffset;
-                if (m_horizontalAlignment == HorizontalAlignment::Right)
+                if (m_horizontalAlignment == tgui::HorizontalAlignment::Right) // TGUI_NEXT: Remove "tgui::" prefix
                     horizontalOffset = availableWidth - lineWidth;
                 else // if (m_horizontalAlignment == HorizontalAlignment::Center)
                     horizontalOffset = (availableWidth - lineWidth) / 2.f;
@@ -337,14 +337,14 @@ namespace tgui
         }
 
         // Vertically align the lines if the text is smaller than the box
-        if (m_verticalAlignment != VerticalAlignment::Top)
+        if (m_verticalAlignment != tgui::VerticalAlignment::Top) // TGUI_NEXT: Remove "tgui::" prefix
         {
             const float totalHeight = getSize().y - outline.getTop() - outline.getBottom();
 
             if (!m_scrollbar->isShown() || (requiredTextHeight < totalHeight))
             {
                 float verticalOffset;
-                if (m_verticalAlignment == VerticalAlignment::Bottom)
+                if (m_verticalAlignment == tgui::VerticalAlignment::Bottom) // TGUI_NEXT: Remove "tgui::" prefix
                     verticalOffset = totalHeight - requiredTextHeight;
                 else // if (m_verticalAlignment == VerticalAlignment::Center)
                     verticalOffset = (totalHeight - requiredTextHeight) / 2.f;

@@ -1,6 +1,6 @@
 ####################################################################################################
 # TGUI - Texus' Graphical User Interface
-# Copyright (C) 2012-2023 Bruno Van de Velde (vdv_b@tgui.eu)
+# Copyright (C) 2012-2024 Bruno Van de Velde (vdv_b@tgui.eu)
 #
 # This software is provided 'as-is', without any express or implied warranty.
 # In no event will the authors be held liable for any damages arising from the use of this software.
@@ -107,6 +107,7 @@ set(TGUI_SRC
     Widgets/ColorPicker.cpp
     Widgets/ComboBox.cpp
     Widgets/EditBox.cpp
+    Widgets/EditBoxSlider.cpp
     Widgets/FileDialog.cpp
     Widgets/Group.cpp
     Widgets/Grid.cpp
@@ -230,7 +231,7 @@ endif()
 
 if (TGUI_BUILD_AS_CXX_MODULE)
     target_sources(tgui
-                   PRIVATE
+                   PUBLIC
                    FILE_SET tgui_cxx_module_files
                    TYPE CXX_MODULES
                    BASE_DIRS "${CMAKE_CURRENT_BINARY_DIR}"
@@ -333,9 +334,13 @@ else()
     target_include_directories(tgui INTERFACE $<INSTALL_INTERFACE:include>)
 endif()
 
-# We need to link to an extra library on android (to use the asset manager)
 if(TGUI_OS_ANDROID)
+    # We need to link to an extra library on android (to use the asset manager)
     target_link_libraries(tgui PRIVATE android)
+
+    # Always use position-independent code on Android, even when linking statically.
+    # This is needed because all c++ code is placed in a shared library on Android.
+    set_target_properties(tgui PROPERTIES POSITION_INDEPENDENT_CODE ON)
 endif()
 
 # Enable automatic reference counting on iOS
@@ -450,11 +455,20 @@ endif()
 
 if (TGUI_INSTALL)
     # Install library
-    install(TARGETS tgui EXPORT TGUIConfigExport
-            RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT bin
-            LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT bin
-            ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT devel
-            FRAMEWORK DESTINATION "." COMPONENT bin)
+    if (TGUI_BUILD_AS_CXX_MODULE)
+        install(TARGETS tgui EXPORT TGUIConfigExport
+                RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT bin
+                LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT bin
+                ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT devel
+                FILE_SET tgui_cxx_module_files DESTINATION ${CMAKE_INSTALL_INCLUDEDIR} COMPONENT include
+                FRAMEWORK DESTINATION "." COMPONENT bin)
+    else()
+        install(TARGETS tgui EXPORT TGUIConfigExport
+                RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT bin
+                LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT bin
+                ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT devel
+                FRAMEWORK DESTINATION "." COMPONENT bin)
+    endif()
 
     install(EXPORT TGUIConfigExport
             NAMESPACE TGUI::

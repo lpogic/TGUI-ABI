@@ -1,6 +1,6 @@
 ####################################################################################################
 # TGUI - Texus' Graphical User Interface
-# Copyright (C) 2012-2023 Bruno Van de Velde (vdv_b@tgui.eu)
+# Copyright (C) 2012-2024 Bruno Van de Velde (vdv_b@tgui.eu)
 #
 # This software is provided 'as-is', without any express or implied warranty.
 # In no event will the authors be held liable for any damages arising from the use of this software.
@@ -54,18 +54,38 @@ add_custom_command(TARGET gui-builder POST_BUILD
                    COMMAND ${CMAKE_COMMAND} -E copy_directory "${PROJECT_SOURCE_DIR}/themes" "${PROJECT_SOURCE_DIR}/gui-builder/themes"
                    VERBATIM)
 
+# Copy the resources folder to the build directory to execute the gui-folder from there
+add_custom_command(TARGET gui-builder
+                   POST_BUILD
+                   COMMAND ${CMAKE_COMMAND} -E copy_directory "${PROJECT_SOURCE_DIR}/gui-builder/resources" "$<TARGET_FILE_DIR:gui-builder>/resources"
+                   COMMAND ${CMAKE_COMMAND} -E copy_directory "${PROJECT_SOURCE_DIR}/gui-builder/themes" "$<TARGET_FILE_DIR:gui-builder>/themes"
+                   VERBATIM)
+
 set(target_install_dir "${TGUI_MISC_INSTALL_PREFIX}/gui-builder")
 
 copy_dlls_to_exe("${PROJECT_SOURCE_DIR}/gui-builder/" "${target_install_dir}" gui-builder)
 
 # Set the RPATH of the executable on Linux (and BSD)
 if (TGUI_SHARED_LIBS AND TGUI_OS_LINUX)
-    file(RELATIVE_PATH rel_lib_dir
-         ${CMAKE_INSTALL_PREFIX}/${target_install_dir}
-         ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR})
+    if (CMAKE_VERSION VERSION_GREATER_EQUAL 3.20)
+        cmake_path(SET lib_dir NORMALIZE "${CMAKE_INSTALL_PREFIX}")
+        cmake_path(APPEND lib_dir "${CMAKE_INSTALL_LIBDIR}")
+
+        cmake_path(SET exe_dir NORMALIZE "${CMAKE_INSTALL_PREFIX}")
+        cmake_path(APPEND exe_dir "${target_install_dir}")
+
+        set(rel_lib_dir "${lib_dir}")
+        cmake_path(RELATIVE_PATH rel_lib_dir BASE_DIRECTORY "${exe_dir}")
+    else()
+        # This code for CMake < 3.20 only works if CMAKE_INSTALL_PREFIX is an absolute path
+        file(RELATIVE_PATH rel_lib_dir
+             "${CMAKE_INSTALL_PREFIX}/${target_install_dir}"
+             "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}")
+    endif()
 
     set_target_properties(gui-builder PROPERTIES
-                          INSTALL_RPATH "$ORIGIN/${rel_lib_dir}")
+                          INSTALL_RPATH "$ORIGIN/${rel_lib_dir}"  # RPATH will contain relative path to where we installed our own library
+                          INSTALL_RPATH_USE_LINK_PATH TRUE)       # RPATH will contain paths to our dependencies
 endif()
 
 if (TGUI_INSTALL)

@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 // TGUI - Texus' Graphical User Interface
-// Copyright (C) 2012-2023 Bruno Van de Velde (vdv_b@tgui.eu)
+// Copyright (C) 2012-2024 Bruno Van de Velde (vdv_b@tgui.eu)
 //
 // This software is provided 'as-is', without any express or implied warranty.
 // In no event will the authors be held liable for any damages arising from the use of this software.
@@ -41,7 +41,7 @@
 TGUI_MODULE_EXPORT namespace tgui
 {
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// CanvasSFML provides a way to directly render SFML contents on a widget
+    /// @brief CanvasSFML provides a way to directly render SFML contents on a widget
     ///
     /// When gui.draw() is called, all widgets are drawn at once. If you wish to have custom SFML rendering inbetween
     /// TGUI widgets (e.g. draw to the background of a child window) then you need to use a CanvasSFML widget.

@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 // TGUI - Texus' Graphical User Interface
-// Copyright (C) 2012-2023 Bruno Van de Velde (vdv_b@tgui.eu)
+// Copyright (C) 2012-2024 Bruno Van de Velde (vdv_b@tgui.eu)
 //
 // This software is provided 'as-is', without any express or implied warranty.
 // In no event will the authors be held liable for any damages arising from the use of this software.
@@ -52,6 +52,8 @@
         #else
             import tgui.backend.glfw_gles2;
         #endif
+    #elif TGUI_HAS_BACKEND_RAYLIB
+        import tgui.backend.raylib;
     #endif
 #endif
 
@@ -89,6 +91,8 @@
         #if !TGUI_EXPERIMENTAL_USE_STD_MODULE
             #include <queue>
         #endif
+    #elif TGUI_HAS_BACKEND_RAYLIB
+        #include <TGUI/Backend/raylib.hpp>
     #endif
 #endif
 
@@ -111,7 +115,7 @@ namespace tgui
 #endif
 
 #if SFML_VERSION_MAJOR >= 3
-            m_window.create(sf::VideoMode{{width, height}}, title.toStdString(), sf::Style::Default, settings);
+            m_window.create(sf::VideoMode{{width, height}}, title.toStdString(), sf::Style::Default, sf::State::Windowed, settings);
 #else
             m_window.create(sf::VideoMode{width, height}, title.toStdString(), sf::Style::Default, settings);
 #endif
@@ -146,11 +150,18 @@ namespace tgui
 
         bool pollEvent(Event& event) override
         {
+#if SFML_VERSION_MAJOR >= 3
+            if (const auto eventSFML = m_window.pollEvent())
+                return m_gui->convertEvent(eventSFML, event);
+            else // No new events
+                return false;
+#else
             sf::Event eventSFML;
             if (m_window.pollEvent(eventSFML))
                 return m_gui->convertEvent(eventSFML, event);
             else // No new events
                 return false;
+#endif
         }
 
         void draw() override
@@ -222,7 +233,7 @@ namespace tgui
 
 #if TGUI_HAS_BACKEND_SDL_RENDERER
     #if SDL_MAJOR_VERSION >= 3
-            m_renderer = SDL_CreateRenderer(m_window, nullptr, SDL_RENDERER_ACCELERATED);
+            m_renderer = SDL_CreateRenderer(m_window, nullptr);
     #else
             m_renderer = SDL_CreateRenderer(m_window, -1, SDL_RENDERER_ACCELERATED);
     #endif
@@ -486,6 +497,105 @@ namespace tgui
         std::queue<Event> m_events;
     };
 
+#elif TGUI_HAS_BACKEND_RAYLIB
+
+    class BackendWindowRaylib : public DefaultBackendWindow
+    {
+    public:
+        BackendWindowRaylib(unsigned int width, unsigned int height, const String& title)
+        {
+            SetTraceLogLevel(LOG_WARNING);
+            InitWindow(static_cast<int>(width), static_cast<int>(height), title.toStdString().c_str());
+
+            m_gui = std::make_unique<Gui>();
+            m_gui->getBackendRenderTarget()->setClearColor({200, 200, 200});
+
+            m_mouseOnWindow = IsCursorOnScreen();
+        }
+
+        ~BackendWindowRaylib() override
+        {
+            m_gui = nullptr; // Gui must be destroyed before destroying raylib window
+            CloseWindow();
+        }
+
+        BackendGui* getGui() const override
+        {
+            return m_gui.get();
+        }
+
+        bool isOpen() const override
+        {
+            return !WindowShouldClose();
+        }
+
+        void close() override
+        {
+            m_gui->endMainLoop();
+        }
+
+        bool pollEvent(Event& event) override
+        {
+            if (m_nextEventIndex >= m_events.size())
+            {
+                if (m_eventsPolled)
+                    return false;
+
+                m_events = m_gui->generateEventQueue(true);
+                m_nextEventIndex = 0;
+                m_eventsPolled = true;
+            }
+
+            if (m_nextEventIndex < m_events.size())
+            {
+                event = std::move(m_events[m_nextEventIndex]);
+                ++m_nextEventIndex;
+                return true;
+            }
+
+            return false;
+        }
+
+        void draw() override
+        {
+            BeginDrawing();
+            m_gui->getBackendRenderTarget()->clearScreen();
+            m_gui->draw();
+            EndDrawing();
+            m_eventsPolled = false;
+        }
+
+        void mainLoop(Color clearColor) override
+        {
+            m_gui->mainLoop(clearColor);
+        }
+
+        void setIcon(const String& filename) override
+        {
+            Vector2u iconSize;
+            auto pixelPtr = ImageLoader::loadFromFile((Filesystem::Path(getResourcePath()) / filename).asString(), iconSize);
+            if (!pixelPtr)
+                return;
+
+            static_assert(sizeof(Image) == sizeof(void*) + 4*sizeof(int), "Assuming layout of Image class (c++20 aggregate initialization would solve this)");
+            Image icon = {
+                const_cast<std::uint8_t*>(pixelPtr.get()),
+                static_cast<int>(iconSize.x),
+                static_cast<int>(iconSize.y),
+                1,
+                PIXELFORMAT_UNCOMPRESSED_R8G8B8A8
+            };
+            SetWindowIcon(icon);
+        }
+
+    private:
+        std::unique_ptr<Gui> m_gui;
+        std::vector<Event> m_events;
+        std::size_t m_nextEventIndex = 0;
+        bool m_mouseOnWindow = false;
+        bool m_eventsPolled = false;
+    };
+
 #endif
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -498,6 +608,8 @@ namespace tgui
         return std::make_shared<BackendWindowSDL>(width, height, title);
 #elif TGUI_HAS_BACKEND_GLFW_OPENGL3 || TGUI_HAS_BACKEND_GLFW_GLES2
         return std::make_shared<BackendWindowGLFW>(width, height, title);
+#elif TGUI_HAS_BACKEND_RAYLIB
+        return std::make_shared<BackendWindowRaylib>(width, height, title);
 #else
         TGUI_ASSERT(false, "DefaultBackendWindow can't be used when TGUI was build without a backend");
         (void)width;

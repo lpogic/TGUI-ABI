@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 // TGUI - Texus' Graphical User Interface
-// Copyright (C) 2012-2023 Bruno Van de Velde (vdv_b@tgui.eu)
+// Copyright (C) 2012-2024 Bruno Van de Velde (vdv_b@tgui.eu)
 //
 // This software is provided 'as-is', without any express or implied warranty.
 // In no event will the authors be held liable for any damages arising from the use of this software.
@@ -178,6 +178,33 @@ namespace tgui
     bool BackendGuiSFML::handleEvent(sf::Event sfmlEvent)
     {
         // Detect scrolling with two fingers by examining touch events
+#if SFML_VERSION_MAJOR >= 3
+        if (const auto* sfmlTouchBegan = sfmlEvent.getIf<sf::Event::TouchBegan>())
+        {
+            const auto fingerId = static_cast<std::intptr_t>(sfmlTouchBegan->finger);
+            const float x = static_cast<float>(sfmlTouchBegan->position.x);
+            const float y = static_cast<float>(sfmlTouchBegan->position.y);
+            m_twoFingerScroll.reportFingerDown(fingerId, x, y);
+        }
+
+        if (const auto* sfmlTouchEnded = sfmlEvent.getIf<sf::Event::TouchEnded>())
+        {
+            const auto fingerId = static_cast<std::intptr_t>(sfmlTouchEnded->finger);
+            m_twoFingerScroll.reportFingerUp(fingerId);
+        }
+
+        if (const auto* sfmlTouchMoved = sfmlEvent.getIf<sf::Event::TouchMoved>())
+        {
+            const auto fingerId = static_cast<std::intptr_t>(sfmlTouchMoved->finger);
+            const float x = static_cast<float>(sfmlTouchMoved->position.x);
+            const float y = static_cast<float>(sfmlTouchMoved->position.y);
+
+            const bool wasScrolling = m_twoFingerScroll.isScrolling();
+            m_twoFingerScroll.reportFingerMotion(fingerId, x, y);
+            if (m_twoFingerScroll.isScrolling())
+                return handleTwoFingerScroll(wasScrolling);
+        }
+#else
         if ((sfmlEvent.type == sf::Event::TouchBegan) || (sfmlEvent.type == sf::Event::TouchEnded) || (sfmlEvent.type == sf::Event::TouchMoved))
         {
             const bool wasScrolling = m_twoFingerScroll.isScrolling();
@@ -197,13 +224,17 @@ namespace tgui
                     return handleTwoFingerScroll(wasScrolling);
             }
         }
-
+#endif
         // Convert the event to our own type so that we can process it in a backend-independent way afterwards
         Event event;
         if (!convertEvent(sfmlEvent, event))
             return false; // We don't process this type of event
 
+#if SFML_VERSION_MAJOR >= 3
+        if ((event.type == Event::Type::MouseButtonPressed) && sfmlEvent.is<sf::Event::TouchBegan>())
+#else
         if ((event.type == Event::Type::MouseButtonPressed) && (sfmlEvent.type == sf::Event::TouchBegan))
+#endif
         {
             // For touches, always send a mouse move event before the mouse press,
             // because widgets may assume that the mouse had to move to the clicked location first
@@ -237,7 +268,6 @@ namespace tgui
 
         setDrawingUpdatesTime(false);
 
-        sf::Event event;
         bool refreshRequired = true;
         std::chrono::steady_clock::time_point lastRenderTime;
         bool windowOpen = m_window->isOpen();
@@ -246,12 +276,21 @@ namespace tgui
             bool eventProcessed = false;
             while (true)
             {
+#if SFML_VERSION_MAJOR >= 3
+                while (const auto event = m_window->pollEvent())
+#else
+                sf::Event event;
                 while (m_window->pollEvent(event))
+#endif
                 {
                     if (handleEvent(event))
                         eventProcessed = true;
 
+#if SFML_VERSION_MAJOR >= 3
+                    if (event.is<sf::Event::Closed>())
+#else
                     if (event.type == sf::Event::Closed)
+#endif
                     {
                         // We don't call m_window->close() as it would destroy the OpenGL context, which will cause messages to be
                         // printed in the terminal later when we try to destroy our backend renderer (which tries to clean up OpenGL resources).
@@ -259,7 +298,11 @@ namespace tgui
                         windowOpen = false;
                         eventProcessed = true;
                     }
+#if SFML_VERSION_MAJOR >= 3
+                    else if (event.is<sf::Event::Resized>() || event.is<sf::Event::MouseLeft>())
+#else
                     else if ((event.type == sf::Event::Resized) || (event.type == sf::Event::MouseLeft))
+#endif
                     {
                         eventProcessed = true;
                     }
@@ -306,6 +349,161 @@ namespace tgui
 
     bool BackendGuiSFML::convertEvent(const sf::Event& eventSFML, Event& eventTGUI)
     {
+#if SFML_VERSION_MAJOR >= 3
+        if (eventSFML.is<sf::Event::FocusLost>())
+        {
+            eventTGUI.type = Event::Type::LostFocus;
+            return true;
+        }
+
+        if (eventSFML.is<sf::Event::FocusGained>())
+        {
+            eventTGUI.type = Event::Type::GainedFocus;
+            return true;
+        }
+
+        if (const auto* eventResized = eventSFML.getIf<sf::Event::Resized>())
+        {
+            eventTGUI.type = Event::Type::Resized;
+            eventTGUI.size.width = eventResized->size.x;
+            eventTGUI.size.height = eventResized->size.y;
+            return true;
+        }
+
+        if (eventSFML.is<sf::Event::Closed>())
+        {
+            eventTGUI.type = Event::Type::Closed;
+            return true;
+        }
+
+        if (const auto* eventTextEntered = eventSFML.getIf<sf::Event::TextEntered>())
+        {
+            eventTGUI.type = Event::Type::TextEntered;
+            eventTGUI.text.unicode = eventTextEntered->unicode;
+            return true;
+        }
+
+        if (const auto* eventKeyPressed = eventSFML.getIf<sf::Event::KeyPressed>())
+        {
+            const Event::KeyboardKey code = convertKeyCode(eventKeyPressed->code);
+            if (code == Event::KeyboardKey::Unknown)
+                return false; // This key isn't handled by TGUI
+
+            eventTGUI.type = Event::Type::KeyPressed;
+            eventTGUI.key.code = code;
+            eventTGUI.key.alt = eventKeyPressed->alt;
+            eventTGUI.key.control = eventKeyPressed->control;
+            eventTGUI.key.shift = eventKeyPressed->shift;
+            eventTGUI.key.system = eventKeyPressed->system;
+            return true;
+        }
+
+        if (const auto* eventMouseWheelScrolled = eventSFML.getIf<sf::Event::MouseWheelScrolled>())
+        {
+            if (eventMouseWheelScrolled->wheel != sf::Mouse::Wheel::Vertical)
+                return false; // TGUI only handles the vertical mouse wheel
+
+            eventTGUI.type = Event::Type::MouseWheelScrolled;
+            eventTGUI.mouseWheel.delta = eventMouseWheelScrolled->delta;
+            eventTGUI.mouseWheel.x = eventMouseWheelScrolled->position.x;
+            eventTGUI.mouseWheel.y = eventMouseWheelScrolled->position.y;
+            return true;
+        }
+
+        if (const auto* eventMousePressed = eventSFML.getIf<sf::Event::MouseButtonPressed>())
+        {
+            if (eventMousePressed->button == sf::Mouse::Button::Left)
+                eventTGUI.mouseButton.button = Event::MouseButton::Left;
+            else if (eventMousePressed->button == sf::Mouse::Button::Middle)
+                eventTGUI.mouseButton.button = Event::MouseButton::Middle;
+            else if (eventMousePressed->button == sf::Mouse::Button::Right)
+                eventTGUI.mouseButton.button = Event::MouseButton::Right;
+            else // This mouse button isn't handled by TGUI
+                return false;
+
+            eventTGUI.type = Event::Type::MouseButtonPressed;
+            eventTGUI.mouseButton.x = eventMousePressed->position.x;
+            eventTGUI.mouseButton.y = eventMousePressed->position.y;
+            return true;
+        }
+
+        if (const auto* eventMouseReleased = eventSFML.getIf<sf::Event::MouseButtonReleased>())
+        {
+            if (eventMouseReleased->button == sf::Mouse::Button::Left)
+                eventTGUI.mouseButton.button = Event::MouseButton::Left;
+            else if (eventMouseReleased->button == sf::Mouse::Button::Middle)
+                eventTGUI.mouseButton.button = Event::MouseButton::Middle;
+            else if (eventMouseReleased->button == sf::Mouse::Button::Right)
+                eventTGUI.mouseButton.button = Event::MouseButton::Right;
+            else // This mouse button isn't handled by TGUI
+                return false;
+
+            eventTGUI.type = Event::Type::MouseButtonReleased;
+            eventTGUI.mouseButton.x = eventMouseReleased->position.x;
+            eventTGUI.mouseButton.y = eventMouseReleased->position.y;
+            return true;
+        }
+
+        if (const auto* eventMouseMoved = eventSFML.getIf<sf::Event::MouseMoved>())
+        {
+            eventTGUI.type = Event::Type::MouseMoved;
+            eventTGUI.mouseMove.x = eventMouseMoved->position.x;
+            eventTGUI.mouseMove.y = eventMouseMoved->position.y;
+            return true;
+        }
+
+        if (eventSFML.is<sf::Event::MouseEntered>())
+        {
+            eventTGUI.type = Event::Type::MouseEntered;
+            return true;
+        }
+
+        if (eventSFML.is<sf::Event::MouseLeft>())
+        {
+            eventTGUI.type = Event::Type::MouseLeft;
+            return true;
+        }
+
+        if (const auto* eventTouchMoved = eventSFML.getIf<sf::Event::TouchMoved>())
+        {
+            if (eventTouchMoved->finger != 0)
+                return false; // Only the first finger is handled
+
+            // Simulate a MouseMoved event
+            eventTGUI.type = Event::Type::MouseMoved;
+            eventTGUI.mouseMove.x = eventTouchMoved->position.x;
+            eventTGUI.mouseMove.y = eventTouchMoved->position.y;
+            return true;
+        }
+
+        if (const auto* eventTouchBegan = eventSFML.getIf<sf::Event::TouchBegan>())
+        {
+            if (eventTouchBegan->finger != 0)
+                return false; // Only the first finger is handled
+
+            // Simulate a MouseButtonPressed event
+            eventTGUI.type = Event::Type::MouseButtonPressed;
+            eventTGUI.mouseButton.button = Event::MouseButton::Left;
+            eventTGUI.mouseButton.x = eventTouchBegan->position.x;
+            eventTGUI.mouseButton.y = eventTouchBegan->position.y;
+            return true;
+        }
+
+        if (const auto* eventTouchEnded = eventSFML.getIf<sf::Event::TouchEnded>())
+        {
+            if (eventTouchEnded->finger != 0)
+                return false; // Only the first finger is handled
+
+            // Simulate a MouseButtonReleased event
+            eventTGUI.type = Event::Type::MouseButtonReleased;
+            eventTGUI.mouseButton.button = Event::MouseButton::Left;
+            eventTGUI.mouseButton.x = eventTouchEnded->position.x;
+            eventTGUI.mouseButton.y = eventTouchEnded->position.y;
+            return true;
+        }
+
+        return false;
+#else
         switch (eventSFML.type)
         {
             case sf::Event::LostFocus:
@@ -352,13 +550,8 @@ namespace tgui
             }
             case sf::Event::MouseWheelScrolled:
             {
-#if SFML_VERSION_MAJOR >= 3
-                if (eventSFML.mouseWheelScroll.wheel != sf::Mouse::Wheel::Vertical)
-                    return false; // TGUI only handles the vertical mouse wheel
-#else
                 if (eventSFML.mouseWheelScroll.wheel != sf::Mouse::Wheel::VerticalWheel)
                     return false; // TGUI only handles the vertical mouse wheel
-#endif
 
                 eventTGUI.type = Event::Type::MouseWheelScrolled;
                 eventTGUI.mouseWheel.delta = eventSFML.mouseWheelScroll.delta;
@@ -441,6 +634,7 @@ namespace tgui
             default: // This event is not handled by TGUI
                 return false;
         }
+#endif
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

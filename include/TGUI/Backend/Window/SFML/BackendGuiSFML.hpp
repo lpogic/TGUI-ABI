@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 // TGUI - Texus' Graphical User Interface
-// Copyright (C) 2012-2023 Bruno Van de Velde (vdv_b@tgui.eu)
+// Copyright (C) 2012-2024 Bruno Van de Velde (vdv_b@tgui.eu)
 //
 // This software is provided 'as-is', without any express or implied warranty.
 // In no event will the authors be held liable for any damages arising from the use of this software.
@@ -161,7 +161,7 @@ TGUI_MODULE_EXPORT namespace tgui
         ///
         /// @param window  The SFML window that will be used by the gui
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        virtual void setGuiWindow(sf::Window& window);
+        void setGuiWindow(sf::Window& window);
 
 
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

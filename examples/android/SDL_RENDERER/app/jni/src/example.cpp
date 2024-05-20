@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 // TGUI - Texus' Graphical User Interface
-// Copyright (C) 2012-2023 Bruno Van de Velde (vdv_b@tgui.eu)
+// Copyright (C) 2012-2024 Bruno Van de Velde (vdv_b@tgui.eu)
 //
 // This software is provided 'as-is', without any express or implied warranty.
 // In no event will the authors be held liable for any damages arising from the use of this software.
@@ -24,6 +24,10 @@
 
 #include <TGUI/TGUI.hpp>
 #include <TGUI/Backend/SDL-Renderer.hpp>
+
+#if SDL_MAJOR_VERSION >= 3
+    #include <SDL3/SDL_main.h>
+#endif
 
 // The background image will rotate with the screen
 void setBackground(tgui::BackendGui& gui, tgui::Vector2f screenSize)
@@ -94,11 +98,18 @@ int main(int, char**)
 
     // TGUI requires a window created with the SDL_WINDOW_OPENGL flag and an OpenGL context.
     // SDL_WINDOW_RESIZABLE is needed to support screen rotations.
+#if SDL_MAJOR_VERSION >= 3
+    SDL_Window* window = SDL_CreateWindow("TGUI window with SDL",
+                                          800, 600, // ignored because of SDL_WINDOW_FULLSCREEN_DESKTOP flag
+                                          SDL_WINDOW_FULLSCREEN_DESKTOP | SDL_WINDOW_RESIZABLE);
+    SDL_Renderer* renderer = SDL_CreateRenderer(window, nullptr);
+#else
     SDL_Window* window = SDL_CreateWindow("TGUI window with SDL",
                                           SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
                                           800, 600, // ignored because of SDL_WINDOW_FULLSCREEN_DESKTOP flag
                                           SDL_WINDOW_SHOWN | SDL_WINDOW_FULLSCREEN_DESKTOP | SDL_WINDOW_RESIZABLE);
     SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+#endif
 
     SDL_SetRenderDrawColor(renderer, 240, 240, 240, 255);
 

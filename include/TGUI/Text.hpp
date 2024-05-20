@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 // TGUI - Texus' Graphical User Interface
-// Copyright (C) 2012-2023 Bruno Van de Velde (vdv_b@tgui.eu)
+// Copyright (C) 2012-2024 Bruno Van de Velde (vdv_b@tgui.eu)
 //
 // This software is provided 'as-is', without any express or implied warranty.
 // In no event will the authors be held liable for any damages arising from the use of this software.
@@ -131,8 +131,6 @@ TGUI_MODULE_EXPORT namespace tgui
         /// @param maxWidth         Maximum width of the text
         /// @param lines            Existing lines that need to be split if they are too long
         /// @param font             Font of the text
-        /// @param textSize         The text size
-        /// @param bold             Should the text be bold?
         ///
         /// @return Lines of text pieces (either the same as the input or more lines when some were split)
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

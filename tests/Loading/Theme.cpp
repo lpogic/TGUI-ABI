@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 // TGUI - Texus' Graphical User Interface
-// Copyright (C) 2012-2023 Bruno Van de Velde (vdv_b@tgui.eu)
+// Copyright (C) 2012-2024 Bruno Van de Velde (vdv_b@tgui.eu)
 //
 // This software is provided 'as-is', without any express or implied warranty.
 // In no event will the authors be held liable for any damages arising from the use of this software.
@@ -83,6 +83,40 @@ TEST_CASE("[Theme]")
         REQUIRE(theme.getRenderer("Label1")->propertyValuePairs.empty());
 
         REQUIRE(!theme.removeRenderer("nonexistent"));
+    }
+
+    SECTION("Replace")
+    {
+        auto data1 = std::make_shared<tgui::RendererData>();
+        data1->propertyValuePairs["TextColor"] = {tgui::Color(255, 0, 0)};
+
+        auto data2 = std::make_shared<tgui::RendererData>();
+        data2->propertyValuePairs["TextColor"] = {tgui::Color(0, 255, 0)};
+
+        auto data3 = std::make_shared<tgui::RendererData>();
+        data3->propertyValuePairs["TextColor"] = {tgui::Color(0, 0, 255)};
+
+        auto data4 = std::make_shared<tgui::RendererData>();
+        data4->propertyValuePairs["TextColor"] = {tgui::Color(255, 255, 0)};
+
+        tgui::Theme theme1;
+        theme1.addRenderer("A", data1);
+        theme1.addRenderer("B", data2);
+
+        tgui::Theme theme2;
+        theme2.addRenderer("B", data3);
+        theme2.addRenderer("C", data4);
+
+        REQUIRE(theme1.getRenderer("A")->propertyValuePairs["TextColor"].getColor() == tgui::Color(255, 0, 0));
+        REQUIRE(theme1.getRenderer("B")->propertyValuePairs["TextColor"].getColor() == tgui::Color(0, 255, 0));
+        REQUIRE(theme1.getRenderer("C")->propertyValuePairs.empty());
+
+        theme1.replace(theme2);
+        REQUIRE(theme1.getRenderer("B")->propertyValuePairs["TextColor"].getColor() == tgui::Color(0, 0, 255));
+        REQUIRE(theme1.getRenderer("C")->propertyValuePairs["TextColor"].getColor() == tgui::Color(255, 255, 0));
+
+        REQUIRE(theme1.getRenderer("B")->connectedTheme == &theme1);
+        REQUIRE(theme2.getRenderer("B")->connectedTheme == &theme2);
     }
 
     SECTION("Renderers are shared")

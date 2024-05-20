@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 // TGUI - Texus' Graphical User Interface
-// Copyright (C) 2012-2023 Bruno Van de Velde (vdv_b@tgui.eu)
+// Copyright (C) 2012-2024 Bruno Van de Velde (vdv_b@tgui.eu)
 //
 // This software is provided 'as-is', without any express or implied warranty.
 // In no event will the authors be held liable for any damages arising from the use of this software.
@@ -36,7 +36,7 @@ int main()
     settings.minorVersion = 3;
 
 #if SFML_VERSION_MAJOR >= 3
-    sf::Window window(sf::VideoMode{{800, 600}}, "TGUI example (SFML-OpenGL3)", sf::Style::Default, settings);
+    sf::Window window(sf::VideoMode{{800, 600}}, "TGUI example (SFML-OpenGL3)", sf::Style::Default, sf::State::Windowed, settings);
 #else
     sf::Window window({800, 600}, "TGUI example (SFML-OpenGL3)", sf::Style::Default, settings);
 #endif
@@ -45,6 +45,6 @@ int main()
     if (!runExample(gui))
         return EXIT_FAILURE;
 
-    gui.mainLoop();
+    gui.mainLoop(); // To use your own main loop, see https://tgui.eu/tutorials/latest-stable/backend-sfml-opengl3/#main-loop
     return EXIT_SUCCESS;
 }

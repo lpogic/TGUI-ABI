@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 // TGUI - Texus' Graphical User Interface
-// Copyright (C) 2012-2023 Bruno Van de Velde (vdv_b@tgui.eu)
+// Copyright (C) 2012-2024 Bruno Van de Velde (vdv_b@tgui.eu)
 //
 // This software is provided 'as-is', without any express or implied warranty.
 // In no event will the authors be held liable for any damages arising from the use of this software.
@@ -82,15 +82,18 @@
 #cmakedefine01 TGUI_HAS_WINDOW_BACKEND_SFML
 #cmakedefine01 TGUI_HAS_WINDOW_BACKEND_SDL
 #cmakedefine01 TGUI_HAS_WINDOW_BACKEND_GLFW
+#cmakedefine01 TGUI_HAS_WINDOW_BACKEND_RAYLIB
 
 #cmakedefine01 TGUI_HAS_RENDERER_BACKEND_SFML_GRAPHICS
 #cmakedefine01 TGUI_HAS_RENDERER_BACKEND_SDL_RENDERER
 #cmakedefine01 TGUI_HAS_RENDERER_BACKEND_OPENGL3
 #cmakedefine01 TGUI_HAS_RENDERER_BACKEND_GLES2
+#cmakedefine01 TGUI_HAS_RENDERER_BACKEND_RAYLIB
 
 #cmakedefine01 TGUI_HAS_FONT_BACKEND_SFML_GRAPHICS
 #cmakedefine01 TGUI_HAS_FONT_BACKEND_SDL_TTF
 #cmakedefine01 TGUI_HAS_FONT_BACKEND_FREETYPE
+#cmakedefine01 TGUI_HAS_FONT_BACKEND_RAYLIB
 
 #cmakedefine01 TGUI_HAS_BACKEND_SFML_GRAPHICS
 #cmakedefine01 TGUI_HAS_BACKEND_SFML_OPENGL3
@@ -101,6 +104,7 @@
 #cmakedefine01 TGUI_HAS_BACKEND_SDL_TTF_GLES2
 #cmakedefine01 TGUI_HAS_BACKEND_GLFW_OPENGL3
 #cmakedefine01 TGUI_HAS_BACKEND_GLFW_GLES2
+#cmakedefine01 TGUI_HAS_BACKEND_RAYLIB
 
 #cmakedefine01 TGUI_USE_SDL3
 

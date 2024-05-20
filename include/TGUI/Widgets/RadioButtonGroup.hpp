@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 // TGUI - Texus' Graphical User Interface
-// Copyright (C) 2012-2023 Bruno Van de Velde (vdv_b@tgui.eu)
+// Copyright (C) 2012-2024 Bruno Van de Velde (vdv_b@tgui.eu)
 //
 // This software is provided 'as-is', without any express or implied warranty.
 // In no event will the authors be held liable for any damages arising from the use of this software.
@@ -88,7 +88,7 @@ TGUI_MODULE_EXPORT namespace tgui
         /// @brief Returns the radio button that is currently checked
         /// @return Checked radio button or nullptr if none of the radio buttons are checked
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        RadioButton::Ptr getCheckedRadioButton() const;
+        TGUI_NODISCARD RadioButton::Ptr getCheckedRadioButton() const;
 
 
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

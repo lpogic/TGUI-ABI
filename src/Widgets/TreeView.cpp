@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 // TGUI - Texus' Graphical User Interface
-// Copyright (C) 2012-2023 Bruno Van de Velde (vdv_b@tgui.eu)
+// Copyright (C) 2012-2024 Bruno Van de Velde (vdv_b@tgui.eu)
 //
 // This software is provided 'as-is', without any express or implied warranty.
 // In no event will the authors be held liable for any damages arising from the use of this software.
@@ -594,6 +594,25 @@ namespace tgui
             const float iconSize = (std::floor((wantedIconSize - lineThickness) / 2.f) * 2.f) + lineThickness; // "+" sign should be symmetric
             m_iconBounds = {iconSize, iconSize};
         }
+    }
+
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    TreeView::ConstNode TreeView::getNode(const std::vector<String>& hierarchy) const
+    {
+        TreeView::ConstNode constNode;
+
+        if (hierarchy.empty())
+            return constNode;
+
+        auto* node = findNode(m_nodes, hierarchy, 0);
+        if (!node)
+            return constNode;
+
+        constNode.expanded = node->expanded;
+        constNode.text = node->text.getString();
+        constNode.nodes = convertNodesToConstNodes(node->nodes);
+        return constNode;
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

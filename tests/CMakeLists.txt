@@ -1,6 +1,6 @@
 ####################################################################################################
 # TGUI - Texus' Graphical User Interface
-# Copyright (C) 2012-2023 Bruno Van de Velde (vdv_b@tgui.eu)
+# Copyright (C) 2012-2024 Bruno Van de Velde (vdv_b@tgui.eu)
 #
 # This software is provided 'as-is', without any express or implied warranty.
 # In no event will the authors be held liable for any damages arising from the use of this software.
@@ -67,6 +67,7 @@ set(TEST_SOURCES
     Widgets/ColorPicker.cpp
     Widgets/ComboBox.cpp
     Widgets/EditBox.cpp
+    Widgets/EditBoxSlider.cpp
     Widgets/FileDialog.cpp
     Widgets/Group.cpp
     Widgets/Grid.cpp
@@ -158,6 +159,13 @@ endif()
 tgui_set_global_compile_flags(tests)
 tgui_set_stdlib(tests)
 
+# Disable warnings about deprecated code, so that we can keep our tests for deprecated functionality
+if (TGUI_COMPILER_MSVC)
+    target_compile_options(tests PRIVATE /wd4996)
+else()
+    target_compile_options(tests PRIVATE -Wno-deprecated-declarations)
+endif()
+
 if(TGUI_OPTIMIZE_SINGLE_BUILD AND TGUI_COMPILER_MSVC)
     # We don't need this for the new UNITY_BUILD, only for the deprecated TGUI_OPTIMIZE_SINGLE_BUILD option,
     # because the new batching doesn't result in such huge object files.
@@ -194,12 +202,25 @@ copy_dlls_to_exe("$<TARGET_FILE_DIR:tests>" "${target_install_dir}" tests)
 
 # Set the RPATH of the executable on Linux (and BSD)
 if(TGUI_SHARED_LIBS AND TGUI_OS_LINUX)
-    file(RELATIVE_PATH rel_lib_dir
-         ${CMAKE_INSTALL_PREFIX}/${target_install_dir}
-         ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR})
+    if (CMAKE_VERSION VERSION_GREATER_EQUAL 3.20)
+        cmake_path(SET lib_dir NORMALIZE "${CMAKE_INSTALL_PREFIX}")
+        cmake_path(APPEND lib_dir "${CMAKE_INSTALL_LIBDIR}")
+
+        cmake_path(SET exe_dir NORMALIZE "${CMAKE_INSTALL_PREFIX}")
+        cmake_path(APPEND exe_dir "${target_install_dir}")
+
+        set(rel_lib_dir "${lib_dir}")
+        cmake_path(RELATIVE_PATH rel_lib_dir BASE_DIRECTORY "${exe_dir}")
+    else()
+        # This code for CMake < 3.20 only works if CMAKE_INSTALL_PREFIX is an absolute path
+        file(RELATIVE_PATH rel_lib_dir
+             "${CMAKE_INSTALL_PREFIX}/${target_install_dir}"
+             "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}")
+    endif()
 
     set_target_properties(tests PROPERTIES
-                          INSTALL_RPATH "$ORIGIN/${rel_lib_dir}")
+                          INSTALL_RPATH "$ORIGIN/${rel_lib_dir}"  # RPATH will contain relative path to where we installed our own library
+                          INSTALL_RPATH_USE_LINK_PATH TRUE)       # RPATH will contain paths to our dependencies
 endif()
 
 if (TGUI_INSTALL)

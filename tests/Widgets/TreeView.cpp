@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 // TGUI - Texus' Graphical User Interface
-// Copyright (C) 2012-2023 Bruno Van de Velde (vdv_b@tgui.eu)
+// Copyright (C) 2012-2024 Bruno Van de Velde (vdv_b@tgui.eu)
 //
 // This software is provided 'as-is', without any express or implied warranty.
 // In no event will the authors be held liable for any damages arising from the use of this software.
@@ -122,6 +122,21 @@ TEST_CASE("[TreeView]")
                 REQUIRE(treeView->getNodes()[1].nodes[1].nodes.size() == 2);
                 REQUIRE(treeView->getNodes()[1].nodes[1].nodes[0].text == "Truck");
                 REQUIRE(treeView->getNodes()[1].nodes[1].nodes[1].text == "Car");
+
+                REQUIRE(treeView->getNode({"Smilies"}).text == "Smilies");
+                REQUIRE(treeView->getNode({"Smilies"}).nodes.size() == 3);
+                REQUIRE(treeView->getNode({"Smilies", "Neither"}).text == "Neither");
+                REQUIRE(treeView->getNode({"Smilies", "Neither"}).nodes.empty());
+                REQUIRE(treeView->getNode({"Vehicles", "Whole"}).text == "Whole");
+                REQUIRE(treeView->getNode({"Vehicles", "Whole"}).nodes.size() == 2);
+                REQUIRE(treeView->getNode({"Vehicles", "Whole"}).nodes[0].text == "Truck");
+                REQUIRE(treeView->getNode({"Vehicles", "Whole"}).nodes[1].text == "Car");
+
+                // Testing invalid getNode calls
+                REQUIRE(treeView->getNode({}).text == "");
+                REQUIRE(treeView->getNode({}).nodes.empty());
+                REQUIRE(treeView->getNode({"Vehicles", "Train"}).text == "");
+                REQUIRE(treeView->getNode({"Vehicles", "Train"}).nodes.empty());
             }
 
             SECTION("Changing items")

@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 // TGUI - Texus' Graphical User Interface
-// Copyright (C) 2012-2023 Bruno Van de Velde (vdv_b@tgui.eu)
+// Copyright (C) 2012-2024 Bruno Van de Velde (vdv_b@tgui.eu)
 //
 // This software is provided 'as-is', without any express or implied warranty.
 // In no event will the authors be held liable for any damages arising from the use of this software.
@@ -49,8 +49,6 @@ struct LabelProperties : WidgetProperties
             label->setAutoSize(parseBoolean(value, true));
         else if (property == "MaximumTextWidth")
             label->setMaximumTextWidth(value.toFloat());
-        else if (property == "IgnoreMouseEvents")
-            label->ignoreMouseEvents(parseBoolean(value, false));
         else
             WidgetProperties::updateProperty(widget, property, value);
     }
@@ -66,7 +64,6 @@ struct LabelProperties : WidgetProperties
         pair.first["ScrollbarPolicy"] = {"Enum{Automatic,Always,Never}", serializeScrollbarPolicy(label->getScrollbarPolicy())};
         pair.first["AutoSize"] = {"Bool", tgui::Serializer::serialize(label->getAutoSize())};
         pair.first["MaximumTextWidth"] = {"Float", tgui::String::fromNumber(label->getMaximumTextWidth())};
-        pair.first["IgnoreMouseEvents"] = {"Bool", tgui::Serializer::serialize(label->isIgnoringMouseEvents())};
 
         const auto renderer = label->getSharedRenderer();
         pair.second["Borders"] = {"Outline", renderer->getBorders().toString()};
@@ -80,50 +77,6 @@ struct LabelProperties : WidgetProperties
         pair.second["TextureBackground"] = {"Texture", tgui::Serializer::serialize(renderer->getTextureBackground())};
         pair.second["ScrollbarWidth"] = {"Float", tgui::String::fromNumber(renderer->getScrollbarWidth())};
         return pair;
-    }
-
-private:
-
-    TGUI_NODISCARD static tgui::Label::HorizontalAlignment deserializeHorizontalAlignment(tgui::String value)
-    {
-        value = value.trim().toLower();
-        if (value == "right")
-            return tgui::Label::HorizontalAlignment::Right;
-        else if (value == "center")
-            return tgui::Label::HorizontalAlignment::Center;
-        else
-            return tgui::Label::HorizontalAlignment::Left;
-    }
-
-    TGUI_NODISCARD static tgui::Label::VerticalAlignment deserializeVerticalAlignment(tgui::String value)
-    {
-        value = value.trim().toLower();
-        if (value == "bottom")
-            return tgui::Label::VerticalAlignment::Bottom;
-        else if (value == "center")
-            return tgui::Label::VerticalAlignment::Center;
-        else
-            return tgui::Label::VerticalAlignment::Top;
-    }
-
-    TGUI_NODISCARD static tgui::String serializeHorizontalAlignment(tgui::Label::HorizontalAlignment alignment)
-    {
-        if (alignment == tgui::Label::HorizontalAlignment::Center)
-            return "Center";
-        else if (alignment == tgui::Label::HorizontalAlignment::Right)
-            return "Right";
-        else
-            return "Left";
-    }
-
-    TGUI_NODISCARD static tgui::String serializeVerticalAlignment(tgui::Label::VerticalAlignment alignment)
-    {
-        if (alignment == tgui::Label::VerticalAlignment::Center)
-            return "Center";
-        else if (alignment == tgui::Label::VerticalAlignment::Bottom)
-            return "Bottom";
-        else
-            return "Top";
     }
 };
 

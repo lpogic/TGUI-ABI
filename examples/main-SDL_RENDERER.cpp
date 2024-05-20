@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 // TGUI - Texus' Graphical User Interface
-// Copyright (C) 2012-2023 Bruno Van de Velde (vdv_b@tgui.eu)
+// Copyright (C) 2012-2024 Bruno Van de Velde (vdv_b@tgui.eu)
 //
 // This software is provided 'as-is', without any express or implied warranty.
 // In no event will the authors be held liable for any damages arising from the use of this software.
@@ -25,14 +25,8 @@
 #include <TGUI/TGUI.hpp>
 #include <TGUI/Backend/SDL-Renderer.hpp>
 
-// Make some defines to keep the code below compatible with both SDL2 and SDL3
 #if SDL_MAJOR_VERSION >= 3
     #include <SDL3/SDL_main.h>
-    #define DEFAULT_RENDERING_DRIVER nullptr
-    #define SDL_WINDOW_SHOWN 0
-    #define SDL_CreateWindow SDL_CreateWindowWithPosition
-#else
-    #define DEFAULT_RENDERING_DRIVER -1
 #endif
 
 bool runExample(tgui::BackendGui& gui);
@@ -44,7 +38,7 @@ void run_application(SDL_Window* window, SDL_Renderer* renderer)
     if (!runExample(gui))
         return;
 
-    gui.mainLoop();
+    gui.mainLoop(); // To use your own main loop, see https://tgui.eu/tutorials/latest-stable/backend-sdl-renderer/#main-loop
 }
 
 // Note that no error checking is performed on SDL initialization in this example code
@@ -52,11 +46,16 @@ int main(int, char **)
 {
     SDL_Init(SDL_INIT_VIDEO);
 
+#if SDL_MAJOR_VERSION >= 3
+    SDL_Window* window = SDL_CreateWindow("TGUI example (SDL-Renderer)", 800, 600, 0);
+    SDL_Renderer* renderer = SDL_CreateRenderer(window, nullptr);
+#else
     SDL_Window* window = SDL_CreateWindow("TGUI example (SDL-Renderer)",
                                           SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
                                           800, 600,
                                           SDL_WINDOW_SHOWN);
-    SDL_Renderer* renderer = SDL_CreateRenderer(window, DEFAULT_RENDERING_DRIVER, SDL_RENDERER_ACCELERATED);
+    SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+#endif
 
     // SDL_ttf needs to be initialized before using TGUI
     TTF_Init();

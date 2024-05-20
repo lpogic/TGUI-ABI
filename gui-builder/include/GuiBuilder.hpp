@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 // TGUI - Texus' Graphical User Interface
-// Copyright (C) 2012-2023 Bruno Van de Velde (vdv_b@tgui.eu)
+// Copyright (C) 2012-2024 Bruno Van de Velde (vdv_b@tgui.eu)
 //
 // This software is provided 'as-is', without any express or implied warranty.
 // In no event will the authors be held liable for any damages arising from the use of this software.
@@ -33,6 +33,7 @@
 // the first one to be included in both Form.cpp and GuiBuilder.cpp
 #include <cassert>
 #if !TGUI_EXPERIMENTAL_USE_STD_MODULE
+    #include <functional>
     #include <iostream>
     #include <fstream>
     #include <sstream>
@@ -108,7 +109,6 @@ private:
         std::vector<CopiedWidget> childWidgets;
     };
 
-
     TGUI_NODISCARD bool loadGuiBuilderState();
     void saveGuiBuilderState();
     void loadStartScreen();
@@ -128,6 +128,7 @@ private:
     void displayErrorMessage(const tgui::String& error);
     tgui::ChildWindow::Ptr openWindowWithFocus(tgui::ChildWindow::Ptr window = tgui::ChildWindow::create());
     TGUI_NODISCARD tgui::String getDefaultFilename() const;
+    tgui::String widgetPtrToStrId(const tgui::Widget::Ptr& widget) const;
 
     void copyWidgetRecursive(std::vector<CopiedWidget>& copiedWidgetList, const std::shared_ptr<WidgetInfo>& widgetInfo);
     void pasteWidgetRecursive(const CopiedWidget& copiedWidget, tgui::Container* parent);
@@ -188,7 +189,6 @@ private:
     std::vector<std::unique_ptr<Form>> m_forms;
     Form* m_selectedForm = nullptr;
     tgui::Panel::Ptr m_foregroundPanel = nullptr;
-
 
     std::map<tgui::String, std::unique_ptr<WidgetProperties>> m_widgetProperties;
     PropertyValueMapPair m_propertyValuePairs;

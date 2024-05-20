@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 // TGUI - Texus' Graphical User Interface
-// Copyright (C) 2012-2023 Bruno Van de Velde (vdv_b@tgui.eu)
+// Copyright (C) 2012-2024 Bruno Van de Velde (vdv_b@tgui.eu)
 //
 // This software is provided 'as-is', without any express or implied warranty.
 // In no event will the authors be held liable for any damages arising from the use of this software.
@@ -743,8 +743,6 @@ namespace tgui
 
     void Widget::showWithEffect(ShowEffectType type, Duration duration)
     {
-        setVisible(true);
-
         // We store the state the widget is currently in. In the event another animation was already playing, we should try to
         // use the current state to start our animation at, but this is not the state that the widget should end at. We must
         // get this state BEFORE finishing the previous animation which is done by finishExistingConflictingAnimations.
@@ -753,6 +751,9 @@ namespace tgui
         //const Vector2f startSize = getSize();
 
         finishExistingConflictingAnimations(m_showAnimations, type);
+
+        // Show the widget AFTER finishing existing animations, as finishing a hide animation would leave the widget invisible
+        setVisible(true);
 
         switch (type)
         {
@@ -1271,6 +1272,20 @@ namespace tgui
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+    void Widget::setIgnoreMouseEvents(bool ignore)
+    {
+        m_ignoreMouseEvents = ignore;
+    }
+
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    bool Widget::getIgnoreMouseEvents() const
+    {
+        return m_ignoreMouseEvents;
+    }
+
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
     void Widget::finishAllAnimations()
     {
         for (auto& animation : m_showAnimations)
@@ -1627,6 +1642,8 @@ namespace tgui
 #endif
         if (m_textSize != 0)
             node->propertyValuePairs[U"TextSize"] = std::make_unique<DataIO::ValueNode>(String::fromNumber(m_textSize));
+        if (m_ignoreMouseEvents)
+            node->propertyValuePairs[U"IgnoreMouseEvents"] = std::make_unique<DataIO::ValueNode>(Serializer::serialize(m_ignoreMouseEvents));
 
         const auto navWidgetUp = m_navWidgetUp.lock();
         const auto navWidgetDown = m_navWidgetDown.lock();
@@ -1725,6 +1742,8 @@ namespace tgui
         }
         if (node->propertyValuePairs[U"TextSize"])
             setTextSize(node->propertyValuePairs[U"TextSize"]->value.toUInt());
+        if (node->propertyValuePairs[U"IgnoreMouseEvents"])
+            setIgnoreMouseEvents(Deserializer::deserialize(ObjectConverter::Type::Bool, node->propertyValuePairs[U"IgnoreMouseEvents"]->value).getBool());
 
         if (m_parentGui)
         {

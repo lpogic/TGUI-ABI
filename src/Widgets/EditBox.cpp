@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 // TGUI - Texus' Graphical User Interface
-// Copyright (C) 2012-2023 Bruno Van de Velde (vdv_b@tgui.eu)
+// Copyright (C) 2012-2024 Bruno Van de Velde (vdv_b@tgui.eu)
 //
 // This software is provided 'as-is', without any express or implied warranty.
 // In no event will the authors be held liable for any damages arising from the use of this software.
@@ -261,7 +261,7 @@ namespace tgui
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void EditBox::setAlignment(Alignment alignment)
+    void EditBox::setAlignment(HorizontalAlignment alignment)
     {
         m_textAlignment = alignment;
 
@@ -270,14 +270,21 @@ namespace tgui
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    EditBox::Alignment EditBox::getAlignment() const
+    HorizontalAlignment EditBox::getAlignment() const
     {
         return m_textAlignment;
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
+#ifndef TGUI_REMOVE_DEPRECATED_CODE
     void EditBox::limitTextWidth(bool limitWidth)
+    {
+        setTextWidthLimited(limitWidth);
+    }
+#endif
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void EditBox::setTextWidthLimited(bool limitWidth)
     {
         m_limitTextWidth = limitWidth;
 
@@ -887,9 +894,9 @@ namespace tgui
     {
         auto node = ClickableWidget::save(renderers);
 
-        if (getAlignment() != EditBox::Alignment::Left)
+        if (getAlignment() != HorizontalAlignment::Left)
         {
-            if (getAlignment() == EditBox::Alignment::Center)
+            if (getAlignment() == HorizontalAlignment::Center)
                 node->propertyValuePairs[U"Alignment"] = std::make_unique<DataIO::ValueNode>("Center");
             else
                 node->propertyValuePairs[U"Alignment"] = std::make_unique<DataIO::ValueNode>("Right");
@@ -938,7 +945,7 @@ namespace tgui
         if (node->propertyValuePairs[U"MaximumCharacters"])
             setMaximumCharacters(node->propertyValuePairs[U"MaximumCharacters"]->value.toUInt());
         if (node->propertyValuePairs[U"TextWidthLimited"])
-            limitTextWidth(Deserializer::deserialize(ObjectConverter::Type::Bool, node->propertyValuePairs[U"TextWidthLimited"]->value).getBool());
+            setTextWidthLimited(Deserializer::deserialize(ObjectConverter::Type::Bool, node->propertyValuePairs[U"TextWidthLimited"]->value).getBool());
         if (node->propertyValuePairs[U"ReadOnly"])
             setReadOnly(Deserializer::deserialize(ObjectConverter::Type::Bool, node->propertyValuePairs[U"ReadOnly"]->value).getBool());
         if (node->propertyValuePairs[U"Suffix"])
@@ -952,11 +959,11 @@ namespace tgui
         if (node->propertyValuePairs[U"Alignment"])
         {
             if (node->propertyValuePairs[U"Alignment"]->value == U"Left")
-                setAlignment(EditBox::Alignment::Left);
+                setAlignment(HorizontalAlignment::Left);
             else if (node->propertyValuePairs[U"Alignment"]->value == U"Center")
-                setAlignment(EditBox::Alignment::Center);
+                setAlignment(HorizontalAlignment::Center);
             else if (node->propertyValuePairs[U"Alignment"]->value == U"Right")
-                setAlignment(EditBox::Alignment::Right);
+                setAlignment(HorizontalAlignment::Right);
             else
                 throw Exception{U"Failed to parse Alignment property. Only the values Left, Center and Right are correct."};
         }
@@ -1009,7 +1016,7 @@ namespace tgui
         // Take the part outside the edit box into account when the text does not fit inside it
         posX += m_textCropPosition;
 
-        if (m_textAlignment == Alignment::Left)
+        if (m_textAlignment == HorizontalAlignment::Left)
             posX -= m_textFull.getExtraHorizontalPadding();
         else
         {
@@ -1019,9 +1026,9 @@ namespace tgui
             if (textWidth < editBoxWidth)
             {
                 // Set the number of pixels to move
-                if (m_textAlignment == Alignment::Center)
+                if (m_textAlignment == HorizontalAlignment::Center)
                     posX -= (editBoxWidth - textWidth) / 2.f;
-                else // if (textAlignment == Alignment::Right)
+                else // if (textAlignment == HorizontalAlignment::Right)
                     posX -= editBoxWidth - textWidth;
             }
         }
@@ -1113,7 +1120,7 @@ namespace tgui
         const float textY = m_paddingCached.getTop() + (((getInnerSize().y - m_paddingCached.getBottom() - m_paddingCached.getTop()) - m_textFull.getSize().y) / 2.f);
 
         // Check if the layout wasn't left
-        if (m_textAlignment != Alignment::Left)
+        if (m_textAlignment != HorizontalAlignment::Left)
         {
             // Calculate the text width
             const float textWidth = m_displayedText.empty() ? (m_defaultText.getSize().x + 2 * textOffset) : getFullTextWidth();
@@ -1122,9 +1129,9 @@ namespace tgui
             if (textWidth < getVisibleEditBoxWidth())
             {
                 // Put the text on the correct position
-                if (m_textAlignment == Alignment::Center)
+                if (m_textAlignment == HorizontalAlignment::Center)
                     textX += (getVisibleEditBoxWidth() - textWidth) / 2.f;
-                else // if (textAlignment == Alignment::Right)
+                else // if (textAlignment == HorizontalAlignment::Right)
                     textX += getVisibleEditBoxWidth() - textWidth;
             }
         }

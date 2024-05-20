@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 // TGUI - Texus' Graphical User Interface
-// Copyright (C) 2012-2023 Bruno Van de Velde (vdv_b@tgui.eu)
+// Copyright (C) 2012-2024 Bruno Van de Velde (vdv_b@tgui.eu)
 //
 // This software is provided 'as-is', without any express or implied warranty.
 // In no event will the authors be held liable for any damages arising from the use of this software.
@@ -59,12 +59,16 @@ namespace tgui
     {
         if ((m_maxTextureSize == 0) && m_renderer)
         {
+#if SDL_MAJOR_VERSION >= 3
+            m_maxTextureSize = static_cast<unsigned int>(SDL_GetNumberProperty(SDL_GetRendererProperties(m_renderer), SDL_PROP_RENDERER_MAX_TEXTURE_SIZE_NUMBER, 0));
+#else
             SDL_RendererInfo info;
             if (SDL_GetRendererInfo(m_renderer, &info) == 0)
-                m_maxTextureSize = std::min(info.max_texture_width, info.max_texture_height);
+                m_maxTextureSize = static_cast<unsigned int>(std::min(info.max_texture_width, info.max_texture_height));
+#endif
         }
 
-        return static_cast<unsigned int>(m_maxTextureSize);
+        return m_maxTextureSize;
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

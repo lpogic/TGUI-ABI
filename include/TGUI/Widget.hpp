@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 // TGUI - Texus' Graphical User Interface
-// Copyright (C) 2012-2023 Bruno Van de Velde (vdv_b@tgui.eu)
+// Copyright (C) 2012-2024 Bruno Van de Velde (vdv_b@tgui.eu)
 //
 // This software is provided 'as-is', without any express or implied warranty.
 // In no event will the authors be held liable for any damages arising from the use of this software.
@@ -297,7 +297,7 @@ TGUI_MODULE_EXPORT namespace tgui
         TGUI_NODISCARD virtual Vector2f getWidgetOffset() const;
 
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        /// @param Sets how the position is determined compared to the other widgets in the parent
+        /// @brief Sets how the position is determined compared to the other widgets in the parent
         ///
         /// @param layout  Alignment for how to position the widget in its parent
         ///
@@ -306,7 +306,7 @@ TGUI_MODULE_EXPORT namespace tgui
         void setAutoLayout(AutoLayout layout);
 
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        /// @param Returns how the position is determined compared to the other widgets in the parent
+        /// @brief Returns how the position is determined compared to the other widgets in the parent
         ///
         /// @return Alignment for how to position the widget in its parent
         ///
@@ -359,8 +359,6 @@ TGUI_MODULE_EXPORT namespace tgui
         ///
         /// The origin of the scaling is set with the setOrigin function. If you want to use a separate origin for position
         /// and scale then you can use the setScale(Vector2f,Vector2f) function to pass a scaling origin.
-        ///
-        /// @warning This functionality is still experimental, it will not work perfectly for all widgets.
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         void setScale(Vector2f scaleFactors);
 
@@ -374,8 +372,6 @@ TGUI_MODULE_EXPORT namespace tgui
         /// of (3,2) will appear on the screen as a (150, 40) widget with its entire contents stretched.
         ///
         /// In the origin the x and y value 0 represent the left/top of the widget while 1 represents right/bottom
-        ///
-        /// @warning This functionality is still experimental, it will not work perfectly for all widgets.
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         void setScale(Vector2f scaleFactors, Vector2f origin);
 
@@ -389,8 +385,6 @@ TGUI_MODULE_EXPORT namespace tgui
         ///
         /// The origin of the scaling is set with the setOrigin function. If you want to use a separate origin for position
         /// and scale then you can use the setScale(float,Vector2f) function to pass a scaling origin.
-        ///
-        /// @warning This functionality is still experimental, it will not work perfectly for all widgets.
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         void setScale(float scaleFactor)
         {
@@ -407,8 +401,6 @@ TGUI_MODULE_EXPORT namespace tgui
         /// of 2 will appear on the screen as a (100, 40) widget with its entire contents stretched.
         ///
         /// In the origin the x and y value 0 represent the left/top of the widget while 1 represents right/bottom
-        ///
-        /// @warning This functionality is still experimental, it will not work perfectly for all widgets.
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         void setScale(float scaleFactor, Vector2f origin)
         {
@@ -879,6 +871,29 @@ TGUI_MODULE_EXPORT namespace tgui
         TGUI_NODISCARD Widget::Ptr getNavigationRight() const;
 
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// @brief Sets whether the widget should completely ignore mouse events and let them pass to the widgets behind it
+        ///
+        /// @param ignore  Should mouse events be ignored by this widget?
+        ///
+        /// By default, mouse events are NOT ignored.
+        ///
+        /// If you want the widget to ignore the events without the events being passed to the widgets behind this one,
+        /// then you need to call setEnabled(false) instead of setIgnoreMouseEvents(true).
+        ///
+        /// @since TGUI 1.3
+        /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        void setIgnoreMouseEvents(bool ignore);
+
+        /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// @brief Returns whether the widget is ignoring mouse events and letting them pass to the widgets behind it
+        ///
+        /// @return Are mouse events ignored by this widget?
+        ///
+        /// @since TGUI 1.3
+        /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        TGUI_NODISCARD bool getIgnoreMouseEvents() const;
+
+        /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         /// @brief Makes all animations of the widget finish immediately
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         void finishAllAnimations();
@@ -1271,6 +1286,7 @@ TGUI_MODULE_EXPORT namespace tgui
         Cursor::Type m_mouseCursor = Cursor::Type::Arrow;
         AutoLayout m_autoLayout = AutoLayout::Manual;
         bool m_autoLayoutUpdateEnabled = true;
+        bool m_ignoreMouseEvents = false;
 
         // Cached renderer properties
         Font  m_fontCached = Font::getGlobalFont();

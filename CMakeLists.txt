@@ -1,6 +1,6 @@
 ####################################################################################################
 # TGUI - Texus' Graphical User Interface
-# Copyright (C) 2012-2023 Bruno Van de Velde (vdv_b@tgui.eu)
+# Copyright (C) 2012-2024 Bruno Van de Velde (vdv_b@tgui.eu)
 #
 # This software is provided 'as-is', without any express or implied warranty.
 # In no event will the authors be held liable for any damages arising from the use of this software.
@@ -31,7 +31,7 @@ include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/Macros.cmake)
 tgui_set_option(CMAKE_BUILD_TYPE Release STRING "Choose the type of build (Debug or Release)")
 
 # Project name and version
-project(TGUI VERSION 1.1.0 LANGUAGES CXX)
+project(TGUI VERSION 1.2.0 LANGUAGES CXX)
 
 # Use the paths from the cmake GNUInstallDirs module as defaults (https://cmake.org/cmake/help/latest/module/GNUInstallDirs.html)
 include(GNUInstallDirs)
@@ -129,6 +129,10 @@ if(TGUI_OS_LINUX)
     list(APPEND TGUI_BACKEND_OPTIONS GLFW_GLES2)
     string(APPEND TGUI_BACKEND_OPTIONS_DESC " - GLFW_GLES2: GLFW + OpenGL ES + FreeType\n")
 endif()
+if(TGUI_OS_WINDOWS OR TGUI_OS_LINUX OR TGUI_OS_MACOS)
+    list(APPEND TGUI_BACKEND_OPTIONS RAYLIB)
+    string(APPEND TGUI_BACKEND_OPTIONS_DESC " - RAYLIB: raylib\n")
+endif()
 
 tgui_set_option(TGUI_BACKEND SFML_GRAPHICS STRING "Select a backend for rendering or select Custom to use multiple or no backends")
 set_property(CACHE TGUI_BACKEND PROPERTY STRINGS Custom;${TGUI_BACKEND_OPTIONS})
@@ -146,8 +150,8 @@ endif()
 
 string(TOUPPER "${TGUI_BACKEND}" TGUI_BACKEND_UPPERCASE)
 
-# Add an option to build TGUI as a c++20 module (when using CMake >= 3.25)
-if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.25)
+# Add an option to build TGUI as a c++20 module (when using CMake >= 3.28)
+if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.28)
     # We currently don't create the option as it is still too experimental,
     # it can still be used if the user manually specifies the option though.
     #option(TGUI_BUILD_AS_CXX_MODULE "ON to build TGUI as a c++20 module instead of using header files" OFF)
@@ -155,16 +159,6 @@ if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.25)
     if(TGUI_BUILD_AS_CXX_MODULE)
         if(TGUI_CXX_STANDARD LESS 20)
             message(FATAL_ERROR "TGUI_BUILD_AS_CXX_MODULE can only be turned on if TGUI_CXX_STANDARD is set to at least 20")
-        endif()
-
-        # TODO: Remove support for CMake < 3.28 as the lines below don't work properly anyway when placed here
-        if(CMAKE_VERSION VERSION_LESS 3.28 AND NOT CMAKE_EXPERIMENTAL_CXX_MODULE_CMAKE_API)
-            if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.27)
-                set(CMAKE_EXPERIMENTAL_CXX_MODULE_CMAKE_API "aa1f7df0-828a-4fcd-9afc-2dc80491aca7") # CMake 3.27
-            else()
-                set(CMAKE_EXPERIMENTAL_CXX_MODULE_CMAKE_API "2182bf5c-ef0d-489a-91da-49dbc3090d2a") # CMake 3.26
-                set(CMAKE_EXPERIMENTAL_CXX_MODULE_DYNDEP 1)
-            endif()
         endif()
     endif()
 endif()
@@ -286,8 +280,8 @@ elseif(TGUI_DEFAULT_BACKEND STREQUAL "SDL_RENDERER"
     if (NOT TGUI_USE_SDL3 AND TARGET SDL2::SDL2main) # This target is only required on Windows or iOS
         target_link_libraries(tgui-console-app-interface INTERFACE SDL2::SDL2main)
     endif()
-elseif(TGUI_DEFAULT_BACKEND STREQUAL "GLFW_OPENGL3" OR TGUI_DEFAULT_BACKEND STREQUAL "GLFW_GLES2")
-    # We don't have to do anything for console apps when using GLFW as it assumes a normal main function
+elseif(TGUI_DEFAULT_BACKEND STREQUAL "GLFW_OPENGL3" OR TGUI_DEFAULT_BACKEND STREQUAL "GLFW_GLES2" OR TGUI_DEFAULT_BACKEND STREQUAL "RAYLIB")
+    # We don't have to do anything for console apps when using GLFW or raylib as they assumes a normal main function
 endif()
 
 # Create an interface to create a graphical app that uses TGUI (used to build the examples and Gui Builder)
@@ -309,7 +303,7 @@ elseif(TGUI_DEFAULT_BACKEND STREQUAL "SDL_RENDERER"
     if (NOT TGUI_USE_SDL3 AND TARGET SDL2::SDL2main) # This target is only required on Windows or iOS
         target_link_libraries(tgui-gui-app-interface INTERFACE SDL2::SDL2main)
     endif()
-elseif(TGUI_DEFAULT_BACKEND STREQUAL "GLFW_OPENGL3" OR TGUI_DEFAULT_BACKEND STREQUAL "GLFW_GLES2")
+elseif(TGUI_DEFAULT_BACKEND STREQUAL "GLFW_OPENGL3" OR TGUI_DEFAULT_BACKEND STREQUAL "GLFW_GLES2" OR TGUI_DEFAULT_BACKEND STREQUAL "RAYLIB")
     if(TGUI_OS_WINDOWS)
         if(TGUI_COMPILER_MSVC OR TGUI_COMPILER_CLANG_CL)
             target_link_options(tgui-gui-app-interface INTERFACE "/ENTRY:mainCRTStartup" "/SUBSYSTEM:WINDOWS")
@@ -374,10 +368,21 @@ if (TGUI_INSTALL)
     option(TGUI_INSTALL_PKGCONFIG_FILES "TRUE to automatically install pkg-config files so other projects can find TGUI" ${TGUI_INSTALL_PKGCONFIG_DEFAULT})
 
     if (TGUI_INSTALL_PKGCONFIG_FILES)
-        tgui_set_option(TGUI_PKGCONFIG_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}/${TGUI_PKGCONFIG_DIR}" PATH "Install directory for TGUI's pkg-config .pc files")
+        if (TGUI_OS_BSD)
+            set(default_pkgconfig_dir "libdata/pkgconfig")
+        else()
+            set(default_pkgconfig_dir "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
+        endif()
+        tgui_set_option(TGUI_PKGCONFIG_INSTALL_DIR "${default_pkgconfig_dir}" PATH "Install directory for TGUI's pkg-config .pc file")
 
         configure_file("cmake/pkgconfig/tgui.pc.in" "pkgconfig/tgui.pc" @ONLY)
-        install(FILES "${CMAKE_CURRENT_BINARY_DIR}/pkgconfig/tgui.pc" DESTINATION "${TGUI_PKGCONFIG_INSTALL_PREFIX}")
+
+        if (TGUI_PKGCONFIG_INSTALL_PREFIX)
+            message(WARNING "TGUI_PKGCONFIG_INSTALL_PREFIX is deprecated, use TGUI_PKGCONFIG_INSTALL_DIR instead (which is a relative instead of an absolute path by default)")
+            install(FILES "${CMAKE_CURRENT_BINARY_DIR}/pkgconfig/tgui.pc" DESTINATION "${TGUI_PKGCONFIG_INSTALL_PREFIX}")
+        else()
+            install(FILES "${CMAKE_CURRENT_BINARY_DIR}/pkgconfig/tgui.pc" DESTINATION "${TGUI_PKGCONFIG_INSTALL_DIR}")
+        endif()
     endif()
 
     # Install include files

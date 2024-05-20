@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 // TGUI - Texus' Graphical User Interface
-// Copyright (C) 2012-2023 Bruno Van de Velde (vdv_b@tgui.eu)
+// Copyright (C) 2012-2024 Bruno Van de Velde (vdv_b@tgui.eu)
 //
 // This software is provided 'as-is', without any express or implied warranty.
 // In no event will the authors be held liable for any damages arising from the use of this software.
@@ -101,6 +101,19 @@ TGUI_MODULE_EXPORT namespace tgui
         /// the old renderer will be reloaded with the new renderer.
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         void load(const String& primary);
+
+
+        /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// @brief Replaced this theme with another one, while updating all connected widgets to the new renderers
+        ///
+        /// @param otherTheme  The theme to copy
+        ///
+        /// The renderers are copied, meaning that all widgets connected to the other theme will remain connected to it.
+        /// Any widgets connected to this theme will however be updated with new renderers when the same name is encountered.
+        ///
+        /// @since TGUI 1.2
+        /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        void replace(const Theme& otherTheme);
 
 
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

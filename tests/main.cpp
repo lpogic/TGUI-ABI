@@ -1,8 +1,11 @@
 
 #include <TGUI/Config.hpp>
 
-#define CATCH_CONFIG_RUNNER
-#include "Tests.hpp"
+#if defined(TGUI_SYSTEM_WINDOWS) && defined(TGUI_HAS_BACKEND_RAYLIB)
+  // raylib.h and windows.h don't mix well
+  #define NOGDI
+  #define NOUSER
+#endif
 
 #if TGUI_HAS_BACKEND_SFML_GRAPHICS
     #include <SFML/Graphics.hpp>
@@ -28,9 +31,19 @@
     #endif
 #endif
 #if TGUI_HAS_BACKEND_GLFW_OPENGL3 || TGUI_HAS_BACKEND_GLFW_GLES2
+    #ifdef TGUI_SYSTEM_WINDOWS
+        #include <TGUI/extlibs/IncludeWindows.hpp>
+    #endif
+
     #define GLFW_INCLUDE_NONE
     #include <GLFW/glfw3.h>
 #endif
+#if TGUI_HAS_BACKEND_RAYLIB
+    #include <raylib.h>
+#endif
+
+#define CATCH_CONFIG_RUNNER
+#include "Tests.hpp"
 
 #if TGUI_BUILD_AS_CXX_MODULE
     import tgui.default_backend_window;
@@ -121,7 +134,7 @@ struct TestsWindowDefault : public TestsWindowBase
         }
 
     #if SFML_VERSION_MAJOR >= 3
-        sf::Window window{sf::VideoMode{{windowWidth, windowHeight}}, windowTitle, sf::Style::Default, sf::ContextSettings(0, 0, 0, 3, 3, sf::ContextSettings::Attribute::Core)};
+        sf::Window window{sf::VideoMode{{windowWidth, windowHeight}}, windowTitle, sf::Style::Default, sf::State::Windowed, sf::ContextSettings(0, 0, 0, 3, 3, sf::ContextSettings::Attribute::Core)};
     #else
         sf::Window window{sf::VideoMode{windowWidth, windowHeight}, windowTitle, sf::Style::Default, sf::ContextSettings(0, 0, 0, 3, 3, sf::ContextSettings::Attribute::Core)};
     #endif
@@ -144,7 +157,7 @@ struct TestsWindowDefault : public TestsWindowBase
             window = SDL_CreateWindow(windowTitle,
                                       windowWidth, windowHeight,
                                       SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
-            renderer = SDL_CreateRenderer(window, nullptr, SDL_RENDERER_ACCELERATED);
+            renderer = SDL_CreateRenderer(window, nullptr);
 #else
             window = SDL_CreateWindow(windowTitle,
                                       SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
@@ -436,6 +449,33 @@ struct TestsWindowDefault : public TestsWindowBase
         GLFWwindow* window = nullptr;
     };
 #endif
+#if TGUI_HAS_BACKEND_RAYLIB
+    #if TGUI_BUILD_AS_CXX_MODULE
+        import tgui.backend.raylib;
+    #else
+        #include <TGUI/Backend/raylib.hpp>
+    #endif
+    struct TestsWindowRaylib : public TestsWindowBase
+    {
+        TestsWindowRaylib()
+        {
+            SetTraceLogLevel(LOG_WARNING);
+            InitWindow(windowWidth, windowHeight, windowTitle);
+            gui = std::make_unique<tgui::RAYLIB::Gui>();
+        }
+
+        ~TestsWindowRaylib() override
+        {
+            gui = nullptr;
+            CloseWindow();
+        }
+
+        void close() override
+        {
+            static_cast<tgui::RAYLIB::Gui*>(gui.get())->endMainLoop();
+        }
+    };
+#endif
 
 int main(int argc, char * argv[])
 {
@@ -488,6 +528,10 @@ int main(int argc, char * argv[])
 #if TGUI_HAS_BACKEND_GLFW_GLES2
         if (selectedBackend == "GLFW_GLES2")
             window = std::make_unique<TestsWindowGlfwGLES2>();
+#endif
+#if TGUI_HAS_BACKEND_RAYLIB
+        if (selectedBackend == "RAYLIB")
+            window = std::make_unique<TestsWindowRaylib>();
 #endif
 
         if (!window)

@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 // TGUI - Texus' Graphical User Interface
-// Copyright (C) 2012-2023 Bruno Van de Velde (vdv_b@tgui.eu)
+// Copyright (C) 2012-2024 Bruno Van de Velde (vdv_b@tgui.eu)
 //
 // This software is provided 'as-is', without any express or implied warranty.
 // In no event will the authors be held liable for any damages arising from the use of this software.
@@ -121,26 +121,26 @@ TEST_CASE("[EditBox]")
 
     SECTION("Alignment")
     {
-        REQUIRE(editBox->getAlignment() == tgui::EditBox::Alignment::Left);
+        REQUIRE(editBox->getAlignment() == tgui::HorizontalAlignment::Left);
         
-        editBox->setAlignment(tgui::EditBox::Alignment::Center);
-        REQUIRE(editBox->getAlignment() == tgui::EditBox::Alignment::Center);
+        editBox->setAlignment(tgui::HorizontalAlignment::Center);
+        REQUIRE(editBox->getAlignment() == tgui::HorizontalAlignment::Center);
         
-        editBox->setAlignment(tgui::EditBox::Alignment::Right);
-        REQUIRE(editBox->getAlignment() == tgui::EditBox::Alignment::Right);
+        editBox->setAlignment(tgui::HorizontalAlignment::Right);
+        REQUIRE(editBox->getAlignment() == tgui::HorizontalAlignment::Right);
         
-        editBox->setAlignment(tgui::EditBox::Alignment::Left);
-        REQUIRE(editBox->getAlignment() == tgui::EditBox::Alignment::Left);
+        editBox->setAlignment(tgui::HorizontalAlignment::Left);
+        REQUIRE(editBox->getAlignment() == tgui::HorizontalAlignment::Left);
     }
 
-    SECTION("LimitTextWidth")
+    SECTION("TextWidthLimited")
     {
         editBox->setTextSize(20);
         editBox->setSize(100, 25);
         editBox->setText("too long text");
 
         REQUIRE(!editBox->isTextWidthLimited());
-        editBox->limitTextWidth(true);
+        editBox->setTextWidthLimited(true);
         REQUIRE(editBox->isTextWidthLimited());
         REQUIRE(editBox->getText() == "too long ");
 
@@ -149,7 +149,7 @@ TEST_CASE("[EditBox]")
         editBox->setText("yet another text");
         REQUIRE(editBox->getText() == "yet anot");
 
-        editBox->limitTextWidth(false);
+        editBox->setTextWidthLimited(false);
         REQUIRE(!editBox->isTextWidthLimited());
 
         editBox->setText("some other text");
@@ -608,8 +608,8 @@ TEST_CASE("[EditBox]")
         editBox->setTextSize(25);
         editBox->setPasswordCharacter('*');
         editBox->setMaximumCharacters(5);
-        editBox->setAlignment(tgui::EditBox::Alignment::Right);
-        editBox->limitTextWidth();
+        editBox->setAlignment(tgui::HorizontalAlignment::Right);
+        editBox->setTextWidthLimited(true);
         editBox->setReadOnly(true);
         editBox->setInputValidator("[0-9a-zA-Z]*");
 
@@ -785,19 +785,19 @@ TEST_CASE("[EditBox]")
 
             SECTION("Left")
             {
-                editBox->setAlignment(tgui::EditBox::Alignment::Left);
+                editBox->setAlignment(tgui::HorizontalAlignment::Left);
                 TEST_DRAW("EditBox_Alignment_Left.png")
             }
 
             SECTION("Center")
             {
-                editBox->setAlignment(tgui::EditBox::Alignment::Center);
+                editBox->setAlignment(tgui::HorizontalAlignment::Center);
                 TEST_DRAW("EditBox_Alignment_Center.png")
             }
 
             SECTION("Right")
             {
-                editBox->setAlignment(tgui::EditBox::Alignment::Right);
+                editBox->setAlignment(tgui::HorizontalAlignment::Right);
                 TEST_DRAW("EditBox_Alignment_Right.png")
             }
         }
@@ -805,7 +805,7 @@ TEST_CASE("[EditBox]")
         SECTION("Suffix")
         {
             editBox->setTextSize(12);
-            editBox->setAlignment(tgui::EditBox::Alignment::Right);
+            editBox->setAlignment(tgui::HorizontalAlignment::Right);
             editBox->setText("50");
             editBox->setSuffix("kg");
             TEST_DRAW("EditBox_Suffix.png")

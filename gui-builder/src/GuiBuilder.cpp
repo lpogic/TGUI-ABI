@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 // TGUI - Texus' Graphical User Interface
-// Copyright (C) 2012-2023 Bruno Van de Velde (vdv_b@tgui.eu)
+// Copyright (C) 2012-2024 Bruno Van de Velde (vdv_b@tgui.eu)
 //
 // This software is provided 'as-is', without any express or implied warranty.
 // In no event will the authors be held liable for any damages arising from the use of this software.
@@ -27,15 +27,21 @@
 #include "WidgetProperties/BitmapButtonProperties.hpp"
 #include "WidgetProperties/ButtonProperties.hpp"
 #include "WidgetProperties/ChatBoxProperties.hpp"
+#include "WidgetProperties/CheckBoxProperties.hpp"
 #include "WidgetProperties/ChildWindowProperties.hpp"
+#include "WidgetProperties/ClickableWidgetProperties.hpp"
 #include "WidgetProperties/ComboBoxProperties.hpp"
 #include "WidgetProperties/EditBoxProperties.hpp"
+#include "WidgetProperties/EditBoxSliderProperties.hpp"
 #include "WidgetProperties/GroupProperties.hpp"
+#include "WidgetProperties/HorizontalLayoutProperties.hpp"
+#include "WidgetProperties/HorizontalWrapProperties.hpp"
 #include "WidgetProperties/KnobProperties.hpp"
 #include "WidgetProperties/LabelProperties.hpp"
 #include "WidgetProperties/ListBoxProperties.hpp"
 #include "WidgetProperties/ListViewProperties.hpp"
 #include "WidgetProperties/PanelProperties.hpp"
+#include "WidgetProperties/PanelListBoxProperties.hpp"
 #include "WidgetProperties/PictureProperties.hpp"
 #include "WidgetProperties/ProgressBarProperties.hpp"
 #include "WidgetProperties/RadioButtonProperties.hpp"
@@ -43,6 +49,7 @@
 #include "WidgetProperties/RichTextLabelProperties.hpp"
 #include "WidgetProperties/ScrollablePanelProperties.hpp"
 #include "WidgetProperties/ScrollbarProperties.hpp"
+#include "WidgetProperties/SeparatorLineProperties.hpp"
 #include "WidgetProperties/SliderProperties.hpp"
 #include "WidgetProperties/SpinButtonProperties.hpp"
 #include "WidgetProperties/SpinControlProperties.hpp"
@@ -50,6 +57,7 @@
 #include "WidgetProperties/TextAreaProperties.hpp"
 #include "WidgetProperties/ToggleButtonProperties.hpp"
 #include "WidgetProperties/TreeViewProperties.hpp"
+#include "WidgetProperties/VerticalLayoutProperties.hpp"
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -235,6 +243,9 @@ GuiBuilder::GuiBuilder(const tgui::String& programName) :
     m_defaultTheme{"White"},
     m_programPath {tgui::Filesystem::Path(programName).getParentPath()}
 {
+    // Needed to make the right-click context menu receive its mouse event before the panel gets a click event and removes it
+    tgui::Panel::setEventBubbling(true);
+
     // If the program is started from a different folder then it wouldn't be able to find its resources unless we set this path.
     // One case where this seems to be required is to start the executable on macOS by double-clicking it.
     tgui::setResourcePath((tgui::Filesystem::getCurrentWorkingDirectory() / m_programPath).getNormalForm());
@@ -260,16 +271,21 @@ GuiBuilder::GuiBuilder(const tgui::String& programName) :
     m_widgetProperties["BitmapButton"] = std::make_unique<BitmapButtonProperties>();
     m_widgetProperties["Button"] = std::make_unique<ButtonProperties>();
     m_widgetProperties["ChatBox"] = std::make_unique<ChatBoxProperties>();
-    m_widgetProperties["CheckBox"] = std::make_unique<RadioButtonProperties>();
+    m_widgetProperties["CheckBox"] = std::make_unique<CheckBoxProperties>();
     m_widgetProperties["ChildWindow"] = std::make_unique<ChildWindowProperties>();
+    m_widgetProperties["ClickableWidget"] = std::make_unique<ClickableWidgetProperties>();
     m_widgetProperties["ComboBox"] = std::make_unique<ComboBoxProperties>();
     m_widgetProperties["EditBox"] = std::make_unique<EditBoxProperties>();
+    m_widgetProperties["EditBoxSlider"] = std::make_unique<EditBoxSliderProperties>();
     m_widgetProperties["Group"] = std::make_unique<GroupProperties>();
+    m_widgetProperties["HorizontalLayout"] = std::make_unique<HorizontalLayoutProperties>();
+    m_widgetProperties["HorizontalWrap"] = std::make_unique<HorizontalWrapProperties>();
     m_widgetProperties["Knob"] = std::make_unique<KnobProperties>();
     m_widgetProperties["Label"] = std::make_unique<LabelProperties>();
     m_widgetProperties["ListBox"] = std::make_unique<ListBoxProperties>();
     m_widgetProperties["ListView"] = std::make_unique<ListViewProperties>();
     m_widgetProperties["Panel"] = std::make_unique<PanelProperties>();
+    m_widgetProperties["PanelListBox"] = std::make_unique<PanelListBoxProperties>();
     m_widgetProperties["Picture"] = std::make_unique<PictureProperties>();
     m_widgetProperties["ProgressBar"] = std::make_unique<ProgressBarProperties>();
     m_widgetProperties["RadioButton"] = std::make_unique<RadioButtonProperties>();
@@ -277,6 +293,7 @@ GuiBuilder::GuiBuilder(const tgui::String& programName) :
     m_widgetProperties["RichTextLabel"] = std::make_unique<RichTextLabelProperties>();
     m_widgetProperties["ScrollablePanel"] = std::make_unique<ScrollablePanelProperties>();
     m_widgetProperties["Scrollbar"] = std::make_unique<ScrollbarProperties>();
+    m_widgetProperties["SeparatorLine"] = std::make_unique<SeparatorLineProperties>();
     m_widgetProperties["Slider"] = std::make_unique<SliderProperties>();
     m_widgetProperties["SpinButton"] = std::make_unique<SpinButtonProperties>();
     m_widgetProperties["SpinControl"] = std::make_unique<SpinControlProperties>();
@@ -284,6 +301,7 @@ GuiBuilder::GuiBuilder(const tgui::String& programName) :
     m_widgetProperties["TextArea"] = std::make_unique<TextAreaProperties>();
     m_widgetProperties["ToggleButton"] = std::make_unique<ToggleButtonProperties>();
     m_widgetProperties["TreeView"] = std::make_unique<TreeViewProperties>();
+    m_widgetProperties["VerticalLayout"] = std::make_unique<VerticalLayoutProperties>();
 
     m_window->setIcon((tgui::getResourcePath() / "resources/Icon.png").asString());
 
@@ -366,6 +384,8 @@ void GuiBuilder::mainLoop()
                                         menuBarCallbackPasteWidget();
                                     else if (item == "Delete")
                                         menuBarCallbackDeleteWidget();
+
+                                    tgui::Timer::scheduleCallback([this]{ removePopupMenu(); });
                                 });
                             }
                             else // The popup menu is empty
@@ -753,7 +773,7 @@ void GuiBuilder::widgetSelected(const tgui::Widget::Ptr& widget)
     initProperties();
 
     if (widget)
-        m_selectedWidgetComboBox->setSelectedItemById(tgui::String::fromNumber(widget.get()));
+        m_selectedWidgetComboBox->setSelectedItemById(widgetPtrToStrId(widget));
     else
         m_selectedWidgetComboBox->setSelectedItemById("form");
 
@@ -969,14 +989,19 @@ void GuiBuilder::loadToolbox()
         {"ChatBox", []{ return tgui::ChatBox::create(); }},
         {"CheckBox", []{ return tgui::CheckBox::create(); }},
         {"ChildWindow", []{ return tgui::ChildWindow::create(); }},
+        {"ClickableWidget", []{ return tgui::ClickableWidget::create({150, 150}); }},
         {"ComboBox", []{ return tgui::ComboBox::create(); }},
         {"EditBox", []{ return tgui::EditBox::create(); }},
+        {"EditBoxSlider", []{ return tgui::EditBoxSlider::create(); }},
         {"Group", []{ return tgui::Group::create({150, 150}); }},
+        {"HorizontalLayout", []{ return tgui::HorizontalLayout::create({150, 150}); }},
+        {"HorizontalWrap", []{ return tgui::HorizontalWrap::create({150, 150}); }},
         {"Knob", []{ return tgui::Knob::create(); }},
         {"Label", []{ return tgui::Label::create("Label"); }},
         {"ListBox", []{ return tgui::ListBox::create(); }},
         {"ListView", []{ return tgui::ListView::create(); }},
         {"Panel", []{ return tgui::Panel::create({150, 150}); }},
+        {"PanelListBox", []{ return tgui::PanelListBox::create(); }},
         {"Picture", []{ return tgui::Picture::create((tgui::getResourcePath() / "resources/DefaultPicture.png").asString()); }},
         {"ProgressBar", []{ return tgui::ProgressBar::create(); }},
         {"RadioButton", []{ return tgui::RadioButton::create(); }},
@@ -984,6 +1009,7 @@ void GuiBuilder::loadToolbox()
         {"RichTextLabel", []{ return tgui::RichTextLabel::create("RichTextLabel"); }},
         {"ScrollablePanel", []{ return tgui::ScrollablePanel::create({150, 150}); }},
         {"Scrollbar", []{ return tgui::Scrollbar::create(); }},
+        {"SeparatorLine", []{ return tgui::SeparatorLine::create({"100%", 3}); }},
         {"Slider", []{ return tgui::Slider::create(); }},
         {"SpinButton", []{ return tgui::SpinButton::create(); }},
         {"SpinControl", []{ return tgui::SpinControl::create(); }},
@@ -991,15 +1017,19 @@ void GuiBuilder::loadToolbox()
         {"TextArea", []{ return tgui::TextArea::create(); }},
         {"ToggleButton", []{ return tgui::ToggleButton::create(); }},
         {"TreeView", []{ return tgui::TreeView::create(); }},
+        {"VerticalLayout", []{ return tgui::VerticalLayout::create({150, 150}); }},
     };
 
     float topPosition = 0;
     for (auto& widget : widgets)
     {
         auto icon = tgui::Picture::create("resources/widget-icons/" + widget.first + ".png");
+        icon->setIgnoreMouseEvents(true);
+
         auto name = tgui::Label::create(widget.first);
         name->setPosition({icon->getSize().x * 1.1f, "50% - 10"});
         name->setTextSize(14);
+        name->setIgnoreMouseEvents(true);
 
         auto verticalLayout = tgui::VerticalLayout::create();
         verticalLayout->setPosition(0, topPosition);
@@ -1057,7 +1087,7 @@ void GuiBuilder::createNewWidget(const tgui::Widget::Ptr& widget, tgui::Containe
             parent = selectedWidget->getParent();
     }
 
-    const tgui::String id = tgui::String::fromNumber(widget.get());
+    const tgui::String id = widgetPtrToStrId(widget);
     const tgui::String name = m_selectedForm->addWidget(widget, parent, selectNewWidget);
     m_selectedWidgetComboBox->addItem(name, id);
 
@@ -1238,7 +1268,7 @@ void GuiBuilder::changeWidgetName(const tgui::String& name)
         return;
     }
 
-    m_selectedWidgetComboBox->changeItemById(tgui::String::fromNumber(m_selectedForm->getSelectedWidget()->ptr.get()), name);
+    m_selectedWidgetComboBox->changeItemById(widgetPtrToStrId(m_selectedForm->getSelectedWidget()->ptr), name);
 
     widgetHierarchyChanged();
     m_selectedForm->setChanged(true);
@@ -1251,7 +1281,7 @@ void GuiBuilder::initSelectedWidgetComboBoxAfterLoad()
     const auto& widgets = m_selectedForm->getWidgets();
     for (const auto& widget : widgets)
     {
-        const tgui::String id = tgui::String::fromNumber(widget->ptr.get());
+        const tgui::String id = widgetPtrToStrId(widget->ptr);
         m_selectedWidgetComboBox->addItem(widget->name, id);
     }
 }
@@ -1276,7 +1306,7 @@ void GuiBuilder::removeSelectedWidget()
             parentsToSearch.pop();
             for (const auto& widget : parent->getWidgets())
             {
-                childIds.push_back(tgui::String::fromNumber(widget.get()));
+                childIds.push_back(widgetPtrToStrId(widget));
                 if (widget->isContainer())
                     parentsToSearch.push(widget->cast<tgui::Container>());
             }
@@ -1287,7 +1317,7 @@ void GuiBuilder::removeSelectedWidget()
     }
 
     // Now remove the widget itself
-    const tgui::String id = tgui::String::fromNumber(selectedWidget->ptr.get());
+    const tgui::String id = widgetPtrToStrId(selectedWidget->ptr);
     m_selectedForm->removeWidget(id);
     m_selectedWidgetComboBox->removeItemById(id);
     m_selectedWidgetComboBox->setSelectedItemById("form");
@@ -1470,6 +1500,14 @@ tgui::String GuiBuilder::getDefaultFilename() const
     return "form.txt";
 }
 
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+tgui::String GuiBuilder::widgetPtrToStrId(const tgui::Widget::Ptr& widget) const
+{
+    return tgui::String::fromNumber(reinterpret_cast<std::uintptr_t>(widget.get()));
+}
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void GuiBuilder::copyWidgetRecursive(std::vector<CopiedWidget>& copiedWidgetList, const std::shared_ptr<WidgetInfo>& widgetInfo)
@@ -1487,7 +1525,7 @@ void GuiBuilder::copyWidgetRecursive(std::vector<CopiedWidget>& copiedWidgetList
         {
             for (const auto& childWidget : container->getWidgets())
             {
-                const auto& childWidgetInfo = m_selectedForm->getWidget(tgui::String::fromNumber(childWidget.get()));
+                const auto& childWidgetInfo = m_selectedForm->getWidget(widgetPtrToStrId(childWidget));
                 copyWidgetRecursive(copiedWidget.childWidgets, childWidgetInfo);
             }
 
@@ -1506,7 +1544,7 @@ void GuiBuilder::pasteWidgetRecursive(const CopiedWidget& copiedWidget, tgui::Co
     auto widget = copiedWidget.widget->clone(); // Clone again, as we may be pasting same widget multiple times
     createNewWidget(widget, parent, false);
 
-    m_selectedForm->getWidget(tgui::String::fromNumber(widget.get()))->theme = copiedWidget.theme;
+    m_selectedForm->getWidget(widgetPtrToStrId(widget))->theme = copiedWidget.theme;
 
     for (const auto& copiedChild : copiedWidget.childWidgets)
         pasteWidgetRecursive(copiedChild, widget->cast<tgui::Container>().get());
@@ -1536,7 +1574,7 @@ void GuiBuilder::pasteWidgetFromInternalClipboard()
 
     auto widget = m_copiedWidgets[0].widget->clone(); // Clone again, as we may be pasting same widget multiple times
     createNewWidget(widget);
-    m_selectedForm->getWidget(tgui::String::fromNumber(widget.get()))->theme = m_copiedWidgets[0].theme;
+    m_selectedForm->getWidget(widgetPtrToStrId(widget))->theme = m_copiedWidgets[0].theme;
 
     // Copy child widgets
     if (!m_copiedWidgets[0].childWidgets.empty())
@@ -2210,14 +2248,14 @@ void GuiBuilder::addPropertyListViewColumns(const tgui::String& property, const 
         {
             tgui::String text;
             float width;
-            tgui::ListView::ColumnAlignment alignment;
+            tgui::HorizontalAlignment alignment;
             bool autoResize;
             bool expanded;
             if (ListViewProperties::deserializeColumn(serializedColumn, text, width, alignment, autoResize, expanded))
             {
                 listView->addItem({text,
                                    tgui::Serializer::serialize(width),
-                                   ListViewProperties::serializeColumnAlignment(alignment),
+                                   WidgetProperties::serializeHorizontalAlignment(alignment),
                                    tgui::Serializer::serialize(autoResize),
                                    tgui::Serializer::serialize(expanded)});
             }

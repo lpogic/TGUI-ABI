@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 // TGUI - Texus' Graphical User Interface
-// Copyright (C) 2012-2023 Bruno Van de Velde (vdv_b@tgui.eu)
+// Copyright (C) 2012-2024 Bruno Van de Velde (vdv_b@tgui.eu)
 //
 // This software is provided 'as-is', without any express or implied warranty.
 // In no event will the authors be held liable for any damages arising from the use of this software.
@@ -56,12 +56,7 @@ TGUI_MODULE_EXPORT namespace tgui
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         /// @brief The text alignment for all texts within a column
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        enum class ColumnAlignment
-        {
-            Left,   //!< Place the text on the left side (default)
-            Center, //!< Center the text inside the column
-            Right   //!< Place the text on the right side (e.g. for numbers)
-        };
+        using ColumnAlignment TGUI_DEPRECATED("Use tgui::HorizontalAlignment instead") = HorizontalAlignment;
 
         struct Item
         {
@@ -77,7 +72,7 @@ TGUI_MODULE_EXPORT namespace tgui
             float widestItemWidth = 0;
             std::size_t widestItemIndex = std::numeric_limits<std::size_t>::max();
             Text text;
-            ColumnAlignment alignment = ColumnAlignment::Left;
+            HorizontalAlignment alignment = HorizontalAlignment::Left;
             bool autoResize = false;
             bool expanded = false;
         };
@@ -137,7 +132,7 @@ TGUI_MODULE_EXPORT namespace tgui
         ///
         /// @return Index of the added column
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        std::size_t addColumn(const String& text, float width = 0, ColumnAlignment alignment = ColumnAlignment::Left);
+        std::size_t addColumn(const String& text, float width = 0, HorizontalAlignment alignment = HorizontalAlignment::Left);
 
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         /// @brief Changes the text of a column
@@ -197,7 +192,7 @@ TGUI_MODULE_EXPORT namespace tgui
         /// @param columnIndex Index of the column to change
         /// @param alignment   The text alignment for all texts in the column
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        void setColumnAlignment(std::size_t columnIndex, ColumnAlignment alignment);
+        void setColumnAlignment(std::size_t columnIndex, HorizontalAlignment alignment);
 
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         /// @brief Returns the current text alignment within a column
@@ -206,13 +201,13 @@ TGUI_MODULE_EXPORT namespace tgui
         ///
         /// @return Text alignment for all texts in the column
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        TGUI_NODISCARD ColumnAlignment getColumnAlignment(std::size_t columnIndex) const;
+        TGUI_NODISCARD HorizontalAlignment getColumnAlignment(std::size_t columnIndex) const;
 
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         /// @brief Changes whether the column width depends on the widest item added to that column
         ///
-        /// @param index  Index of the column to change
-        /// @param expand Should the column's width expand to make it fill the list view when the list view isn't full yet?
+        /// @param index      Index of the column to change
+        /// @param autoResize Should the column's width expand and shrink when the widest item in the column changes?
         ///
         /// If auto-resize is true then the width specified in addColumn and setColumnWidth will act as the minimum width.
         /// If the width was set to 0 then the minimum width is the width of the header caption.
@@ -225,11 +220,11 @@ TGUI_MODULE_EXPORT namespace tgui
         void setColumnAutoResize(std::size_t index, bool autoResize);
 
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        /// @brief Returns whether the column is expanded to fill the list view (if all columns fit inside the list view)
+        /// @brief Returns whether the column width depends on the widest item added to that column
         ///
         /// @param index  Index of the column
         ///
-        /// @return Is the column is expanded to make it fill the list view when the list view isn't full yet?
+        /// @return Does the column's width expand and shrink when the widest item in the column changes?
         ///
         /// @since TGUI 1.1
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -427,7 +422,7 @@ TGUI_MODULE_EXPORT namespace tgui
         ///
         /// @return The index of the selected item, or -1 when no item was selected
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        int getSelectedItemIndex() const;
+        TGUI_NODISCARD int getSelectedItemIndex() const;
 
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         /// @brief Gets the indices of the selected items

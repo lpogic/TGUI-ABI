@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 // TGUI - Texus' Graphical User Interface
-// Copyright (C) 2012-2023 Bruno Van de Velde (vdv_b@tgui.eu)
+// Copyright (C) 2012-2024 Bruno Van de Velde (vdv_b@tgui.eu)
 //
 // This software is provided 'as-is', without any express or implied warranty.
 // In no event will the authors be held liable for any damages arising from the use of this software.
@@ -239,7 +239,7 @@ TGUI_MODULE_EXPORT namespace tgui
         /// @param padding The new padding around the widget
         ///
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        void setWidgetPadding(const Widget::Ptr& widget, const Padding& padding = Padding(0, 0, 0, 0));
+        void setWidgetPadding(const Widget::Ptr& widget, const Padding& padding = {});
 
 
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -250,7 +250,7 @@ TGUI_MODULE_EXPORT namespace tgui
         /// @param padding The new padding around the widget
         ///
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        void setWidgetPadding(std::size_t row, std::size_t column, const Padding& padding = Padding(0, 0, 0, 0));
+        void setWidgetPadding(std::size_t row, std::size_t column, const Padding& padding = {});
 
 
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
