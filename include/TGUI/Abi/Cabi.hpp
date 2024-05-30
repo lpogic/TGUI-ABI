@@ -112,6 +112,8 @@ namespace tgui
 	C_ABI void ABI_BackendGui_setKeyboardNavigationEnabled(BackendGui* self, int enabled);
 	C_ABI bool ABI_BackendGui_isKeyboardNavigationEnabled(BackendGui* self);
 	C_ABI Signal* ABI_BackendGui_onViewChange(BackendGui* self);
+	C_ABI Signal* ABI_BackendGui_onWindowFocus(BackendGui* self);
+	C_ABI Signal* ABI_BackendGui_onWindowUnfocus(BackendGui* self);
 	// Font
 	C_ABI Font* ABI_Font_new(char * id);
 	C_ABI void ABI_STATIC_Font_delete(Font* font);
@@ -202,6 +204,8 @@ namespace tgui
 	C_ABI void ABI_Widget_setAutoLayout(Widget::Ptr* self, int autoLayout);
 	C_ABI int ABI_Widget_getAutoLayout(Widget::Ptr* self);
 	C_ABI const char32_t* ABI_Widget_getWidgetName(Widget::Ptr* self);
+	C_ABI void ABI_Widget_setIgnoreMouseEvents(Widget::Ptr* self, int ignore);
+	C_ABI bool ABI_Widget_getIgnoreMouseEvents(Widget::Ptr* self);
 	C_ABI SignalVector2f* ABI_Widget_onPositionChange(Widget::Ptr* self);
 	C_ABI SignalVector2f* ABI_Widget_onSizeChange(Widget::Ptr* self);
 	C_ABI void ABI_Widget_setColorRendererProperty(Widget::Ptr* self, char* property, Color* value);
@@ -260,7 +264,7 @@ namespace tgui
 	C_ABI unsigned int ABI_EditBox_getMaximumCharacters(EditBox::Ptr* self);
 	C_ABI void ABI_EditBox_setAlignment(EditBox::Ptr* self, int alignment);
 	C_ABI int ABI_EditBox_getAlignment(EditBox::Ptr* self);
-	C_ABI void ABI_EditBox_limitTextWidth(EditBox::Ptr* self, int limit);
+	C_ABI void ABI_EditBox_setTextWidthLimited(EditBox::Ptr* self, int limit);
 	C_ABI bool ABI_EditBox_isTextWidthLimited(EditBox::Ptr* self);
 	C_ABI void ABI_EditBox_setReadOnly(EditBox::Ptr* self, int read_only);
 	C_ABI bool ABI_EditBox_isReadOnly(EditBox::Ptr* self);
@@ -288,8 +292,6 @@ namespace tgui
 	C_ABI bool ABI_Label_getAutoSize(Label::Ptr* self);
 	C_ABI void ABI_Label_setMaximumTextWidth(Label::Ptr* self, float maximumWidth);
 	C_ABI float ABI_Label_getMaximumTextWidth(Label::Ptr* self);
-	C_ABI void ABI_Label_ignoreMouseEvents(Label::Ptr* self, int ignore);
-	C_ABI bool ABI_Label_ignoringMouseEvents(Label::Ptr* self);
 	// RadioButton
 	C_ABI RadioButton::Ptr* ABI_RadioButton_new();
 	C_ABI void ABI_RadioButton_setText(RadioButton::Ptr* self, char* text);
@@ -381,7 +383,7 @@ namespace tgui
 	C_ABI void ABI_ChildWindow_setPositionLocked(ChildWindow::Ptr* self, int positionLocked);
 	C_ABI bool ABI_ChildWindow_isPositionLocked(ChildWindow::Ptr* self);
 	C_ABI void ABI_ChildWindow_setKeepInParent(ChildWindow::Ptr* self, int enabled);
-	C_ABI bool ABI_ChildWindow_isKeptInParent(ChildWindow::Ptr* self);
+	C_ABI bool ABI_ChildWindow_getKeepInParent(ChildWindow::Ptr* self);
 	C_ABI Signal* ABI_ChildWindow_onMousePress(ChildWindow::Ptr* self);
 	C_ABI Signal* ABI_ChildWindow_onClose(ChildWindow::Ptr* self);
 	C_ABI Signal* ABI_ChildWindow_onMinimize(ChildWindow::Ptr* self);
@@ -640,8 +642,6 @@ namespace tgui
 	C_ABI SignalString* ABI_MessageBox_onButtonPress(MessageBox::Ptr* self);
 	// Picture
 	C_ABI Picture::Ptr* ABI_Picture_new(Texture* texture, int transparent);
-	C_ABI void ABI_Picture_ignoreMouseEvents(Picture::Ptr* self, int ignore);
-	C_ABI bool ABI_Picture_isIgnoringMouseEvents(Picture::Ptr* self);
 	C_ABI SignalVector2f* ABI_Picture_onDoubleClick(Picture::Ptr* self);
 	// MenuBar
 	C_ABI MenuBar::Ptr* ABI_MenuBar_new();

@@ -393,6 +393,14 @@ namespace tgui {
         return &self->onViewChange;
     }
 
+    C_ABI Signal* ABI_BackendGui_onWindowFocus(BackendGui* self) {
+        return &self->onWindowFocus;
+    }
+
+    C_ABI Signal* ABI_BackendGui_onWindowUnfocus(BackendGui* self) {
+        return &self->onWindowUnfocus;
+    }
+
     // Font
     
     C_ABI Font* ABI_Font_new(char* id) {
@@ -813,6 +821,14 @@ namespace tgui {
         return str->data();
     }
 
+    C_ABI void ABI_Widget_setIgnoreMouseEvents(Widget::Ptr* self, int ignore) {
+        (**self).setIgnoreMouseEvents(ignore);
+    }
+
+    C_ABI bool ABI_Widget_getIgnoreMouseEvents(Widget::Ptr* self) {
+        return (**self).getIgnoreMouseEvents();
+    }
+
     C_ABI void ABI_Widget_setColorRendererProperty(Widget::Ptr* self, char* property, Color* value) {
         (**self).getRenderer()->setProperty(property, *value);
     }
@@ -910,7 +926,6 @@ namespace tgui {
     C_ABI SignalAnimationType* ABI_Widget_onAnimationFinish(Widget::Ptr* self) {
         return &(**self).onAnimationFinish;
     }
-
 
     // ClickableWidget
 
@@ -1041,15 +1056,15 @@ namespace tgui {
     }
 
     C_ABI void ABI_EditBox_setAlignment(EditBox::Ptr* self, int alignment) {
-        (**self).setAlignment(static_cast<EditBox::Alignment>(alignment));
+        (**self).setAlignment(static_cast<HorizontalAlignment>(alignment));
     }
 
     C_ABI int ABI_EditBox_getAlignment(EditBox::Ptr* self) {
         return static_cast<int>((**self).getAlignment());
     }
 
-    C_ABI void ABI_EditBox_limitTextWidth(EditBox::Ptr* self, int limit) {
-        (**self).limitTextWidth(limit);
+    C_ABI void ABI_EditBox_setTextWidthLimited(EditBox::Ptr* self, int limit) {
+        (**self).setTextWidthLimited(limit);
     }
 
     C_ABI bool ABI_EditBox_isTextWidthLimited(EditBox::Ptr* self) {
@@ -1114,7 +1129,7 @@ namespace tgui {
     }
 
     C_ABI void ABI_Label_setHorizontalAlignment(Label::Ptr* self, int alignment) {
-        (**self).setHorizontalAlignment(static_cast<Label::HorizontalAlignment>(alignment));
+        (**self).setHorizontalAlignment(static_cast<HorizontalAlignment>(alignment));
     }
 
     C_ABI int ABI_Label_getHorizontalAlignment(Label::Ptr* self) {
@@ -1122,7 +1137,7 @@ namespace tgui {
     }
 
     C_ABI void ABI_Label_setVerticalAlignment(Label::Ptr* self, int alignment) {
-        (**self).setVerticalAlignment(static_cast<Label::VerticalAlignment>(alignment));
+        (**self).setVerticalAlignment(static_cast<VerticalAlignment>(alignment));
     }
 
     C_ABI int ABI_Label_getVerticalAlignment(Label::Ptr* self) {
@@ -1159,14 +1174,6 @@ namespace tgui {
 
     C_ABI float ABI_Label_getMaximumTextWidth(Label::Ptr* self) {
         return (**self).getMaximumTextWidth();
-    }
-
-    C_ABI void ABI_Label_ignoreMouseEvents(Label::Ptr* self, int ignore) {
-        (**self).ignoreMouseEvents(ignore);
-    }
-
-    C_ABI bool ABI_Label_ignoringMouseEvents(Label::Ptr* self) {
-        return (**self).isIgnoringMouseEvents();
     }
 
     // RadioButton
@@ -1546,7 +1553,7 @@ namespace tgui {
     }
 
     C_ABI void ABI_ChildWindow_setTitleAlignment(ChildWindow::Ptr* self, int alignment) {
-        (**self).setTitleAlignment(static_cast<ChildWindow::TitleAlignment>(alignment));
+        (**self).setTitleAlignment(static_cast<HorizontalAlignment>(alignment));
     }
 
     C_ABI int ABI_ChildWindow_getTitleAlignment(ChildWindow::Ptr* self) {
@@ -1589,8 +1596,8 @@ namespace tgui {
         (**self).setKeepInParent(enabled);
     }
 
-    C_ABI bool ABI_ChildWindow_isKeptInParent(ChildWindow::Ptr* self) {
-        return (**self).isKeptInParent();
+    C_ABI bool ABI_ChildWindow_getKeepInParent(ChildWindow::Ptr* self) {
+        return (**self).getKeepInParent();
     }
 
     C_ABI Signal* ABI_ChildWindow_onMousePress(ChildWindow::Ptr* self) {
@@ -2021,7 +2028,7 @@ namespace tgui {
     }
 
 	C_ABI void ABI_ListBox_setTextAlignment(ListBox::Ptr* self, int alignment) {
-        (**self).setTextAlignment(static_cast<ListBox::TextAlignment>(alignment));
+        (**self).setTextAlignment(static_cast<HorizontalAlignment>(alignment));
     }
 
 	C_ABI int ABI_ListBox_getTextAlignment(ListBox::Ptr* self) {
@@ -2096,7 +2103,7 @@ namespace tgui {
     }
 
 	C_ABI void ABI_ListView_setColumnAlignment(ListView::Ptr* self, int index, int columnAlignment) {
-        (**self).setColumnAlignment((std::size_t)index, static_cast<ListView::ColumnAlignment>(columnAlignment));
+        (**self).setColumnAlignment((std::size_t)index, static_cast<HorizontalAlignment>(columnAlignment));
     }
 
 	C_ABI int ABI_ListView_getColumnAlignment(ListView::Ptr* self, int index) {
@@ -2710,7 +2717,7 @@ namespace tgui {
     }
 
 	C_ABI void ABI_MessageBox_setLabelAlignment(MessageBox::Ptr* self, int alignment) {
-        (**self).setLabelAlignment(static_cast<MessageBox::Alignment>(alignment));
+        (**self).setLabelAlignment(static_cast<HorizontalAlignment>(alignment));
     }
 
 	C_ABI int ABI_MessageBox_getLabelAlignment(MessageBox::Ptr* self) {
@@ -2718,7 +2725,7 @@ namespace tgui {
     }
 
 	C_ABI void ABI_MessageBox_setButtonAlignment(MessageBox::Ptr* self, int alignment) {
-        (**self).setButtonAlignment(static_cast<MessageBox::Alignment>(alignment));
+        (**self).setButtonAlignment(static_cast<HorizontalAlignment>(alignment));
     }
 
 	C_ABI int ABI_MessageBox_getButtonAlignment(MessageBox::Ptr* self) {
@@ -2736,14 +2743,6 @@ namespace tgui {
         auto ptr = new Picture::Ptr(nullptr);
         ptr->swap(self);
         return ptr;
-    }
-
-	C_ABI void ABI_Picture_ignoreMouseEvents(Picture::Ptr* self, int ignore) {
-        (**self).ignoreMouseEvents(ignore);
-    }
-
-    C_ABI bool ABI_Picture_isIgnoringMouseEvents(Picture::Ptr* self) {
-        return (**self).isIgnoringMouseEvents();
     }
 
 	C_ABI SignalVector2f* ABI_Picture_onDoubleClick(Picture::Ptr* self) {
@@ -3543,7 +3542,7 @@ namespace tgui {
     }
 
 	C_ABI int ABI_TabContainer_getTabAlignment(TabContainer::Ptr* self) {
-        return static_cast<TabContainer::TabAlign>((**self).getTabAlignment());
+        return static_cast<int>((**self).getTabAlignment());
     }
 
 	C_ABI void ABI_TabContainer_setTabFixedSize(TabContainer::Ptr* self, float fixedSize) {
@@ -4128,8 +4127,8 @@ namespace tgui {
 	C_ABI void ABI_Text_setFont(sf::Text* self, Font* font) {
         const BackendFont& backend = *font->getBackendFont();
         const BackendFontSFML& sfml = static_cast<const BackendFontSFML&>(backend);
-        const sf::Font& internalFont = const_cast<BackendFontSFML&>(sfml).getInternalFont();
-        self->setFont(internalFont);
+        sf::Font* internalFont = const_cast<BackendFontSFML&>(sfml).getInternalFont();
+        self->setFont(*internalFont);
     }
 
 	// C_ABI Font* ABI_Text_getFont(sf::Text* self) {
